@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <title>Camunda Diagram Viewer</title>
+
+  <style>
+
+    body { font-family: sans-serif; padding: 1em; }
+
+    #fileList button { margin: 0.2em; padding: 0.5em; cursor: pointer; }
+
+    #canvas { height: 80vh; border: 1px solid #ccc; margin-top: 1em; }
+
+  </style>
+
+  <script src=https://unpkg.com/bpmn-js/dist/bpmn-viewer.development.js></script>
+
+</head>
+
+<body>
+
+  <h2>Select a BPMN Diagram</h2>
+
+  <div id="fileList">Loading diagrams...</div>
+
+  <div id="canvas"></div>
+
+ 
+
+  <script>
+
+    const viewer = new BpmnJS({ container: '#canvas' });
+
+ 
+
+    fetch('/list')
+
+      .then(res => res.json())
+
+      .then(files => {
+
+        const listDiv = document.getElementById('fileList');
+
+        listDiv.innerHTML = '';
+
+        files.filter(f => f.endsWith('.bpmn')).forEach(file => {
+
+          const btn = document.createElement('button');
+
+          btn.textContent = file;
+
+          btn.onclick = () => loadDiagram(file);
+
+          listDiv.appendChild(btn);
+
+        });
+
+      });
+
+ 
+
+    function loadDiagram(fileName) {
+
+      const jsonFile = fileName.replace('.bpmn', '.json');
+
+ 
+
+      Promise.all([
+
+        fetch(`/${fileName}`).then(res => res.text()),
+
+        fetch(`/${jsonFile}`).then(res => res.json()).catch(() => ({ executedActivities: [] }))
+
+      ])
+
+      .then(([xml, activityData]) => {
+
+        viewer.importXML(xml).then(() => {
+
+          const canvas = viewer.get('canvas');
+
+          canvas.zoom('fit-viewport');
+
+ 
+
+          // Clear markers
+
+          canvas.getRootElement().children.forEach(el => canvas.removeMarker(el.id, 'highlight'));
+
+ 
+
+          // Highlight executed steps
+
+          activityData.executedActivities.forEach(id => {
+
+            canvas.addMarker(id, 'highlight');
+
+          });
+
+        });
+
+      });
+
+    }
+
+ 
+
+    const style = document.createElement('style');
+
+    style.innerHTML = `
+
+      .djs-element.highlight > .djs-visual {
+
+        stroke: #1976d2 !important;
+
+        stroke-width: 4px !important;
+
+      }
+
+    `;
+
+    document.head.appendChild(style);
+
+  </script>
+
+</body>
+
+</html>
