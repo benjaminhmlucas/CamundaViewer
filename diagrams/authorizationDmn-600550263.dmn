@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/1.0" id="Definitions_0i74ex0" name="DRD" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="3.7.0">
+  <decision id="authorizationDmn" name="Authorization">
+    <extensionElements>
+      <biodi:bounds x="150" y="150" width="180" height="80" />
+    </extensionElements>
+    <decisionTable id="decisionTable_1" hitPolicy="FIRST">
+      <input id="input_1" label="Net Award Amount">
+        <inputExpression id="inputExpression_1" typeRef="double">
+          <text>awards_currentAward.netAmount</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_00h6euk" label="Is Claim Associated With Award?">
+        <inputExpression id="LiteralExpression_0i3af9q" typeRef="boolean" expressionLanguage="groovy">
+          <text>claimExecution.claimSummary != null &amp;&amp; awards_currentAward != null &amp;&amp; awards_currentAward.getClaims() != null &amp;&amp; !awards_currentAward.getClaims().isEmpty() &amp;&amp; awards_currentAward.getClaims().every({ claim -&gt; claimExecution.claimSummary.claimId.equals(claim.getClaimID()) })</text>
+        </inputExpression>
+      </input>
+      <output id="output_1" label="Error Code" typeRef="string" />
+      <rule id="DecisionRule_1pz5w4w">
+        <description>Claim Not Associated with the Award</description>
+        <inputEntry id="UnaryTests_0q0bd4p">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1sk97we">
+          <text>false</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1mwr14o">
+          <text>"242"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_08aenr7">
+        <description>Not Eligibile for Authorize</description>
+        <inputEntry id="UnaryTests_03q5n3a">
+          <text>&gt;=25000</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1fj03lo">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1oyhcrb">
+          <text>"209"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1oiaf7w">
+        <description>Eligible for Authorize</description>
+        <inputEntry id="UnaryTests_013t38g">
+          <text>&lt;25000</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08tbo26">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_09j5b5q">
+          <text></text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
+

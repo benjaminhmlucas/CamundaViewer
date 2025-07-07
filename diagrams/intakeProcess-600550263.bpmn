@@ -1,0 +1,547 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_005unz0" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.27.0">
+  <bpmn:error id="Error_1vv4qi0" name="MissingDataError" errorCode="USE_MESSAGE" camunda:errorMessage="${evalSuppMap.evalSupp_errorCode}" />
+  <bpmn:error id="Error_1tjtsg3" name="OnrampPreCheckError" errorCode="USE_MESSAGE" camunda:errorMessage="${evalClaimMap.evalClaim_errorCode}" />
+  <bpmn:error id="Error_0zpobni" name="RuntimeError" />
+  <bpmn:error id="Error_1ut4pfr" name="NoRouteError" errorCode="032" />
+  <bpmn:collaboration id="intakeCollaboration">
+    <bpmn:participant id="mainIntakeProcess" name="Pension Automation Intake Process" processRef="intakeProcess" />
+    <bpmn:textAnnotation id="TextAnnotation_13kzafb">
+      <bpmn:text>Start of Initial Development Process</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_0kx62jl" sourceRef="callClassificationProcess" targetRef="TextAnnotation_13kzafb" />
+  </bpmn:collaboration>
+  <bpmn:process id="intakeProcess" name="Intake Process" isExecutable="true" camunda:versionTag="1.0.0" camunda:historyTimeToLive="15">
+    <bpmn:sequenceFlow id="StartAc_RetClaim_Flow" sourceRef="startIntake" targetRef="Activity_LoadConfiguration" />
+    <bpmn:sequenceFlow id="Flow_1f9r1lf" sourceRef="Activity_LoadConfiguration" targetRef="intakeClaimActivity" />
+    <bpmn:sequenceFlow id="Flow_1uwa96c" sourceRef="intakeClaimActivity" targetRef="Activity_0zbqj9i" />
+    <bpmn:startEvent id="startIntake" name="Start" camunda:asyncAfter="true">
+      <bpmn:outgoing>StartAc_RetClaim_Flow</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Activity_LoadConfiguration" name="Load Configuration" camunda:delegateExpression="${loadConfigurationDelegate}">
+      <bpmn:incoming>StartAc_RetClaim_Flow</bpmn:incoming>
+      <bpmn:incoming>Flow_0fpsmjb</bpmn:incoming>
+      <bpmn:incoming>Flow_0fccixz</bpmn:incoming>
+      <bpmn:outgoing>Flow_1f9r1lf</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="intakeClaimActivity" name="Intake Claim" camunda:delegateExpression="${intakeClaim}">
+      <bpmn:incoming>Flow_1f9r1lf</bpmn:incoming>
+      <bpmn:outgoing>Flow_1uwa96c</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:startEvent id="restartIntake" name="Restart Intake">
+      <bpmn:outgoing>Flow_0fpsmjb</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1scyg7j" messageRef="Message_0t23b1a" />
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0fpsmjb" sourceRef="restartIntake" targetRef="Activity_LoadConfiguration" />
+    <bpmn:sequenceFlow id="Flow_1e2q5gq" sourceRef="Activity_0gdmvd7" targetRef="RetrieveSupplementalData" />
+    <bpmn:sequenceFlow id="Flow_0u5swdd" sourceRef="Activity_0zbqj9i" targetRef="Activity_0gdmvd7" />
+    <bpmn:serviceTask id="Activity_0gdmvd7" name="Retrieve Benefits Processing Data" camunda:delegateExpression="${bpdsDelegate}">
+      <bpmn:incoming>Flow_0u5swdd</bpmn:incoming>
+      <bpmn:outgoing>Flow_1e2q5gq</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_0zbqj9i" name="Retrieve Veteran Info" camunda:delegateExpression="${veteranInfoDelegate}">
+      <bpmn:extensionElements>
+        <camunda:executionListener delegateExpression="${veteranAdditionalIdentifiers}" event="end" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1uwa96c</bpmn:incoming>
+      <bpmn:outgoing>Flow_0u5swdd</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_1mzp0ug" name="Update Benefit Claim Type" camunda:delegateExpression="${updateBenefitClaimTypeDelegate}">
+      <bpmn:incoming>Flow_1x5p7yx</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ueox1j</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_0sp2pat" name="Eligible for Benefit Claim Type Change?" default="Flow_0monq2g">
+      <bpmn:incoming>Flow_1pv1yol</bpmn:incoming>
+      <bpmn:outgoing>Flow_0monq2g</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1x5p7yx</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Gateway_15h1ahz" default="intakeOfframpFlow">
+      <bpmn:incoming>Flow_0o94d3j</bpmn:incoming>
+      <bpmn:outgoing>intakeAwardFlow</bpmn:outgoing>
+      <bpmn:outgoing>intakeOfframpFlow</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="dicRatingMessageEvent" name="Call Rating Process">
+      <bpmn:incoming>intakeRatingFlow</bpmn:incoming>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0oktu7v" camunda:delegateExpression="${callRating}" />
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="Gateway_1j5whsf" default="Flow_0o94d3j">
+      <bpmn:incoming>Flow_1g0kamk</bpmn:incoming>
+      <bpmn:outgoing>Flow_0o94d3j</bpmn:outgoing>
+      <bpmn:outgoing>intakeRatingFlow</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="Event_1jgmpr9" name="Call Development Process">
+      <bpmn:incoming>intakeDevelopmentFlow</bpmn:incoming>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_15b58d8" camunda:delegateExpression="${callDevelopment}" />
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="Gateway_0pug5cd" default="Flow_1g0kamk">
+      <bpmn:incoming>Flow_1ocjvo1</bpmn:incoming>
+      <bpmn:outgoing>Flow_1g0kamk</bpmn:outgoing>
+      <bpmn:outgoing>intakeDevelopmentFlow</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Activity_1rgzyep" name="Benefit Claim Type Change Eligibility" camunda:delegateExpression="${benefitClaimTypeUpdateEligibilityDelegate}">
+      <bpmn:incoming>SequenceFlow_1lhtdn1</bpmn:incoming>
+      <bpmn:outgoing>Flow_1pv1yol</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:businessRuleTask id="EvaluateSupplementalDataActivity" name="Evaluate Supplemental Data" camunda:resultVariable="evalSuppMap" camunda:decisionRef="intake-evaluate-supplemental" camunda:decisionRefBinding="deployment" camunda:mapDecisionResult="singleResult">
+      <bpmn:incoming>Flow_1b1fxwo</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ey6j66</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:exclusiveGateway id="Gateway_13naasg" name="Supplemental Data Complete?">
+      <bpmn:incoming>Flow_0ey6j66</bpmn:incoming>
+      <bpmn:outgoing>Flow_13ltsoa</bpmn:outgoing>
+      <bpmn:outgoing>benefitTypeFlow</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="Event_1nplsfb" name="Missing Data to Automate">
+      <bpmn:incoming>Flow_13ltsoa</bpmn:incoming>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_03j9mlk" errorRef="Error_1vv4qi0" />
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Activity_16iensl" name="Preliminary Rating" camunda:delegateExpression="${preliminaryRating}">
+      <bpmn:incoming>Flow_1ka6nn7</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1lhtdn1</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:callActivity id="callInitialDevelopment" name="Eligibility and Entitlement" calledElement="eligibilityProcess">
+      <bpmn:extensionElements>
+        <camunda:in businessKey="#{execution.processBusinessKey}" />
+        <camunda:in variables="all" />
+        <camunda:out variables="all" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0monq2g</bpmn:incoming>
+      <bpmn:outgoing>burialEligibilityEndFlow</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:exclusiveGateway id="routingDecisionGateway" name="Routing Decision">
+      <bpmn:extensionElements>
+        <camunda:executionListener delegateExpression="${iDevEndListener}" event="end" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>burialEligibilityEndFlow</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ocjvo1</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="Event_11vzdrr" name="Restart Intake Process">
+      <bpmn:incoming>Flow_1ueox1j</bpmn:incoming>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0jqi41r" camunda:delegateExpression="${restartIntake}" />
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="RetrieveSupplementalData" name="Retrieve Supplemental Data" camunda:delegateExpression="${supplementalDelegate}">
+      <bpmn:incoming>Flow_1e2q5gq</bpmn:incoming>
+      <bpmn:outgoing>Flow_1b1fxwo</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1x5p7yx" name="Yes" sourceRef="Gateway_0sp2pat" targetRef="Activity_1mzp0ug">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${eligibility_updateBenefitClaimTypeReason != "INELIGIBLE"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1ueox1j" sourceRef="Activity_1mzp0ug" targetRef="Event_11vzdrr" />
+    <bpmn:sequenceFlow id="Flow_1pv1yol" sourceRef="Activity_1rgzyep" targetRef="Gateway_0sp2pat" />
+    <bpmn:sequenceFlow id="Flow_0monq2g" name="No" sourceRef="Gateway_0sp2pat" targetRef="callInitialDevelopment" />
+    <bpmn:sequenceFlow id="intakeOfframpFlow" sourceRef="Gateway_15h1ahz" targetRef="developmentRequiredErrorEvent" />
+    <bpmn:sequenceFlow id="intakeAwardFlow" sourceRef="Gateway_15h1ahz" targetRef="dicAwardMessageEvent">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${routingDestination == "AWARD"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0o94d3j" sourceRef="Gateway_1j5whsf" targetRef="Gateway_15h1ahz" />
+    <bpmn:sequenceFlow id="intakeRatingFlow" sourceRef="Gateway_1j5whsf" targetRef="dicRatingMessageEvent">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${routingDestination == "RATING"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1g0kamk" sourceRef="Gateway_0pug5cd" targetRef="Gateway_1j5whsf" />
+    <bpmn:sequenceFlow id="intakeDevelopmentFlow" sourceRef="Gateway_0pug5cd" targetRef="Event_1jgmpr9">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${routingDestination == "DEVELOPMENT"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1ocjvo1" sourceRef="routingDecisionGateway" targetRef="Gateway_0pug5cd" />
+    <bpmn:sequenceFlow id="SequenceFlow_1lhtdn1" sourceRef="Activity_16iensl" targetRef="Activity_1rgzyep" />
+    <bpmn:sequenceFlow id="Flow_1b1fxwo" sourceRef="RetrieveSupplementalData" targetRef="EvaluateSupplementalDataActivity" />
+    <bpmn:sequenceFlow id="Flow_0ey6j66" sourceRef="EvaluateSupplementalDataActivity" targetRef="Gateway_13naasg" />
+    <bpmn:sequenceFlow id="Flow_13ltsoa" name="No" sourceRef="Gateway_13naasg" targetRef="Event_1nplsfb">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!evalSuppMap.supplementalDataComplete}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="benefitTypeFlow" name="Yes" sourceRef="Gateway_13naasg" targetRef="callVeteranRecordProcess">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${evalSuppMap.supplementalDataComplete}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="burialEligibilityEndFlow" sourceRef="callInitialDevelopment" targetRef="routingDecisionGateway" />
+    <bpmn:startEvent id="startAutoBurial" name="Auto Burial Intake" camunda:asyncAfter="true">
+      <bpmn:outgoing>Flow_0fccixz</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0c93si2" messageRef="Message_0dbvv9a" />
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0fccixz" sourceRef="startAutoBurial" targetRef="Activity_LoadConfiguration" />
+    <bpmn:subProcess id="errorIntakeSubProcess" name="Handle Errors" triggeredByEvent="true">
+      <bpmn:endEvent id="intakeEndEvent" name="Claim Not Awarded">
+        <bpmn:incoming>Flow_0wsi6bi</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:serviceTask id="intakeOffRampClaim" name="Offramp Claim" camunda:delegateExpression="${offrampClaimDelegate}">
+        <bpmn:incoming>Flow_0c9sdiq</bpmn:incoming>
+        <bpmn:outgoing>Flow_0wsi6bi</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:startEvent id="intakeErrorCaught" name="Error Caught">
+        <bpmn:outgoing>Flow_0c9sdiq</bpmn:outgoing>
+        <bpmn:errorEventDefinition id="ErrorEventDefinition_1cr6dc6" camunda:errorCodeVariable="errorCode" camunda:errorMessageVariable="errorMessage" />
+      </bpmn:startEvent>
+      <bpmn:sequenceFlow id="Flow_0c9sdiq" sourceRef="intakeErrorCaught" targetRef="intakeOffRampClaim" />
+      <bpmn:sequenceFlow id="Flow_0wsi6bi" sourceRef="intakeOffRampClaim" targetRef="intakeEndEvent" />
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="eligibilityEndEvent" attachedToRef="callInitialDevelopment">
+      <bpmn:outgoing>Flow_13xp4dm</bpmn:outgoing>
+      <bpmn:escalationEventDefinition id="EscalationEventDefinition_1pcqkbb" escalationRef="Escalation_0jnawrn" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_13xp4dm" sourceRef="eligibilityEndEvent" targetRef="Event_0i8th2k" />
+    <bpmn:endEvent id="Event_0i8th2k" name="Offramped in Eligibility Process">
+      <bpmn:incoming>Flow_13xp4dm</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:callActivity id="callVeteranRecordProcess" name="Update Veteran Record" calledElement="veteranRecordProcess">
+      <bpmn:extensionElements>
+        <camunda:in businessKey="#{execution.processBusinessKey}" />
+        <camunda:in variables="all" />
+        <camunda:out variables="all" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>benefitTypeFlow</bpmn:incoming>
+      <bpmn:outgoing>flowUpdateVetRecord</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="flowUpdateVetRecord" sourceRef="callVeteranRecordProcess" targetRef="callClassificationProcess" />
+    <bpmn:sequenceFlow id="Flow_1ka6nn7" sourceRef="callClassificationProcess" targetRef="Activity_16iensl" />
+    <bpmn:callActivity id="callClassificationProcess" name="Classification" calledElement="presumptClassifyProcess">
+      <bpmn:extensionElements>
+        <camunda:executionListener delegateExpression="${iDevStartListener}" event="start" />
+        <camunda:in businessKey="#{execution.processBusinessKey}" />
+        <camunda:in variables="all" />
+        <camunda:out variables="all" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>flowUpdateVetRecord</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ka6nn7</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:endEvent id="dicAwardMessageEvent" name="Call Award Process">
+      <bpmn:incoming>intakeAwardFlow</bpmn:incoming>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0bzdxtl" camunda:delegateExpression="${callAward}" />
+    </bpmn:endEvent>
+    <bpmn:endEvent id="developmentRequiredErrorEvent" name="Offramp">
+      <bpmn:incoming>intakeOfframpFlow</bpmn:incoming>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0gav2ya" errorRef="Error_0ish0mp" />
+    </bpmn:endEvent>
+    <bpmn:textAnnotation id="TextAnnotation_1blyvnv">
+      <bpmn:text>End of Initial Development Process</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:textAnnotation id="TextAnnotation_0p4zt2p">
+      <bpmn:text>Update the Benefit Claim Type then restart the intake process to rerun all initial eligibility checks</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:textAnnotation id="TextAnnotation_0th23bn">
+      <bpmn:text>All claims execute eligibility and entitlement logic</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_163xyid" sourceRef="Activity_1mzp0ug" targetRef="TextAnnotation_0p4zt2p" />
+    <bpmn:association id="Association_0q5qwti" sourceRef="callInitialDevelopment" targetRef="TextAnnotation_0th23bn" />
+    <bpmn:association id="Association_0x8g060" sourceRef="routingDecisionGateway" targetRef="TextAnnotation_1blyvnv" />
+  </bpmn:process>
+  <bpmn:error id="Error_0ish0mp" name="RoutingError" errorCode="032" />
+  <bpmn:error id="Error_1isaw15" name="PresumptiveErrorCode" errorCode="USE_MESSAGE" camunda:errorMessage="${intake_presumptiveErrorCode}" />
+  <bpmn:message id="Message_0t23b1a" name="RestartIntakeMessage" />
+  <bpmn:message id="Message_0dbvv9a" name="StartAutoBurialMessage" />
+  <bpmn:escalation id="Escalation_0jnawrn" name="eligibilityEscalation" escalationCode="eligibilityEscalation" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="intakeCollaboration">
+      <bpmndi:BPMNShape id="Participant_0lza6kp_di" bpmnElement="mainIntakeProcess" isHorizontal="true">
+        <dc:Bounds x="200" y="70" width="2481" height="710" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="startIntake">
+        <dc:Bounds x="292" y="410" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="300" y="393" width="24" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ierk7n_di" bpmnElement="Activity_LoadConfiguration">
+        <dc:Bounds x="372" y="388" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_11bw18b_di" bpmnElement="intakeClaimActivity">
+        <dc:Bounds x="510" y="388" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0lhjqux_di" bpmnElement="restartIntake">
+        <dc:Bounds x="404" y="532" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="388" y="575" width="69" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0gdmvd7_di" bpmnElement="Activity_0gdmvd7">
+        <dc:Bounds x="790" y="388" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0zbqj9i_di" bpmnElement="Activity_0zbqj9i">
+        <dc:Bounds x="650" y="388" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1mzp0ug_di" bpmnElement="Activity_1mzp0ug">
+        <dc:Bounds x="1971" y="510" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0sp2pat_di" bpmnElement="Gateway_0sp2pat" isMarkerVisible="true">
+        <dc:Bounds x="1996" y="403" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1987" y="350" width="72" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_15h1ahz_di" bpmnElement="Gateway_15h1ahz" isMarkerVisible="true">
+        <dc:Bounds x="2601" y="403" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1545" y="400" width="74" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0k01jgi_di" bpmnElement="dicRatingMessageEvent">
+        <dc:Bounds x="2513" y="332" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2504" y="304" width="54" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1j5whsf_di" bpmnElement="Gateway_1j5whsf" isMarkerVisible="true">
+        <dc:Bounds x="2506" y="403" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0bxa9qz_di" bpmnElement="Event_1jgmpr9">
+        <dc:Bounds x="2412" y="332" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2388" y="303" width="88" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0pug5cd_di" bpmnElement="Gateway_0pug5cd" isMarkerVisible="true">
+        <dc:Bounds x="2406" y="403" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1rgzyep_di" bpmnElement="Activity_1rgzyep">
+        <dc:Bounds x="1841" y="388" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0qbnfid_di" bpmnElement="EvaluateSupplementalDataActivity">
+        <dc:Bounds x="1077" y="388" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_13naasg_di" bpmnElement="Gateway_13naasg" isMarkerVisible="true">
+        <dc:Bounds x="1227" y="403" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1211" y="359" width="80" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_15pgw0p_di" bpmnElement="Event_1nplsfb">
+        <dc:Bounds x="1234" y="518" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1221" y="561" width="77" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_01whz4r_di" bpmnElement="Activity_16iensl">
+        <dc:Bounds x="1701" y="388" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1gw5yxi_di" bpmnElement="callInitialDevelopment">
+        <dc:Bounds x="2118" y="388" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1q22oan_di" bpmnElement="routingDecisionGateway" isMarkerVisible="true">
+        <dc:Bounds x="2306" y="403" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2289" y="383" width="84" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1t74t52_di" bpmnElement="Event_11vzdrr">
+        <dc:Bounds x="2003" y="642" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1986" y="688" width="70" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1f0bxyi_di" bpmnElement="RetrieveSupplementalData">
+        <dc:Bounds x="924" y="388" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_081f0fo_di" bpmnElement="startAutoBurial">
+        <dc:Bounds x="404" y="332" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="376" y="313" width="87" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0r3qexs_di" bpmnElement="dicAwardMessageEvent">
+        <dc:Bounds x="2608" y="332" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2601" y="302" width="53" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_19s7m4c_di" bpmnElement="developmentRequiredErrorEvent">
+        <dc:Bounds x="2608" y="502" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2611" y="552" width="40" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_056i59b_di" bpmnElement="errorIntakeSubProcess" isExpanded="true">
+        <dc:Bounds x="450" y="90" width="350" height="210" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1fgmh03_di" bpmnElement="intakeEndEvent">
+        <dc:Bounds x="722" y="172" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="716" y="215" width="49" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1jpmbm8_di" bpmnElement="intakeOffRampClaim">
+        <dc:Bounds x="570" y="150" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0qhrkn8_di" bpmnElement="intakeErrorCaught">
+        <dc:Bounds x="482" y="172" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="469" y="215" width="63" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0c9sdiq_di" bpmnElement="Flow_0c9sdiq">
+        <di:waypoint x="518" y="190" />
+        <di:waypoint x="570" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0wsi6bi_di" bpmnElement="Flow_0wsi6bi">
+        <di:waypoint x="670" y="190" />
+        <di:waypoint x="722" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_0i8th2k_di" bpmnElement="Event_0i8th2k">
+        <dc:Bounds x="2152" y="302" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2128" y="272" width="86" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_00flaz1_di" bpmnElement="callVeteranRecordProcess">
+        <dc:Bounds x="1341" y="388" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_160bq7z_di" bpmnElement="callClassificationProcess">
+        <dc:Bounds x="1520" y="388" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_1blyvnv_di" bpmnElement="TextAnnotation_1blyvnv">
+        <dc:Bounds x="2281" y="523" width="100" height="54" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0p4zt2p_di" bpmnElement="TextAnnotation_0p4zt2p">
+        <dc:Bounds x="1801" y="623" width="150" height="67" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0th23bn_di" bpmnElement="TextAnnotation_0th23bn">
+        <dc:Bounds x="2118" y="514" width="100" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0c45al1_di" bpmnElement="eligibilityEndEvent">
+        <dc:Bounds x="2152" y="370" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1ode1bi_di" bpmnElement="StartAc_RetClaim_Flow">
+        <di:waypoint x="328" y="428" />
+        <di:waypoint x="372" y="428" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1f9r1lf_di" bpmnElement="Flow_1f9r1lf">
+        <di:waypoint x="472" y="428" />
+        <di:waypoint x="510" y="428" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1uwa96c_di" bpmnElement="Flow_1uwa96c">
+        <di:waypoint x="610" y="428" />
+        <di:waypoint x="650" y="428" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0fpsmjb_di" bpmnElement="Flow_0fpsmjb">
+        <di:waypoint x="422" y="532" />
+        <di:waypoint x="422" y="468" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1e2q5gq_di" bpmnElement="Flow_1e2q5gq">
+        <di:waypoint x="890" y="428" />
+        <di:waypoint x="924" y="428" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0u5swdd_di" bpmnElement="Flow_0u5swdd">
+        <di:waypoint x="750" y="428" />
+        <di:waypoint x="790" y="428" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1x5p7yx_di" bpmnElement="Flow_1x5p7yx">
+        <di:waypoint x="2021" y="453" />
+        <di:waypoint x="2021" y="510" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2027" y="473" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ueox1j_di" bpmnElement="Flow_1ueox1j">
+        <di:waypoint x="2021" y="590" />
+        <di:waypoint x="2021" y="642" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1pv1yol_di" bpmnElement="Flow_1pv1yol">
+        <di:waypoint x="1941" y="428" />
+        <di:waypoint x="1996" y="428" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0monq2g_di" bpmnElement="Flow_0monq2g">
+        <di:waypoint x="2046" y="428" />
+        <di:waypoint x="2118" y="428" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2075" y="410" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1sfpu8o_di" bpmnElement="intakeOfframpFlow">
+        <di:waypoint x="2626" y="453" />
+        <di:waypoint x="2626" y="502" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0i84qlr_di" bpmnElement="intakeAwardFlow">
+        <di:waypoint x="2626" y="403" />
+        <di:waypoint x="2626" y="368" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1634" y="363" width="48" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0o94d3j_di" bpmnElement="Flow_0o94d3j">
+        <di:waypoint x="2556" y="428" />
+        <di:waypoint x="2601" y="428" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1w0wk0n_di" bpmnElement="intakeRatingFlow">
+        <di:waypoint x="2531" y="403" />
+        <di:waypoint x="2531" y="368" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1542" y="373" width="48" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1g0kamk_di" bpmnElement="Flow_1g0kamk">
+        <di:waypoint x="2456" y="428" />
+        <di:waypoint x="2506" y="428" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0u5dbl8_di" bpmnElement="intakeDevelopmentFlow">
+        <di:waypoint x="2430" y="404" />
+        <di:waypoint x="2430" y="368" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ocjvo1_di" bpmnElement="Flow_1ocjvo1">
+        <di:waypoint x="2356" y="428" />
+        <di:waypoint x="2406" y="428" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1lhtdn1_di" bpmnElement="SequenceFlow_1lhtdn1">
+        <di:waypoint x="1801" y="428" />
+        <di:waypoint x="1841" y="428" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1b1fxwo_di" bpmnElement="Flow_1b1fxwo">
+        <di:waypoint x="1024" y="428" />
+        <di:waypoint x="1077" y="428" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ey6j66_di" bpmnElement="Flow_0ey6j66">
+        <di:waypoint x="1177" y="428" />
+        <di:waypoint x="1227" y="428" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13ltsoa_di" bpmnElement="Flow_13ltsoa">
+        <di:waypoint x="1252" y="453" />
+        <di:waypoint x="1252" y="518" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1263" y="483" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1cct7zm_di" bpmnElement="benefitTypeFlow">
+        <di:waypoint x="1277" y="428" />
+        <di:waypoint x="1341" y="428" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1299" y="433" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0h8e1pw_di" bpmnElement="burialEligibilityEndFlow">
+        <di:waypoint x="2218" y="428" />
+        <di:waypoint x="2306" y="428" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0fccixz_di" bpmnElement="Flow_0fccixz">
+        <di:waypoint x="422" y="368" />
+        <di:waypoint x="422" y="388" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13xp4dm_di" bpmnElement="Flow_13xp4dm">
+        <di:waypoint x="2170" y="370" />
+        <di:waypoint x="2170" y="338" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02am3kz_di" bpmnElement="flowUpdateVetRecord">
+        <di:waypoint x="1441" y="428" />
+        <di:waypoint x="1520" y="428" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ka6nn7_di" bpmnElement="Flow_1ka6nn7">
+        <di:waypoint x="1620" y="428" />
+        <di:waypoint x="1701" y="428" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_163xyid_di" bpmnElement="Association_163xyid">
+        <di:waypoint x="1973" y="586" />
+        <di:waypoint x="1922" y="623" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0q5qwti_di" bpmnElement="Association_0q5qwti">
+        <di:waypoint x="2168" y="468" />
+        <di:waypoint x="2168" y="514" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0x8g060_di" bpmnElement="Association_0x8g060">
+        <di:waypoint x="2331" y="453" />
+        <di:waypoint x="2331" y="523" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_13kzafb_di" bpmnElement="TextAnnotation_13kzafb">
+        <dc:Bounds x="1520" y="523" width="100" height="53" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_0kx62jl_di" bpmnElement="Association_0kx62jl">
+        <di:waypoint x="1570" y="468" />
+        <di:waypoint x="1571" y="523" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
+

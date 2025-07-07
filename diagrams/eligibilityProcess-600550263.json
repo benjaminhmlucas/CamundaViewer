@@ -1,0 +1,9 @@
+﻿{
+    "executedActivities":  [
+                               "gateway_RouteByBurialEligibilityType",
+                               "eligibilityStartEvent",
+                               "evalAutoBurialEligibility",
+                               "gatewayRouteByBenefitType",
+                               "idevEndEvent"
+                           ]
+}

@@ -1,0 +1,900 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" id="intakeBenefitTypeDefinition" name="Intake Benefit Type Definition" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="4.12.0">
+  <decision id="intakeBenefitType" name="intake Benefit Type">
+    <decisionTable id="decisionTable_1" hitPolicy="FIRST">
+      <input id="input_1" label="EP Code">
+        <inputExpression id="inputExpression_1" typeRef="integer">
+          <text>claimData.getEndProductCode()</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1hpsh9q" label="Claim from Auto Burial Intake">
+        <inputExpression id="LiteralExpression_1jeqjfz" typeRef="boolean">
+          <text>claimFromAutoBurialIntake != null and claimFromAutoBurialIntake</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_15pua5q" label="Claim Label">
+        <inputExpression id="LiteralExpression_0ceviik" typeRef="string" expressionLanguage="groovy">
+          <text>claimData?.benefitClaimType?.code</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1jmhzt8" label="Does pending DIC claim exist when processing burial?">
+        <inputExpression id="LiteralExpression_0bct8dd" typeRef="boolean" expressionLanguage="groovy">
+          <text>if (eligibility_pendingDicClaimExists != null) {eligibility_pendingDicClaimExists}</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1o6rdyc" label="Claimant Relationship">
+        <inputExpression id="LiteralExpression_1jaqzdt" typeRef="string" expressionLanguage="groovy">
+          <text>claimantPersonalInfoData?.relationship?.name</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0rb5mha" label="Form 530 Block 13A">
+        <inputExpression id="LiteralExpression_09qohkh" typeRef="string" expressionLanguage="groovy">
+          <text>if(claimExecution.benefitsProcessingData != null &amp;&amp; claimExecution.benefitsProcessingData.form530GroupData != null &amp;&amp; claimExecution.benefitsProcessingData.form530GroupData.serviceConnectedDeath != null &amp;&amp; claimExecution.benefitsProcessingData.form530GroupData.serviceConnectedDeath) {"SC"} 
+else if(claimExecution.benefitsProcessingData != null &amp;&amp; claimExecution.benefitsProcessingData.form530GroupData!= null &amp;&amp; claimExecution.benefitsProcessingData.form530GroupData.nonServiceConnectedDeath !=null &amp;&amp; claimExecution.benefitsProcessingData.form530GroupData.nonServiceConnectedDeath) {"NSC"}
+else if(claimExecution.benefitsProcessingData != null &amp;&amp; claimExecution.benefitsProcessingData.form530GroupData!= null &amp;&amp; claimExecution.benefitsProcessingData.form530GroupData.vaMedicalCenterDeath != null &amp;&amp; claimExecution.benefitsProcessingData.form530GroupData.vaMedicalCenterDeath) {"VMCD"} 
+else {null}</text>
+        </inputExpression>
+      </input>
+      <output id="output_1" label="Benefit Type" name="intake_benefitType" typeRef="string" />
+      <output id="OutputClause_1jxuo2t" label="Award Type" name="intake_awardType" typeRef="string" />
+      <output id="OutputClause_1qoph7m" label="Error Code" name="intake_errorCode" typeRef="string" />
+      <rule id="DecisionRule_0cbbpcj">
+        <description>Claim was from the endpoint for auto burial intake</description>
+        <inputEntry id="UnaryTests_0lad4xo">
+          <text>169</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0pmj1pk">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17jrfqf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1mjgsg4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ue1yc5">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0mrlgwn">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1yo2p48">
+          <text>"SCBB"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1dbvtvt">
+          <text>"BUR"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1096mnw">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0mxgnz6">
+        <inputEntry id="UnaryTests_01i81mi">
+          <text>[160..162],[166..168]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_14rvw38">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0xqws7h">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_088ve1x">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0gr7v4p">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1fekbhb">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0avxiqs">
+          <text>"SCBB"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_143srja">
+          <text>"BUR"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1lzcx03">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0yx167b">
+        <inputEntry id="UnaryTests_12syoll">
+          <text>[160..162],[166..168]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0rle9s1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0b3gynl">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0gf4688">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0fg8eot">
+          <text>-</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ua1udb">
+          <text>"NSC","VMCD"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0o56ncf">
+          <text>"NSCBB"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1av413j">
+          <text>"BUR"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1jjcf59">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_00qecb6">
+        <inputEntry id="UnaryTests_0zg32q4">
+          <text>[160..162],[166..168]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0okit75">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0qny30t">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_01w7n1v">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1eeikhw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0p4po63">
+          <text>"SC"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1fy1907">
+          <text>"SCBB"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1hbavdn">
+          <text>"BUR"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1am38hx">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0r21aq9">
+        <description>COULD_NOT_DETERMINE_CLAIMANT_RELATIONSHIP</description>
+        <inputEntry id="UnaryTests_1enbcsp">
+          <text>[140..148]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0bikoyb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15cth2o">
+          <text>"140ISCD","140ISCDPMC","140ISCDP"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0jajops">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0zkhjqp">
+          <text>null</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0h81slx">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1f6rnri">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1tt7cyj">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1nj7ic9">
+          <text>"037"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1b1y9we">
+        <description>COULD_NOT_DETERMINE_CLAIMANT_RELATIONSHIP</description>
+        <inputEntry id="UnaryTests_0xu902r">
+          <text>[020..029]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0rrv2bj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1nzvh9e">
+          <text>"020RSCDTH","020RSCDTHPMC","020SMDICPMC","020REPSRPMC","020CPHLP","020CLMINC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0tw7ho4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0as38kr">
+          <text>null</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0m8aav8">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0rlv97u">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_08mswou">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1r6sos8">
+          <text>"037"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0xrqogm">
+        <description>COULD_NOT_DETERMINE_CLAIMANT_RELATIONSHIP</description>
+        <inputEntry id="UnaryTests_1x11nvc">
+          <text>[020..029]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_11vy6y7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1bxkqmz">
+          <text>"020NI","020NEW","020NEWPMC","020INCMPRVSC","020IRDICPMC","020CPHLPPMC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1vtm11c">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1eam8ht">
+          <text>null</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0xippr1">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_08ahlr5">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_12m9hf1">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1xuyils">
+          <text>"037"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0vbmfkb">
+        <description>COULD_NOT_DETERMINE_CLAIMANT_RELATIONSHIP</description>
+        <inputEntry id="UnaryTests_193pfnc">
+          <text>[190..199]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0qm71av">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_03lanqd">
+          <text>"190ORGDPN","190ORGDPNPMC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ig8zlh">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0h0c4uz">
+          <text>null</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0t7wkbk">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0vo1fce">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0ou3oiv">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1qjo97i">
+          <text>"037"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0we05hx">
+        <inputEntry id="UnaryTests_0umpngt">
+          <text>[140..148]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0kc9vkj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13pikmu">
+          <text>"140ISCD","140ISCDPMC","140ISCDP"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_07xdrlf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16cot7b">
+          <text>"Spouse"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0wjkwyu">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0eojuvr">
+          <text>"DIC"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1kh1nz6">
+          <text>"CPDS"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1jj2r09">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0yqi21q">
+        <inputEntry id="UnaryTests_1gx2dxg">
+          <text>[020..029]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1auqm93">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_110kylk">
+          <text>"020RSCDTH","020RSCDTHPMC","020SMDICPMC","020REPSRPMC","020CPHLP","020CLMINC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_184l046">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1knor3f">
+          <text>"Spouse"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_01acnza">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0tri6b5">
+          <text>"DIC"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_109m3f4">
+          <text>"CPDS"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0p0z4fe">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_15yhwz9">
+        <inputEntry id="UnaryTests_1nckzcu">
+          <text>[020..029]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1hpq3cq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1fmi7e4">
+          <text>"020NI","020NEW","020NEWPMC","020INCMPRVSC","020IRDICPMC","020CPHLPPMC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1wcki8o">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0twey36">
+          <text>"Spouse"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0yh94x8">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0v6nx93">
+          <text>"DIC"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1yklf9i">
+          <text>"CPDS"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_06hk1ri">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0zpv8im">
+        <inputEntry id="UnaryTests_0kszmps">
+          <text>[190..199]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0fmbeu3">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1iuqszv">
+          <text>"190ORGDPN","190ORGDPNPMC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1puxvzw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_06g28ru">
+          <text>"Spouse"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_04mwjxq">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0qqjsv7">
+          <text>"IDP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_11bd6vm">
+          <text>"CPDS"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0z78keo">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0evqtji">
+        <inputEntry id="UnaryTests_1s330jo">
+          <text>[140..148]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1mbvwcn">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_04sjc5g">
+          <text>"140ISCD","140ISCDPMC","140ISCDP"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ff8iog">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0b9ykpv">
+          <text>"Child"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0rm1qd1">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0simr8t">
+          <text>"DIC"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_126rsty">
+          <text>"CPDC"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0wgqhpk">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_05179zk">
+        <inputEntry id="UnaryTests_0womikd">
+          <text>[020..029]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0rzp8tt">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1b66swk">
+          <text>"020RSCDTH","020RSCDTHPMC","020SMDICPMC","020REPSRPMC","020CPHLP","020CLMINC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ljae81">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ipphdi">
+          <text>"Child"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0fakkg9">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1kmjnz2">
+          <text>"DIC"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1flbqd3">
+          <text>"CPDC"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_11r24aq">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1r8vesa">
+        <inputEntry id="UnaryTests_1atmyku">
+          <text>[020..029]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1xfy9g0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16izz22">
+          <text>"020NI","020NEW","020NEWPMC","020INCMPRVSC","020IRDICPMC","020CPHLPPMC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0y50yok">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ch61iq">
+          <text>"Child"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1byf6zh">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0ae8z2j">
+          <text>"DIC"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1x6dexa">
+          <text>"CPDC"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0piyjyz">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1bukuxy">
+        <inputEntry id="UnaryTests_1numh4x">
+          <text>[190..199]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0uzo4zm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_10pig8h">
+          <text>"190ORGDPN","190ORGDPNPMC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1yhg6aa">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_14z6r50">
+          <text>"Child"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1qutrw8">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1o4513g">
+          <text>"IDP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0ke6f8d">
+          <text>"CPDC"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1jvv9eh">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0v2646o">
+        <inputEntry id="UnaryTests_1hbw8up">
+          <text>[140..148]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0dh6f3c">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1r76gmc">
+          <text>"140ISCD","140ISCDPMC","140ISCDP"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1jva0zk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1yy9r0j">
+          <text>"Parent"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1hhe7ig">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0g1qz8v">
+          <text>"DIC"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0eopdsu">
+          <text>"CPDP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_153b5i4">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0otiql7">
+        <inputEntry id="UnaryTests_0s3po7c">
+          <text>[020..029]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0phqs4i">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12iqw5t">
+          <text>"020RSCDTH","020RSCDTHPMC","020SMDICPMC","020REPSRPMC","020CPHLP","020CLMINC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0rjh17g">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_14cex64">
+          <text>"Parent"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15x4c9w">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1h6ov0j">
+          <text>"DIC"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1l1h70v">
+          <text>"CPDP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0m05d9b">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0k4c83m">
+        <inputEntry id="UnaryTests_1ashodb">
+          <text>[020..029]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1lbk9tk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16t23jo">
+          <text>"020NI","020NEW","020NEWPMC","020INCMPRVSC","020IRDICPMC","020CPHLPPMC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1145mmg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_18mojtv">
+          <text>"Parent"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ykwoik">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1impm8c">
+          <text>"DIC"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0lp3cqw">
+          <text>"CPDP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1nch70u">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0wuqnvb">
+        <inputEntry id="UnaryTests_0d5lv8s">
+          <text>[190..199]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1fkhzht">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ecqi3a">
+          <text>"190ORGDPN","190ORGDPNPMC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1h5i9v4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0m4sre6">
+          <text>"Parent"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1206dpq">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1jyrvd6">
+          <text>"IDP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_07hsfri">
+          <text>"CPDP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0k53zfa">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1a0dlof">
+        <description>COULD_NOT_DETERMINE_CLAIMANT_RELATIONSHIP</description>
+        <inputEntry id="UnaryTests_0jcw1ub">
+          <text>[120..129]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1is3mj8">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1t4rigw">
+          <text>"120SMP","120SMPPMC","120ILCP7","120ILCP7PMC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1hzd7xb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0umgh21">
+          <text>null</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0tdocg2">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_17ei6um">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0p7bfgt">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_16j912s">
+          <text>"037"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1vsvv89">
+        <inputEntry id="UnaryTests_15ebswv">
+          <text>[120..129]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1c5g6bx">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1vqg6by">
+          <text>"120SMP","120SMPPMC","120ILCP7","120ILCP7PMC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0v6cau1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1i4axl2">
+          <text>"Veteran"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0kxd7uo">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_13vyxvi">
+          <text>"SMP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0pwtk32">
+          <text>"CPL"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1httmd6">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0e7v71r">
+        <inputEntry id="UnaryTests_1tzsh6l">
+          <text>[120..129]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1fibiou">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1sfcbeq">
+          <text>"120SMP","120SMPPMC","120ILCP7","120ILCP7PMC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1b1052q">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1bna6jx">
+          <text>"Spouse"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_021bfv9">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1h3xl98">
+          <text>"SMP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0qmur4a">
+          <text>"CPDS"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0yenxd9">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1eoazo6">
+        <inputEntry id="UnaryTests_0e78af2">
+          <text>[120..129]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1n9ocju">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0rcvyv3">
+          <text>"120SMP","120SMPPMC","120ILCP7","120ILCP7PMC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1inr37y">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0qtqagy">
+          <text>"Child"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15gm6om">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1f0gw29">
+          <text>"SMP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1mvgawg">
+          <text>"CPDC"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1vyj0oh">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0yrzara">
+        <inputEntry id="UnaryTests_0iy651b">
+          <text>[120..129]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0lobclm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1yfwbka">
+          <text>"120SMP","120SMPPMC","120ILCP7","120ILCP7PMC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1n122by">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0p7spvk">
+          <text>"Parent"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_18ratbw">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_048ta64">
+          <text>"SMP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_03r5hdq">
+          <text>"CPDP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_13y99l2">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0g1x01x">
+        <description>COULD_NOT_DETERMINE_CLAIMANT_RELATIONSHIP</description>
+        <inputEntry id="UnaryTests_1gu68ft">
+          <text>[180..189]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0f46xi6">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05591o6">
+          <text>"180ORGPEN","180ORGPENPMC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_04xw9lk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1g7rceo">
+          <text>null</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0rpsf8j">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1qv4dzj">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0h8xh84">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0cjg1wb">
+          <text>"037"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0en0r9o">
+        <inputEntry id="UnaryTests_0ej2l55">
+          <text>[180..189]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1qdu547">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ayx9qy">
+          <text>"180ORGPEN","180ORGPENPMC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0dlyg57">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_075s7di">
+          <text>"Veteran"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1vo5lmr">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0wvo1sq">
+          <text>"IP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1es65by">
+          <text>"CPL"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0i4ru7t">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_14zjs61">
+        <inputEntry id="UnaryTests_1bq0g7u">
+          <text>[160..162],[166..168]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_03ggjoj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12239k2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1lnwc66">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1kmz58g">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12hh3ju">
+          <text>not("NSC","SC","VMCD")</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1vejroa">
+          <text>"SCBB"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0m1aodp">
+          <text>"BUR"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_089dk9q">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0zjjsyj">
+        <description>UNSUPPORTED_BENEFIT_TYPE</description>
+        <inputEntry id="UnaryTests_1g9jbmv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1oxk59p">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0lswqak">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0wjeokb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1bpi177">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1eg1vfi">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1hratw7">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0i6haa9">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0irb25n">
+          <text>"007"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram id="DMNDiagram_18wisor">
+      <dmndi:DMNShape id="DMNShape_0gyrcdz" dmnElementRef="intakeBenefitType">
+        <dc:Bounds height="80" width="180" x="159" y="77" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
+

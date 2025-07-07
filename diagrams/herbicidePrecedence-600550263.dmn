@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" id="pactPrecedence" name="ao_and_gw_precedence" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.34.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
+  <decision id="herbicidePrecedence" name="Herbicide Precedence">
+    <decisionTable id="DecisionTable_1bsmy6h" hitPolicy="RULE ORDER">
+      <output id="Output_1" label="Herbicide Exposure Final Result" name="exposureResult" typeRef="string" biodi:width="438" />
+      <rule id="DecisionRule_0bv9nx5">
+        <description></description>
+        <outputEntry id="LiteralExpression_19dxhw3">
+          <text>"AGENT_ORANGE_OFFRAMP_BENEFIT_ISSUE"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_05e1xkf">
+        <description></description>
+        <outputEntry id="LiteralExpression_0y7igqs">
+          <text>"PACT_ACT_REVIEW_REQUIRED"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_077udyc">
+        <outputEntry id="LiteralExpression_1h7qfcy">
+          <text>"PACT_GRANT"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0oo6l80">
+        <description>Grant Presumptive for AGENT_ORANGE condition</description>
+        <outputEntry id="LiteralExpression_0q1q8at">
+          <text>"AGENT_ORANGE"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_06t4tgl">
+        <outputEntry id="LiteralExpression_0c4tb1e">
+          <text>"AO_FLASH"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_19vbyh7">
+        <outputEntry id="LiteralExpression_0zma6fe">
+          <text>"AO_SPECIAL_ISSUE"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_129fada">
+        <outputEntry id="LiteralExpression_05b4clg">
+          <text>"AGENT_ORANGE_OFFRAMP_NO_SPECIAL_ISSUE_OR_FLASH"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_00axhmx">
+        <outputEntry id="LiteralExpression_1amzo5q">
+          <text>"AGENT_ORANGE_OFF_RAMP"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_04oipyf">
+        <outputEntry id="LiteralExpression_0jiufkw">
+          <text>"NO_AGENT_ORANGE_DECISION"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <decision id="gulfWarPrecedence" name="Gulf War Precedence">
+    <decisionTable id="DecisionTable_090we5m" hitPolicy="RULE ORDER">
+      <output id="OutputClause_0mec5gi" label="Final Gulf War Exposure Result" name="exposureResult" typeRef="string" biodi:width="531" />
+      <rule id="DecisionRule_0l9fyer">
+        <outputEntry id="LiteralExpression_0s92qqr">
+          <text>"GULF_WAR_OFFRAMP_BENEFIT_ISSUE"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0titkxw">
+        <outputEntry id="LiteralExpression_01heve8">
+          <text>"AS21_AS27_INTERIM_FINAL_RULE_REVIEW"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1tusgmz">
+        <outputEntry id="LiteralExpression_0jxlkc5">
+          <text>"PACT_ACT_REVIEW_REQUIRED"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1cyg1y0">
+        <outputEntry id="LiteralExpression_1axp0kb">
+          <text>"GULF_WAR_OFFRAMP_RARE_CANCER"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0le5oat">
+        <outputEntry id="LiteralExpression_148utk5">
+          <text>"PACT_GRANT"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0a34kh0">
+        <description>Grant Presumptive for GULF_WAR condition</description>
+        <outputEntry id="LiteralExpression_19f7pl7">
+          <text>"GULF_WAR"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0ce614b">
+        <outputEntry id="LiteralExpression_04bdwq4">
+          <text>"GW_FLASH"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1pj4zb2">
+        <outputEntry id="LiteralExpression_0hl9upo">
+          <text>"GW_SPECIAL_ISSUE"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1imlojq">
+        <outputEntry id="LiteralExpression_0xsfl33">
+          <text>"GULF_WAR_OFFRAMP_NO_SPECIAL_ISSUE_OR_FLASH"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_08xthdu">
+        <outputEntry id="LiteralExpression_19zjl3c">
+          <text>"GULF_WAR_OFFRAMP_REVIEW_YEARS_BETWEEN_RAD_AND_DOD"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0oi1akp">
+        <outputEntry id="LiteralExpression_0ur21am">
+          <text>"GULF_WAR_OFFRAMP_NO_COD_MATCH"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0br6ehp">
+        <outputEntry id="LiteralExpression_1r51o9i">
+          <text>"NO_GULF_WAR_DECISION"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="herbicidePrecedence">
+        <dc:Bounds height="80" width="180" x="160" y="100" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="DMNShape_181xopw" dmnElementRef="gulfWarPrecedence">
+        <dc:Bounds height="80" width="180" x="480" y="100" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
+

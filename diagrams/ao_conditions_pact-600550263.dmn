@@ -1,0 +1,2243 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" xmlns:camunda="http://camunda.org/schema/1.0/dmn" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" id="ao_conditions" name="DRD" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.27.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <decision id="herbicide-presumptive-pact" name="Herbicide Exposure">
+    <informationRequirement id="InformationRequirement_0fy52ge">
+      <requiredDecision href="#ao_conditions_original" />
+    </informationRequirement>
+    <informationRequirement id="InformationRequirement_1kd11ze">
+      <requiredDecision href="#ao_conditions_20210101" />
+    </informationRequirement>
+    <informationRequirement id="InformationRequirement_1aqetal">
+      <requiredDecision href="#ao_conditions_pact" />
+    </informationRequirement>
+    <decisionTable id="DecisionTable_1oh8bas" hitPolicy="COLLECT" biodi:annotationsWidth="454">
+      <input id="InputClause_0i5zvp0" label="Benefit Type">
+        <inputExpression id="LiteralExpression_0f9yuvv" typeRef="string" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getBenefitType()</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_036dlrv" label="Claim Lifecycle Status">
+        <inputExpression id="LiteralExpression_1mjf7c4" typeRef="string" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getClaimLifecycleStatus()</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0ft343f" label="Claim Lifecycle Phase">
+        <inputExpression id="LiteralExpression_1wssp97" typeRef="string" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getClaimLifecycle()</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_14y8tei" label="Veteran DOD">
+        <inputExpression id="LiteralExpression_0qde56m" typeRef="date" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.dateOfDeath.atStartOfDay()</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1g7dijr" label="Claim within 1 year of Death" biodi:width="192">
+        <inputExpression id="LiteralExpression_1fpcce7" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.claimWithin1YearOfDeath</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1dvw5kw" label="Valid ITF within 1 year of Death" biodi:width="192">
+        <inputExpression id="LiteralExpression_14nlp14" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.itfWithin1YearOfDeath</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1kbc2fu" label="Valid ITF Date">
+        <inputExpression id="LiteralExpression_0jif31b" typeRef="date" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.itfDate?.atStartOfDay()</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0rcsk6f" label="Last Service Era">
+        <inputExpression id="LiteralExpression_01w7s0o" typeRef="string" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getLastServiceEra()</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1dzqxo3" label="AO Original COD Match" camunda:inputVariable="herbicideCondition">
+        <inputExpression id="LiteralExpression_1a6370z" typeRef="boolean" expressionLanguage="groovy">
+          <text>herbicideCondition != null</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0xkmy1g" label="AO COD Effective 1/01/21 Match" camunda:inputVariable="aoCODS_01_01_21">
+        <inputExpression id="LiteralExpression_1kj0yaf" typeRef="boolean" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[0] != null</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0dho36s" label="Has Any SC Disability Matching AO COD Effective 1/01/21" camunda:inputVariable="aoCODS_01_01_21">
+        <inputExpression id="LiteralExpression_13gvujm" typeRef="boolean" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[1] != null</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_17sf5rl" label="Latest SC Disability Matching Herbicide COD Effective 1/01/21" biodi:width="192" camunda:inputVariable="aoCODS_01_01_21">
+        <inputExpression id="LiteralExpression_1p4xwcj" typeRef="boolean" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[2] != null</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0ho983y" label="Herbicide COD Effective 8/10/22 Match (PACT)" camunda:inputVariable="ao_aug10_2022">
+        <inputExpression id="LiteralExpression_09dovb2" typeRef="boolean" expressionLanguage="groovy">
+          <text>ao_aug10_2022 != null</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_05rv5lf" label="Has Herbicide Rating Special Issue" biodi:width="192">
+        <inputExpression id="LiteralExpression_074lttp" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getRatingSpecialIssues() != null &amp;&amp; 
+                !intake_pactPresumptiveCriteria.getRatingSpecialIssues().isEmpty() &amp;&amp; 
+                intake_pactPresumptiveCriteria.getRatingSpecialIssues().any{ 'AO'.equalsIgnoreCase(it.spisTc)} ||
+                intake_pactPresumptiveCriteria.getRatingSpecialIssues().any{ 'AOOV'.equalsIgnoreCase(it.spisTc)} ||
+                intake_pactPresumptiveCriteria.getRatingSpecialIssues().any{ 'AOIV'.equalsIgnoreCase(it.spisTc)}
+            </text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1aohy8r" label="Has Herbicide Death Special Issue with Herbicide Basis">
+        <inputExpression id="LiteralExpression_02ctyxp" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.hasAODeathSpecialIssueWithBasis</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0nzuee5" label="Has Herbicide Death Special Issue from Jan 1, 2021">
+        <inputExpression id="LiteralExpression_0xuwnpl" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getDeathSpecialIssues() != null &amp;&amp; 
+              !intake_pactPresumptiveCriteria.getDeathSpecialIssues().isEmpty() &amp;&amp; 
+              intake_pactPresumptiveCriteria.getDeathSpecialIssues().any{ 'AOIV'.equalsIgnoreCase(it)} || 
+              intake_pactPresumptiveCriteria.getDeathSpecialIssues().any{ 'AOOV'.equalsIgnoreCase(it)}
+          </text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_14s7sbo" label="Herbicide Death Contention Special Issue">
+        <inputExpression id="LiteralExpression_1ugottv" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getContentionSpecialIssues() != null &amp;&amp;
+!intake_pactPresumptiveCriteria.getContentionSpecialIssues().isEmpty() &amp;&amp;
+intake_pactPresumptiveCriteria.getContentionSpecialIssues().any{ 'BWAO'.equalsIgnoreCase(it)} ||
+intake_pactPresumptiveCriteria.getContentionSpecialIssues().any{ 'NP'.equalsIgnoreCase(it)} ||
+intake_pactPresumptiveCriteria.getContentionSpecialIssues().any{ 'NAPN'.equalsIgnoreCase(it)} ||
+intake_pactPresumptiveCriteria.getContentionSpecialIssues().any{ 'NNAPN'.equalsIgnoreCase(it)} ||
+intake_pactPresumptiveCriteria.getContentionSpecialIssues().any{ 'NNPN'.equalsIgnoreCase(it)}
+            </text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_09vuzr5" label="Has Grantable Herbicide Corporate Flash">
+        <inputExpression id="LiteralExpression_1p4t99u" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getCorporateFlashes() != null &amp;&amp;
+              !intake_pactPresumptiveCriteria.getCorporateFlashes().isEmpty() &amp;&amp;
+              intake_pactPresumptiveCriteria.getCorporateFlashes().any{'Agent Orange - Vietnam'.equalsIgnoreCase(it)} ||
+              intake_pactPresumptiveCriteria.getCorporateFlashes().any{'Agent Orange Exposure Verified'.equalsIgnoreCase(it)} ||
+              intake_pactPresumptiveCriteria.getCorporateFlashes().any{'Non - Nehmer Agent Orange 2010'.equalsIgnoreCase(it)} ||
+              intake_pactPresumptiveCriteria.getCorporateFlashes().any{'Vietnam In - Country Service Verified'.equalsIgnoreCase(it)}
+          </text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1envsbb" label="Has Herbicide Corporate Flash Needing Review">
+        <inputExpression id="LiteralExpression_0hu97t3" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getCorporateFlashes() != null &amp;&amp;
+                !intake_pactPresumptiveCriteria.getCorporateFlashes().isEmpty() &amp;&amp;
+                intake_pactPresumptiveCriteria.getCorporateFlashes().any{'Agent Orange - Vietnam'.equalsIgnoreCase(it)} ||
+                intake_pactPresumptiveCriteria.getCorporateFlashes().any{'Blue Water Navy'.equalsIgnoreCase(it)} ||
+                intake_pactPresumptiveCriteria.getCorporateFlashes().any{'Non - Nehmer Agent Orange 2010'.equalsIgnoreCase(it)} ||
+                intake_pactPresumptiveCriteria.getCorporateFlashes().any{'Non - Nehmer AO Peripheral Neuropathy'.equalsIgnoreCase(it)}
+            </text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0oyfe5w" label="Claiming Income and Assets">
+        <inputExpression id="LiteralExpression_1mf9x1m" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.isIncomeAndAssetsAnswered()</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0uya360" label="FF VBMSD-192340 evaluateAgentOrangePresumptiveConditions">
+        <inputExpression id="LiteralExpression_15f9c6n" typeRef="boolean" expressionLanguage="groovy">
+          <text>evaluateAgentOrangePresumptiveConditions</text>
+        </inputExpression>
+      </input>
+      <output id="OutputClause_0f8qdtt" label="Herbicide Exposure" name="herbicideExposureResult" typeRef="string" biodi:width="238" />
+      <output id="OutputClause_0sob5n1" label="Matched Condition" name="matchedHerbicideCondition" typeRef="string" biodi:width="256" />
+      <output id="OutputClause_03xlqpm" label="COD Match Type (Used for Additional PACT Processing)" name="aoCodMatchType" typeRef="string" biodi:width="192" />
+      <rule id="DecisionRule_1xus5we">
+        <description>VBMSD-198433 - off-ramping for possible PACT CoD but no Flash or Special Issues.
+HerbicideExposure - 1</description>
+        <inputEntry id="UnaryTests_0zvd0mx">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0xsg1e2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1x4qvlb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_02ubbcu">
+          <text>&lt;= date and time("2022-08-10T00:00:00")</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_10f8tpg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0dkmqsv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_01ezhfp">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16sbhwm">
+          <text>"Vietnam Era"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1b1puxu">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1kuwkkc">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ceme73">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0envwij">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1jj03ax">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0au57z1">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0typ1zf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1rgy0gb">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1n0mrd2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1jiznp9">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_06qfx3l">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1rxnm5m">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0cxtv12">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1jknm69">
+          <text>"AGENT_ORANGE_OFFRAMP_NO_SPECIAL_ISSUE_OR_FLASH"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0b6aokg">
+          <text>herbicideCondition</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0xax6qs">
+          <text>"ao_original"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1pp2jaj">
+        <description>VBMSD-198433: AO_PREUSMPTIVE_BENEFIT_REVIEW
+HerbicideExposure - 2 (Claim)</description>
+        <inputEntry id="UnaryTests_08rui7d">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0b111wz">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1lin7lm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1coo7qx">
+          <text>&lt; date and time("2021-01-01T00:00:00")</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15uu7wq">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ytqcm6">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1b4ab77">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_00db04h">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08ya53m">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0k6pbva">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1k54b8v">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_10zzw1z">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0t1e2qn">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_101tlxq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1aric8x">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0w4cnid">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1sij8on">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ttpu7o">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0lllyb6">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1gyo2ac">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0eerf1x">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_01vq2ap">
+          <text>"AGENT_ORANGE_OFFRAMP_BENEFIT_ISSUE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0uy3pc9" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[0]</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0ngv675">
+          <text>"ao_jan01_2021"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1gu4yan">
+        <description>VBMSD-198433: AO_PREUSMPTIVE_BENEFIT_REVIEW
+HerbicideExposure - 2 (ITF)</description>
+        <inputEntry id="UnaryTests_13pu67s">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0oj4rj8">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1bi6xmv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_01oku86">
+          <text>&lt; date and time("2021-01-01T00:00:00")</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ws2z2o">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_022bb8f">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13zj0qh">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0hfd8rf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_077v3sn">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_09egwwa">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1nnnp5z">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ro2fpr">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1y7u74w">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1g66jg2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_11ryk0m">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1n1u3c4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_07ga8my">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0gq75wv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1lmdwox">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0wtnaz8">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05dikyn">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1g0a79e">
+          <text>"AGENT_ORANGE_OFFRAMP_BENEFIT_ISSUE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0a3qttl" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[0]</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0h9yon7">
+          <text>"ao_jan01_2021"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0ay8lfa">
+        <description>VBMSD-198433: AO_PREUSMPTIVE_BENEFIT_REVIEW
+HerbicideExposure - 3</description>
+        <inputEntry id="UnaryTests_0b9dj1y">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0uqjd0h">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_18jxsif">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_125zsa7">
+          <text>&lt; date and time("2021-01-01T00:00:00")</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_06i4p19">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08oo9z8">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0a0grwn">
+          <text>&lt; date and time("2021-01-01T00:00:00")</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1w14pmc">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0b8djea">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1srjqg5">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05ia0iq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0r80asj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1uu5oay">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15tcevm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17qznlw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_02pl6ip">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0qfsscg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_009kjb9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ie1kxu">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0k99chu">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0qoe8u8">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_06eb1u1">
+          <text>"AGENT_ORANGE_OFFRAMP_BENEFIT_ISSUE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_18xrea0" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[0]</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1rw05yu">
+          <text>"ao_jan01_2021"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0tlazrq">
+        <description>VBMSR-26452
+HerbicideExposure - 4 (Claim)</description>
+        <inputEntry id="UnaryTests_14c7hmf">
+          <text>"DIC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_14bk5y8">
+          <text>"Rating Decision Complete"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1bselgc">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1cjtq77">
+          <text>&lt; date and time("2021-01-01T00:00:00")</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1mu8jng">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1otfd1n">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1rt5qz4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0sfc5nx">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ae5agp">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0e5plt9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ra5363">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0l2gtq7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1qa5wpm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1w2ovv1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1337m4u">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1gv0e9p">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1eu1ha9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1mtzy7p">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0n7mtqq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0h8xkze">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1435zfs">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_12w0o2f">
+          <text>"AGENT_ORANGE_OFFRAMP_BENEFIT_ISSUE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0lv7005" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[1]</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_07nhyzr">
+          <text>"ao_jan01_2021"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_19l6vjh">
+        <description>VBMSR-26452
+HerbicideExposure - 4 (ITF)</description>
+        <inputEntry id="UnaryTests_1iy15ma">
+          <text>"DIC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_10eb05a">
+          <text>"Rating Decision Complete"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0jv2l0k">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_137c61v">
+          <text>&lt; date and time("2021-01-01T00:00:00")</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0mz9wiw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_081edxw">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0cfhjlw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0c1sdem">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13s7w3k">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_07qn69s">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_081u1kd">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1pgdx8d">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1r7t4xr">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1r9g7cu">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0c0s1gk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0q0hyw9">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1rbn8dd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_11uivp0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1a08120">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0y9ubrv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1sqmp2d">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_035lz45">
+          <text>"AGENT_ORANGE_OFFRAMP_BENEFIT_ISSUE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0uf85zt" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[1]</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0qko3y6">
+          <text>"ao_jan01_2021"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1ymwigg">
+        <description>VBMSR-26452
+HerbicideExposure - 5
+</description>
+        <inputEntry id="UnaryTests_0mbf1gh">
+          <text>"DIC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1r22a9x">
+          <text>"Rating Decision Complete"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0a6xgn8">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1te5tsm">
+          <text>&lt; date and time("2021-01-01T00:00:00")</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1yk2m95">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1k35xmp">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_01vo3au">
+          <text>&lt; date and time("2021-01-01T00:00:00")</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0zygryl">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0a4g4lg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_187wheb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1uv7uie">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_07ehqz2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_11fg9id">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1xq4vf5">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0e0d5x1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ycrpj0">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0w6tyfw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08xv7vz">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0cniids">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0zedb71">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1t5zknu">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0d4ejsf">
+          <text>"AGENT_ORANGE_OFFRAMP_BENEFIT_ISSUE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1983qjw" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[1]</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_103jwqa">
+          <text>"ao_jan01_2021"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_174dy98">
+        <description>VBMSR-26452
+HerbicideExposure - 6</description>
+        <inputEntry id="UnaryTests_0c4cdr6">
+          <text>"DIC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1cr3ap9">
+          <text>"Rating Decision Complete"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1buw3ih">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1334g1s">
+          <text>&lt; date and time("2021-01-01T00:00:00")</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0neql7d">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0xrnw8j">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12si9ef">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ky4vsj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0dekvc7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0gczgt6">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1swpvx4">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0klcvsm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0mtzhf8">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0429bis">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0n69fwi">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0fz12ww">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1q2cho7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0q3p5k6">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0c68ojs">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ql5tyr">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1krikzr">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0skbpqq">
+          <text>"AGENT_ORANGE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1q3l4re" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[1]</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0l4qgln">
+          <text>"ao_jan01_2021"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0mez0p0">
+        <description>VBMSD-198433; AO Rating Special Issues include "AO", "AOOV" and "AOIV"
+HerbicideExposure - 7,8,9</description>
+        <inputEntry id="UnaryTests_1k9hn4b">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_02r9vtp">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1v4obdj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0dbwbz7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12013iw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_068upxj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0pf408r">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0e37b2e">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0t3xov1">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1sptg15">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0baqwmm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_18oo3ih">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_07c22lw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1awz67k">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1f4ia7g">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0278guz">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1nyt6u2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0tjokf1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_00gxbju">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16iuefu">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_000oq8d">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0xeh8zy">
+          <text>"AGENT_ORANGE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1l89emm" expressionLanguage="groovy">
+          <text>herbicideCondition</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0ocmk45">
+          <text>"ao_original"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0ct3umc">
+        <description>Grantable Corporate Flashes include: "Agent Orange - Vietnam", "Vietnam In - Country Verified", "Agent Orange Exposure Verified", and "Non - Nehmer AO Agent Orange 2010"
+HerbicideExposure - 10,11,12,13</description>
+        <inputEntry id="UnaryTests_0917aln">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1r9nuyy">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0fg2inv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_01jsv4b">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0jvesqv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1gxd790">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1w88u3p">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1eavt2r">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_137667h">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13k1n2y">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16io08w">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_04xjwky">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1dzm0g9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1t0aszr">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0seg5o3">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ludor7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ey6b6d">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0dg0cgk">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1s20h4w">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1co9qkz">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0brip6f">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0have6m">
+          <text>"AGENT_ORANGE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0r7fwew" expressionLanguage="groovy">
+          <text>herbicideCondition</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1ud17wj">
+          <text>"ao_original"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_19s4moq">
+        <description>VBMSD-198433
+HerbicideExposure - 14,15,16</description>
+        <inputEntry id="UnaryTests_1mywvid">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16u6eri">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1k4htsy">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1u4dx45">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_02e9l5d">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0rhb5jg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1tvtr39">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0xf8zfv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0igcz1b">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0fuyhuk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0l9hs1w">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16gyi1l">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0e3wd1z">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_179q33w">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0qgfgsw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ucnnf9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0uxvq8d">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_09v2985">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_125ydum">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1008ru7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_14w7lp7">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0x9v5zi">
+          <text>"AGENT_ORANGE_OFF_RAMP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1wrg4bu">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1l199ut">
+          <text>"ao_original"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_11kgmea">
+        <description>PRESUMPTIVE_NEEDING_REVIEW_FOR_AO_FLASH
+PendingPresumptiveNeedingReview - 5,6,7,8</description>
+        <inputEntry id="UnaryTests_1xwfc8s">
+          <text>"DIC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0pbdmvf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0febm47">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0jwml9w">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0hvxv30">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1owmr0h">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05pe3qo">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0k2go78">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0qo9dfe">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1kczsve">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1gno97z">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12g200l">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0n2pbk9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16osxh9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ijmtlg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0u4k6sf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1n01jqu">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0u3kkye">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1b8641z">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0osrtr9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_06fm112">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0fwy23d">
+          <text>"AO_FLASH"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_06nx03u">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_009t4qf">
+          <text>"any"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0nz3lw0">
+        <description>PRESUMPTIVE_NEEDING_REVIEW_FOR_AO_SPECIAL_ISSUE
+PendingPresumptiveNeedingReview - 11,12,13,14</description>
+        <inputEntry id="UnaryTests_050pbb9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0eefs94">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1sn22t0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ycucv4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0cjvs89">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0qkjfq5">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1331n4i">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ocbw4k">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0y677pz">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1tw518f">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ibbd8n">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08wsejs">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ly4j4o">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0cxw1gs">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_09086dn">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1q6zkwv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1uo3np4">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0tvi32i">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0qmp9eu">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_07cg06z">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_118e5wi">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1g1h036">
+          <text>"AO_SPECIAL_ISSUE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_12gbxh4">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0q84v1t">
+          <text>"any"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_010czky">
+        <description>VBMSD-156508, AC 6.1
+Pact: GrantCriteria - 7</description>
+        <inputEntry id="UnaryTests_0zamxbx">
+          <text>"DIC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1yjukhg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0kjgwl4">
+          <text>not("AWAITING AWARD")</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0bl87ww">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1nrgn4z">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0b77dw1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1y6rnp7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05eem3h">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_07obe3i">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0kdcnws">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_06itq2e">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1wc1z1b">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_14r0y76">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0880i4u">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1tx26xg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1es97ep">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_052iq6i">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0r9bxhk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0x4j542">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_014y5z4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1l31qen">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1e9h32e">
+          <text>"POSSIBLE_PACT_AO"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_09875dv">
+          <text>ao_aug10_2022</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_01u7l00">
+          <text>"ao_aug10_2022"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0fv0j91">
+        <description>VBMSD-185648, AC 1
+Pact: GrantCriteria - 8</description>
+        <inputEntry id="UnaryTests_0meu9x8">
+          <text>"DIC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1qp38mn">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0rszs2h">
+          <text>"AWAITING AWARD"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1sxzmzz">
+          <text>&lt; date and time("2022-08-10T00:00:00")</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05na6e5">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1789lni">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1h627dn">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1cl34tj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1sft7ne">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1fmh2le">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ucz0he">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05wcv1z">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1pja3df">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0mnqogt">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1eyqjvg">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17cmeeb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0jt1amo">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1iolbkl">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1hz22ms">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0jspuj7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1l4yues">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1n7w09s">
+          <text>"POSSIBLE_PACT_AO"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1kwz6rx">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_13856at">
+          <text>"ao_prevAward"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0yn2yhz">
+        <description>VBMSD-156508, AC 6.2
+Pact: GrantCriteria - 9</description>
+        <inputEntry id="UnaryTests_01nejgl">
+          <text>"DIC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1golhu1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1km3av3">
+          <text>not("AWAITING AWARD")</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1fft04q">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0yx47px">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0kocxe9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1da5lee">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1xdplqo">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_07qz8wh">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0sp2kp2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0iyxhfd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0tiqsuq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0y876bv">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1kdpue9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0g74zao">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0zw6ajz">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1qvthlc">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_152j14r">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1dvfg6i">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0f3dq9v">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17kkm9n">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0366x1v">
+          <text>"POSSIBLE_PACT_AO"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0xee9ja">
+          <text>ao_aug10_2022</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1n61um4">
+          <text>"ao_aug10_2022"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0xhymb6">
+        <description>VBMSD-192340, AC 2
+Pact: GrantCriteria - 11 (COD Match from Death Cert)</description>
+        <inputEntry id="UnaryTests_0j6fjpc">
+          <text>"DIC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08fidze">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0cg79aj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0pp2po6">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0tzjmzk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0evinmt">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0na824g">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0qoaift">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0f73zsc">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1m4v8o4">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_10o3znz">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1qe05oc">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_19mx2qh">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1e10sfv">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0zf86xd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0mgywqt">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0p3onqz">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1l3rap4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_168fm9t">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15z6ar5">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1gfe3we">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0g8oih6">
+          <text>"POSSIBLE_PACT_AO"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1s39rok" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[0]</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1wbsmbh">
+          <text>"ao_jan01_2021"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0rgze9w">
+        <description>VBMSD-192340, AC 2
+Pact: GrantCriteria - 11 (COD Match from Rating Profile)</description>
+        <inputEntry id="UnaryTests_0t90mq1">
+          <text>"DIC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0o12pjg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1k02qwt">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_181da2m">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1e5haqk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0lprs4o">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_040cv9y">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0i21tvg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_09q3pn8">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0nxhviq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0lbhtan">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08foukx">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08lwswx">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1on8gys">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0bkrwlq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ktv6sx">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ptz0k0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_129c4zh">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0qh64fd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0l3cbsw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1781ydd">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0hfk0qn">
+          <text>"POSSIBLE_PACT_AO"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1vbelpg" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[1]</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_01cb8uh">
+          <text>"ao_jan01_2021"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0mziguc">
+        <description>VBMSD-192340, AC 2
+Pact: GrantCriteria - 12 (COD Match from Death Cert)</description>
+        <inputEntry id="UnaryTests_1l4nam2">
+          <text>"DIC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1sqqa90">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1sqaiiv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0sg6gvj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0k8wl9j">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_18tk1ns">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1fghtgv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_044xjse">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1kslgi0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0hvq6zt">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0q9vzvy">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1nswdgd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1bu7h6w">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0yabpsq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0w8yzuy">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1thi02z">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0akoj8f">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08fwleg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1h1fvq1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_072311k">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0j90ypl">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_150vz2f">
+          <text>"POSSIBLE_PACT_AO"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0ysvim8" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[0]</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0gysgzr">
+          <text>"ao_jan01_2021"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0beqcni">
+        <description>VBMSD-192340, AC 2
+Pact: GrantCriteria - 12 (COD Match from Rating Profile)</description>
+        <inputEntry id="UnaryTests_0spsv7q">
+          <text>"DIC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0y483ey">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0aahg1b">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1pp1lbq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1kqmvx6">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05xhmld">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ci1mkm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_09g9ygd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_157iv8s">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0r76uyd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1fjh0ic">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0leq5jf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0558y60">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0b6q0rm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0phgk32">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0t54zsu">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_03ge7s3">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ybo3ro">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1hfaw33">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1jgq9gv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ghsbmx">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1aigu1m">
+          <text>"POSSIBLE_PACT_AO"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0npnlal" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[1]</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1r8igx6">
+          <text>"ao_jan01_2021"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0472yp7">
+        <description>VBMSD-192340, AC 2
+Pact: GrantCriteria - 13 (COD Match From Death Cert)</description>
+        <inputEntry id="UnaryTests_16zjlel">
+          <text>"DIC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0wbwsg2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0o8n3nm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1bsaua2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_122v60b">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0vfqize">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_009nt6v">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0wrwswc">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0339xk5">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1er8jdy">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0q7zdsl">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0a6y1f3">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_162ztzz">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_047ro5f">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1slrtv5">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0nqnxee">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ukpcsq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0r5ypvq">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1geq7ql">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ulhqqe">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0mt4hkh">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_05bjrwl">
+          <text>"POSSIBLE_PACT_AO"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_08kk77u" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[0]</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_17ojat5">
+          <text>"ao_jan01_2021"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0pjlelk">
+        <description>VBMSD-192340, AC 2
+Pact: GrantCriteria - 13 (COD Match From Rating Profile)</description>
+        <inputEntry id="UnaryTests_1qfmdeb">
+          <text>"DIC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1mgbu5u">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0hjx1s2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17wr298">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16r0h1r">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0hjfocx">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0vqyhlh">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ewyjzf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1lbpe1b">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1nxsirh">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0p8prho">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1j4gtg2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_19eu59x">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_14kohzn">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0zxnzfb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0m25m2h">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0w02hic">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_01i0b4n">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0kwuiiq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1lrndme">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1e45evm">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1obfdvc">
+          <text>"POSSIBLE_PACT_AO"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_084e7tt" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[1]</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_01d8vjc">
+          <text>"ao_jan01_2021"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1bl5w73">
+        <description>VBMSR-26452, AC 1
+Pact: GrantCriteria - 14 (COD Match from Death Cert)</description>
+        <inputEntry id="UnaryTests_1vnmr4t">
+          <text>"DIC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1hnieex">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0giz14f">
+          <text>"AWAITING AWARD"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1na39i1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1qs9v1q">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1c7vbpl">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ci6zz4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ehnrx9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0jo86vh">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_122c0pn">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_09vh7sk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1pgy3fu">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1l0igxd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1vdqypi">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_056fzck">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15gb2xd">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17mqzvi">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_059cske">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0vn7wlg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17j9nvq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_18xa4ut">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1thzmvd">
+          <text>"POSSIBLE_PACT_AO"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_13a11uu" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[0]</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1q911zw">
+          <text>"ao_jan01_2021"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0mjbii8">
+        <description>VBMSR-26452, AC 1
+Pact: GrantCriteria - 14 (COD Match from Rating Profile)</description>
+        <inputEntry id="UnaryTests_126av8w">
+          <text>"DIC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0tbp8j3">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0gzsvne">
+          <text>"AWAITING AWARD"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1uz8r4a">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1wlgdm0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_04stuwq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_04tb2ss">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0wymn68">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_138ywo1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1smy4a1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1g6xd95">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0v0s323">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1y42of0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1g6zxg5">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1hkgic0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1het66l">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0bhhcv4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0o1guj3">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_19xjlfz">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_03wih6j">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ys8f3t">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1ce9a1v">
+          <text>"POSSIBLE_PACT_AO"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_01eu7nl" expressionLanguage="groovy">
+          <text>aoCODS_01_01_21[1]</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1ey7vdi">
+          <text>"ao_jan01_2021"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1wlqbub">
+        <description>Default, no decision (will always collect this line)</description>
+        <inputEntry id="UnaryTests_19mnq8l">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0rycf5r">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_03jt7h9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_06o5028">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0dvoszz">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17fod36">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0kluiqb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ptkbb1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0vhfdrk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_11a0uwq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1pvr2zj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0w00snc">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08yehwv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1wjb153">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1oh84uv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05vg34n">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0k3mv7z">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15cojjd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1x49fpo">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1xpfquf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0kkna5e">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0halvge">
+          <text>"NO_AGENT_ORANGE_DECISION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0heut17">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_093o1mu">
+          <text>"none"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <decision id="ao_conditions_original" name="Original Herbicide Conditions">
+    <variable id="InformationItem_0tpn5zf" name="herbicideCondition" typeRef="string" />
+    <literalExpression id="LiteralExpression_14taaov" expressionLanguage="groovy">
+      <text>herbicideCODS = [
+    "adult fibrosarcoma",
+    "adult form fibrosarcoma",
+    "adult onset diabetes",
+    "al amyloidosis",
+    "alveolar soft part sarcoma",
+    "amyloid light chain amyloidosis",
+    "angioendotheliomatosis proliferans systemisata",
+    "angiosarcoma",
+    "ascvd",
+    "atherosclerotic cardiovascular disease",
+    "b cell leukemia",
+    "bladder cancer",
+    "cad",
+    "cancer of the bronchus",
+    "cancer of the larynx",
+    "cancer of the lung",
+    "cancer of the trachea",
+    "chronic lymphocytic leukemia",
+    "clear cell sarcoma of tendons and aponeuroses",
+    "congenital fibrosarcoma",
+    "coronary artery disease",
+    "coronary bypass surgery",
+    "coronary spasm",
+    "dermatofibrosarcoma protuberans",
+    "diabetes mellitus ii",
+    "diabetes type 2",
+    "dmii",
+    "ectomesenchymoma",
+    "epithelioid leiomyosarcoma",
+    "epithelioid sarcoma",
+    "extraskeletal ewings sarcoma",
+    "hairy cell leukemia",
+    "hemangiosarcoma",
+    "hodgkins disease",
+    "hypertension",
+    "hypothyroidism",
+    "infantile fibrosarcoma",
+    "ischemic heart disease",
+    "laryngeal cancer",
+    "leiomyosarcoma",
+    "liposarcoma",
+    "lung cancer",
+    "lymphangiosarcoma",
+    "malignant fibrous histiocytoma",
+    "malignant ganglioneuroma",
+    "malignant giant cell tumor of tendon sheath",
+    "malignant glomus tumor",
+    "malignant granular cell tumor",
+    "malignant hemangiopericytoma",
+    "malignant leiomyoblastoma",
+    "malignant melanoma of soft parts",
+    "malignant mesenchymoma",
+    "malignant pigmented villonodular synovitis",
+    "malignant schwannoma",
+    "malignant synovioma",
+    "malignant triton tumor",
+    "mgus",
+    "mi",
+    "monoclonal gammopathy of undetermined significance ",
+    "multiple myeloma",
+    "myocardial infarction",
+    "non hodgkins lymphoma",
+    "parkinsonism",
+    "parkinsons",
+    "parkinsons disease",
+    "post coronary bypass",
+    "primary amyloidosis",
+    "prinzmetals angina",
+    "prostate cancer",
+    "reactive angioendotheliomatosis",
+    "respiratory cancer",
+    "rhabdomyosarcoma",
+    "soft tissue sarcoma",
+    "stable angina",
+    "synovial sarcoma",
+    "systemic angioendotheliomatosis",
+    "tracheal cancer",
+    "type 2 diabetes",
+    "type ii diabetes",
+    "unstable angina"
+]
+
+
+herbicideCODS.sort{a,b -&gt; b.length() &lt;=&gt; a.length()}
+
+
+herbicideCODS.find{condition -&gt;
+    intake_pactPresumptiveCriteria.causesOfDeathFromDeathCert.any{
+        cause_of_death -&gt;
+        cause_of_death.toLowerCase().matches(".*\\b$condition\\b.*") &amp;&amp;
+        !(cause_of_death.toLowerCase().matches(".*hypertensive atherosclerotic cardiovascular disease.*")
+            || cause_of_death.toLowerCase().matches(".*hypertensive ascvd.*")
+            || cause_of_death.toLowerCase().matches(".*hascvd.*")
+        )
+    }
+}</text>
+    </literalExpression>
+  </decision>
+  <decision id="ao_conditions_20210101" name="Jan 1, 2021 Herbicide COD Conditions">
+    <variable id="InformationItem_11b417v" name="aoCODS_01_01_21" />
+    <literalExpression id="LiteralExpression_08kc57u" expressionLanguage="groovy">
+      <text>aoCod01Jan2021 = [
+    "bladder cancer",
+    "hypothyroidism",
+    "parkinsonism"
+]
+
+
+causes_deathCert = intake_pactPresumptiveCriteria.getCausesOfDeathFromDeathCert()
+
+
+conditionFoundInDeathCert = aoCod01Jan2021.find{
+    condition -&gt; causes_deathCert.any{ cause_of_death -&gt; if(cause_of_death != null)
+          {cause_of_death.toLowerCase().matches(".*\\b$condition\\b.*")}
+    }
+}
+
+
+causes_rba = intake_pactPresumptiveCriteria.getCausesOfDeathFromRatingProfile()
+
+
+conditionFoundInRatingProfile = aoCod01Jan2021.find{
+    condition -&gt; causes_rba.any{ cause_of_death -&gt; if(cause_of_death != null)
+          {cause_of_death.toLowerCase().matches(condition)}
+    }
+}
+
+
+ratingDecision = intake_pactPresumptiveCriteria.latestRatingSCDeathDecision
+
+
+conditionFoundInLatestRating = ratingDecision != null &amp;&amp; ratingDecision.getDgnstcTxt() != null ? 
+    aoCod01Jan2021.find{condition -&gt; ratingDecision.getDgnstcTxt().toLowerCase().replaceAll(" ","").matches(condition.replaceAll(" ",""))} : null
+
+aoCODS_01_01_21 = [conditionFoundInDeathCert, conditionFoundInRatingProfile, conditionFoundInLatestRating]</text>
+    </literalExpression>
+  </decision>
+  <decision id="ao_conditions_pact" name="Herbicide Exposure - PACT Effective 8/10/2022">
+    <variable id="InformationItem_1v68qbs" name="ao_aug10_2022" typeRef="string" />
+    <literalExpression id="LiteralExpression_126ute1" expressionLanguage="groovy">
+      <text>herbicideCODs = [
+  "hypertension",
+  "mgus", 
+  "monoclonal gammopathy of undetermined significance"
+]
+
+causes_deathCert = intake_pactPresumptiveCriteria.getCausesOfDeathFromDeathCert()
+
+ao_aug10_2022 = herbicideCODs.find{
+    condition -&gt; causes_deathCert.any{
+        cause_of_death -&gt; cause_of_death.matches(".*\\b$condition\\b.*")
+    }
+}</text>
+    </literalExpression>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNEdge id="DMNEdge_13l1a20" dmnElementRef="InformationRequirement_0fy52ge">
+        <di:waypoint x="340" y="260" />
+        <di:waypoint x="450" y="260" />
+        <di:waypoint x="470" y="260" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNShape id="DMNShape_1civik6" dmnElementRef="herbicide-presumptive-pact">
+        <dc:Bounds height="80" width="180" x="470" y="220" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="DMNShape_0uduvnp" dmnElementRef="ao_conditions_original">
+        <dc:Bounds height="80" width="180" x="160" y="220" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_07mm6u9" dmnElementRef="InformationRequirement_1kd11ze">
+        <di:waypoint x="560" y="160" />
+        <di:waypoint x="560" y="200" />
+        <di:waypoint x="560" y="220" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNShape id="DMNShape_1ity59j" dmnElementRef="ao_conditions_20210101">
+        <dc:Bounds height="80" width="180" x="470" y="80" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_0htq6w4" dmnElementRef="InformationRequirement_1aqetal">
+        <di:waypoint x="760" y="260" />
+        <di:waypoint x="670" y="260" />
+        <di:waypoint x="650" y="260" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNShape id="DMNShape_0mm9mhm" dmnElementRef="ao_conditions_pact">
+        <dc:Bounds height="80" width="180" x="760" y="220" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
+

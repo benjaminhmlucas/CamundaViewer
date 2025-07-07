@@ -1,0 +1,210 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:camunda="http://camunda.org/schema/1.0/dmn" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" id="Definitions_1wv7io3" name="DRD" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.27.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
+  <decision id="vital-organ" name="Vital Organs">
+    <informationRequirement id="InformationRequirement_12a6o2l">
+      <requiredDecision href="#disability_literalExpression" />
+    </informationRequirement>
+    <decisionTable id="DecisionTable_15kyaai" hitPolicy="FIRST">
+      <input id="Input_1" label="Claim Lifecycle">
+        <inputExpression id="InputExpression_1" typeRef="string" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.claimLifecycle</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_18dcqtm" label="EP Code">
+        <inputExpression id="LiteralExpression_1ylfspa" typeRef="integer" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.epCode</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1l5ikg7" label="Manner of Death">
+        <inputExpression id="LiteralExpression_030vjhm" typeRef="string" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.mannerOfDeath</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0rb0f9j" label="Death Certificate Missing">
+        <inputExpression id="LiteralExpression_0sz6upj" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.isDeathCertificateMissing()</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0xjmc4v" label="Is Cause of Death Present?">
+        <inputExpression id="LiteralExpression_0bu6idk" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.causesOfDeathFromDeathCert != null &amp;&amp; !intake_pactPresumptiveCriteria.causesOfDeathFromDeathCert.isEmpty()</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_12qb4bw" label="Has Vital Organ Disability Match" camunda:inputVariable="vitalOrganDisabilityId">
+        <inputExpression id="LiteralExpression_1ckq72m" typeRef="boolean" expressionLanguage="groovy">
+          <text>vitalOrganDisabilityId != null</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0vagkua" label="Cause and/or Manner of Death Review Offramp Flag">
+        <inputExpression id="LiteralExpression_13qr0t7" typeRef="boolean" expressionLanguage="groovy">
+          <text>featureFlags.contains("cod-or-mod-review-offramp-flag")</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="Vital Organs Result" name="vitalOrgansResult" typeRef="string" />
+      <output id="OutputClause_1lt227b" label="Match Disability ID" name="matchedVitalOrganDisability" typeRef="string" biodi:width="205" />
+      <rule id="DecisionRule_048xkyq">
+        <description>Offramp for Accidental Manner of Death and Vital Organ Disability</description>
+        <inputEntry id="UnaryTests_0n0rstg">
+          <text>"DEVELOPMENT"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1bp2pmj">
+          <text>[140..148],[160..162],[166..168]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_09365tx">
+          <text>"accident"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ok6r7w">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15d3j1n">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15g7f6j">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0d7uoua">
+          <text>false</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_04thk03">
+          <text>"VITAL_ORGAN_OFF_RAMP_ACCIDENTAL"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0ds6n8f">
+          <text>vitalOrganDisabilityId</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1is21ow">
+        <inputEntry id="UnaryTests_0dma1gs">
+          <text>"DEVELOPMENT"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0nub3rc">
+          <text>[140..148],[160..162],[166..168]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0xegtya">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0j34tga">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_06hryjg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1i6m496">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0k1ujz4">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_09b0rvu">
+          <text>"VITAL_ORGAN_OFF_RAMP_MISSING_DEATH_CERT"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0ubeexr">
+          <text>vitalOrganDisabilityId</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0pqb3ji">
+        <inputEntry id="UnaryTests_0sqfmi8">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12hogic">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05xgog2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1dldajj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1sc7txk">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0kedfw2">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1syuc1x">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0bdicyh">
+          <text>"VITAL_ORGAN"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0xt9xbi">
+          <text>vitalOrganDisabilityId</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_089um4d">
+        <inputEntry id="UnaryTests_0js3gp4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1wl06um">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_062w1cr">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1dqxl0d">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_10zb5cl">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0u5sjlx">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_02edofo">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1886u4q">
+          <text>"NO_VITAL_ORGAN"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0ygpuyg">
+          <text></text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <decision id="disability_literalExpression" name="Vital Organ Disabilities">
+    <variable id="InformationItem_01aaao2" name="vitalOrganDisabilityId" typeRef="string" />
+    <literalExpression id="LiteralExpression_0ikjz6q" expressionLanguage="groovy">
+      <text>threshold100Codes = [
+     6600, 6601, 6602, 6603, 6604, 6703,
+     6817, 6819, 6825, 6833, 6840, 6844,
+     6845, 6846, 6847, 7005, 7006, 7007,
+     7010, 7011, 7015, 7016, 7017, 7018,
+     7019, 7020, 7312, 7345, 7500, 7502,
+     7507, 7509, 7530, 7531, 7533, 7534,
+     7535, 7536, 7541, 8000, 8002, 8003,
+     8004, 8005, 8007, 8008, 8009, 8017,
+     8046, 9301, 9302, 9303, 9305, 9306,
+     9309, 9310, 9312, 9326
+] as Set
+
+
+matchedVitalOrganDisability = null
+vitalOrganDisabilityId = null
+
+if (intake_pactPresumptiveCriteria.ratedDisabilities != null &amp;&amp; !intake_pactPresumptiveCriteria.ratedDisabilities.isEmpty()) {
+    matchedVitalOrganDisability = intake_pactPresumptiveCriteria.ratedDisabilities.find{ disability -&gt; 
+       (disability.rating == 100 &amp;&amp; disability.diagnosticCode in threshold100Codes) 
+    }
+}
+
+if (matchedVitalOrganDisability)
+    vitalOrganDisabilityId = matchedVitalOrganDisability.disabilityEvaluationId</text>
+    </literalExpression>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="vital-organ">
+        <dc:Bounds height="80" width="180" x="160" y="240" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_0qt09pw" dmnElementRef="InformationRequirement_12a6o2l">
+        <di:waypoint x="250" y="160" />
+        <di:waypoint x="250" y="220" />
+        <di:waypoint x="250" y="240" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNShape id="DMNShape_0gdxgml" dmnElementRef="disability_literalExpression">
+        <dc:Bounds height="80" width="180" x="160" y="80" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
+

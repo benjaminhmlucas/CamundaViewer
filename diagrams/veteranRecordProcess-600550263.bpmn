@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_118se8k" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.12.0">
+  <bpmn:collaboration id="Collaboration_1bt45k8">
+    <bpmn:participant id="veteranRecordProcessActivity" name="Veteran Record Activity (Intake)" processRef="veteranRecordProcess" />
+    <bpmn:participant id="vetRecordActivityViaAwards" name="Vet Record Activity (Awards)" processRef="vetRecordProcessAwards" />
+  </bpmn:collaboration>
+  <bpmn:process id="veteranRecordProcess" name="Veteran Record Process" isExecutable="true" camunda:versionTag="1.0.0">
+    <bpmn:startEvent id="startVetRecordProcess" name="Start Veteran Record Process">
+      <bpmn:outgoing>flowFromStartToSavePos</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="flowFromStartToSavePos" sourceRef="startVetRecordProcess" targetRef="savePeriodOfServiceTask" />
+    <bpmn:sequenceFlow id="flowFromSavePosToEnd" sourceRef="savePeriodOfServiceTask" targetRef="endVetRecordProcess" />
+    <bpmn:serviceTask id="savePeriodOfServiceTask" name="Save Period of Service" camunda:delegateExpression="${savePeriodOfService}">
+      <bpmn:incoming>flowFromStartToSavePos</bpmn:incoming>
+      <bpmn:outgoing>flowFromSavePosToEnd</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="endVetRecordProcess" name="End Veteran Record Process">
+      <bpmn:incoming>flowFromSavePosToEnd</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmn:process id="vetRecordProcessAwards" name="Vet Record Process (Awards)" isExecutable="true" camunda:versionTag="1.0.0">
+    <bpmn:startEvent id="startVetRecordViaAwards" name="Start Veteran Record Process (Awards)">
+      <bpmn:outgoing>toSaveDDInformation</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="toSaveDDInformation" sourceRef="startVetRecordViaAwards" targetRef="saveDirectDepositInformation" />
+    <bpmn:sequenceFlow id="fromSaveDDToEnd" sourceRef="saveDirectDepositInformation" targetRef="endVetRecordProcessAwards" />
+    <bpmn:serviceTask id="saveDirectDepositInformation" name="Save Direct Deposit Information" camunda:delegateExpression="${saveDirectDepositInformation}">
+      <bpmn:incoming>toSaveDDInformation</bpmn:incoming>
+      <bpmn:outgoing>fromSaveDDToEnd</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="endVetRecordProcessAwards" name="End Veteran Record Process (Awards)">
+      <bpmn:incoming>fromSaveDDToEnd</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1bt45k8">
+      <bpmndi:BPMNShape id="Participant_1k4bfwp_di" bpmnElement="veteranRecordProcessActivity" isHorizontal="true">
+        <dc:Bounds x="140" y="90" width="470" height="250" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1gzq3e6_di" bpmnElement="flowFromSavePosToEnd">
+        <di:waypoint x="440" y="210" />
+        <di:waypoint x="512" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0a4v2sm_di" bpmnElement="flowFromStartToSavePos">
+        <di:waypoint x="258" y="210" />
+        <di:waypoint x="340" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="startVetRecordProcess">
+        <dc:Bounds x="222" y="192" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="201" y="235" width="79" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_173qqph_di" bpmnElement="savePeriodOfServiceTask">
+        <dc:Bounds x="340" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0kyuuxr_di" bpmnElement="endVetRecordProcess">
+        <dc:Bounds x="512" y="192" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="491" y="235" width="79" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_0208hkl_di" bpmnElement="vetRecordActivityViaAwards" isHorizontal="true">
+        <dc:Bounds x="140" y="390" width="470" height="250" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_125nbip_di" bpmnElement="toSaveDDInformation">
+        <di:waypoint x="248" y="500" />
+        <di:waypoint x="330" y="500" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0iwbs6e_di" bpmnElement="fromSaveDDToEnd">
+        <di:waypoint x="430" y="500" />
+        <di:waypoint x="502" y="500" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_191s73b_di" bpmnElement="startVetRecordViaAwards">
+        <dc:Bounds x="212" y="482" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="191" y="525" width="79" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1xthslh_di" bpmnElement="saveDirectDepositInformation">
+        <dc:Bounds x="330" y="460" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0idbj34_di" bpmnElement="endVetRecordProcessAwards">
+        <dc:Bounds x="502" y="482" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="481" y="525" width="79" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
+

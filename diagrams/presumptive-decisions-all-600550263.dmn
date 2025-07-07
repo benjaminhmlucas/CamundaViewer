@@ -1,0 +1,2065 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" id="Definitions_1aos5e9" name="DRD" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.34.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <decision id="presumptive-decisions-all" name="All Presumptive Decisions">
+    <decisionTable id="DecisionTable_1jqb433" hitPolicy="RULE ORDER">
+      <input id="InputClause_18zqudq" label="Attorney Fee">
+        <inputExpression id="LiteralExpression_0udt7xd" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.corporateFlashes != null &amp;&amp; !intake_pactPresumptiveCriteria.corporateFlashes.isEmpty() &amp;&amp; (
+    intake_pactPresumptiveCriteria.corporateFlashes.any{'Potential Attorney Fee'.equalsIgnoreCase(it)}
+    || intake_pactPresumptiveCriteria.corporateFlashes.any{'Private Attorney - Fees Payable'.equalsIgnoreCase(it)}
+    || intake_pactPresumptiveCriteria.corporateFlashes.any{'Private Attorney - No Fees Payable'.equalsIgnoreCase(it)}
+)</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0ysm6vt" label="Pending Presumptive Claim">
+        <inputExpression id="LiteralExpression_00626ik" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.hasPendingPresumptiveClaim</text>
+        </inputExpression>
+      </input>
+      <input id="Input_1" label="Less Than 90 Days of Service">
+        <inputExpression id="InputExpression_1" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.numberOfDaysServed &lt; 90 &amp;&amp;
+                        !intake_pactPresumptiveCriteria.missingServiceDates</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0k9kud2" label="Herbicide Exposure" biodi:width="226">
+        <inputExpression id="LiteralExpression_0n2fsq9" typeRef="string" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getHerbicideFinalDmnResult().get("herbicideExposureResult")</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0wxyile" label="Gulf War Exposure" biodi:width="190">
+        <inputExpression id="LiteralExpression_1clv145" typeRef="string" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getGulfWarFinalDmnResult().get("gulfWarExposureResult")</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1vk409s" label="Camp Lejeune Exposure">
+        <inputExpression id="LiteralExpression_0xsegpl" typeRef="string" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getCampLejeuneDmnResult().get("campLejeuneResult")</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_08uzmwo" label="Radiation Exposure">
+        <inputExpression id="LiteralExpression_1wri2fa" typeRef="string" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getRadiationExposureDmnResult().get("radiationExposureResult")</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1ud3yv5" label="Vital Organ Condition">
+        <inputExpression id="LiteralExpression_04u23mf" typeRef="string" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getVitalOrganDmnResult().get("vitalOrgansResult")</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0xyczf5" label="Chronic Condition" biodi:width="192">
+        <inputExpression id="LiteralExpression_0ypl6uk" typeRef="string" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getChronicConditionDmnResult().get("chronicConditionResult")</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1ue2ube" label="POW Disease">
+        <inputExpression id="LiteralExpression_0mjpooa" typeRef="string" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getPowDmnResult().get("powResult")</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="Presumptive Approval Decision" name="presumptiveDecision" typeRef="string" biodi:width="192" />
+      <output id="OutputClause_0hyoebq" label="Presumptive Decision Grant Type" name="presumptiveDecisionType" typeRef="string" biodi:width="197" />
+      <output id="OutputClause_17h4vz0" label="Match Type" name="matchType" typeRef="string" />
+      <output id="OutputClause_1vyw2o9" label="Matched Condition" name="matchedCondition" typeRef="string" biodi:width="271" />
+      <output id="OutputClause_0egeqpb" label="Presumptive Identifier" name="presumptiveIdentifierType" typeRef="string" />
+      <output id="OutputClause_1v2z0dr" label="Error Code" name="errorCode" typeRef="string" />
+      <rule id="DecisionRule_0jkwnem">
+        <description>PendingPresumptiveNeedingReview - 1,2,3</description>
+        <inputEntry id="UnaryTests_0s4wgmy">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1jb8ul1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1gtl28c">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0xjxbqo">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0jv7t5z">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1vxyw77">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12yjjcp">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0lfot8j">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1qbmk87">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1r96hbn">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0ky2urq">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_024lp7r">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0dabqxe">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1wavida">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1oqcxhe">
+          <text>"ATTORNEY_FEE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_01gfttv">
+          <text>"113"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_12t0k3u">
+        <description>PendingPresumptiveNeedingReview - 4</description>
+        <inputEntry id="UnaryTests_0xyru3b">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1klcql9">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_01pgmtm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0x1ytxo">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1rfd0hf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0zjouu0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0vp94ry">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ptfval">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0kvy9xl">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08lyr5y">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_069ghw3">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0w4pdbm">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_14dam3j">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1t7jpwb">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_14v4iva">
+          <text>"COMPANION_PRESUMPTIVE_CLAIM"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1i5b457">
+          <text>"123"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_01m0bd4">
+        <description>Any PACT Grant with an Herbicide (Agent Orange) COD/Condition</description>
+        <inputEntry id="UnaryTests_1v5i96s">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0p6pg9c">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17bx88i">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_14md6jb">
+          <text>"PACT_GRANT"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0mljfnt">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0x6ithh">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_00f4ovw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17b6nz2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1c5rfwf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_187d8jq">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_109qs3f">
+          <text>"GRANT"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1dw5voa">
+          <text>"AGENT_ORANGE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_08bzuv2">
+          <text>"CONTRIBUTORY"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_02ulydx" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getHerbicideFinalDmnResult().get("matchedHerbicideCondition")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0tlob9p">
+          <text>"CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_14e7x4z">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0vh3v6g">
+        <description>Any PACT Grant with a Gulf War COD/Condition</description>
+        <inputEntry id="UnaryTests_0m9q991">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0v73145">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0p95dsq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_012dvks">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0fmzi50">
+          <text>"PACT_GRANT"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1okdr9f">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1xvx48s">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0xud95o">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0392agj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1hjywpw">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1u5j0pd">
+          <text>"GRANT"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1oor8ql">
+          <text>"GULF_WAR"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0798vak">
+          <text>"CONTRIBUTORY"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1y7iad7" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getGulfWarFinalDmnResult().get("matchedGulfWarCondition")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0qz9aoa">
+          <text>"CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0v3c8s3">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1oulj1o">
+        <description>PresumptiveDecisions - 18</description>
+        <inputEntry id="UnaryTests_0hzawzt">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0c794c6">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ekcht9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1vi4iqf">
+          <text>"AGENT_ORANGE"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1im6cnv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1pz23jc">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08ssvn1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13khzdk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1iz1e7s">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0pnomc0">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_17duup6">
+          <text>"GRANT"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1m9mc13">
+          <text>"AGENT_ORANGE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1sbbte5">
+          <text>"CONTRIBUTORY"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0b94kzr" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getHerbicideFinalDmnResult().get("matchedHerbicideCondition")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1hqo9wk">
+          <text>"CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1sgpk57">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_00xx10o">
+        <description>PresumptiveDecisions - 17</description>
+        <inputEntry id="UnaryTests_0230chf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0k5bpuq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0dkwus2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1b972wo">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0pm2te0">
+          <text>"GULF_WAR"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0d9ezlg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0n79afo">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_18lmvte">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ghzgpc">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08uogfc">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_14n282s">
+          <text>"GRANT"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_15xtwr8">
+          <text>"GULF_WAR"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_01xkbks">
+          <text>"CONTRIBUTORY"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0q74s3t" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getGulfWarFinalDmnResult().get("matchedGulfWarCondition")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0j33c2w">
+          <text>"CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_06e7p5j">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1xkeass">
+        <description>PendingPresumptiveNeedingReview - 5,6,7,8</description>
+        <inputEntry id="UnaryTests_0l1feg7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_049v2io">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0pwk02x">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_07ft0q3">
+          <text>"AO_FLASH"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1we4q2z">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17z4k30">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_06o7mh8">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1kwdwy5">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_09rre4s">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0z0ptxb">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0kvkhiq">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0bzm8rf">
+          <text>"AGENT_ORANGE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1ur4ge2">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_12h2g35">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_03eo6t1">
+          <text>"AO_FLASH"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0vcnoka">
+          <text>"122"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1e15m80">
+        <description>PendingPresumptiveNeedingReview - 9,10</description>
+        <inputEntry id="UnaryTests_1gmrkz8">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12ks178">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0x7kt5h">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0a3hspw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0kins4b">
+          <text>"GW_FLASH"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0qsi5hn">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0exx5a2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_00l6krt">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_00pdm8q">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1pvuic6">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1pv5fdm">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1192a47">
+          <text>"GULF_WAR"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1wvelhw">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_03jw2g7">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1ibg5eb">
+          <text>"GW_FLASH"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1krd5hd">
+          <text>"125"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1kiwku8">
+        <description>PendingPresumptiveNeedingReview - 11,12,13,14</description>
+        <inputEntry id="UnaryTests_01mrjh6">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0rq8fba">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05jqvp9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_10einbb">
+          <text>"AO_SPECIAL_ISSUE"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1e55b1i">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1e81j70">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ezubza">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16ulzv4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1jjqftn">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1cvtq3b">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0d7hcki">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_08y9p52">
+          <text>"AGENT_ORANGE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0lrw3pc">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_03qg3gp">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0egz034">
+          <text>"AO_SPECIAL_ISSUE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_10jn15a">
+          <text>"121"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0kl8tu5">
+        <description>PendingPresumptiveNeedingReview - 15,16,17,18,19</description>
+        <inputEntry id="UnaryTests_0zg0y9a">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_04jo3o5">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_011n31b">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1cn892l">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1d1n73k">
+          <text>"GW_SPECIAL_ISSUE"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_09xj80k">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1av49x1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ltl1x9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1th36qd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1nydb8m">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_14mlv03">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_09v9tgw">
+          <text>"GULF_WAR"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_18w0jg5">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0r5qcdf">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_125z3df">
+          <text>"GW_SPECIAL_ISSUE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1lhlbsu">
+          <text>"126"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1ogqchr">
+        <description>PresumptiveDecisions - 2</description>
+        <inputEntry id="UnaryTests_0y2rbrj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_19rjxo7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0x3f47u">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0mw8yv1">
+          <text>"AGENT_ORANGE_OFFRAMP_NO_SPECIAL_ISSUE_OR_FLASH"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1y3904y">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_04qkvny">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0x3w3a5">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13df3if">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1j0mxln">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0g8ko3b">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0k64p6d">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_159d9cg">
+          <text>"AGENT_ORANGE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0xbb270">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0d954rz">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1n7o5pa">
+          <text>"RATING"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1n8nruz">
+          <text>"131"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0iabwq9">
+        <description>PresumptiveDecisions - 1</description>
+        <inputEntry id="UnaryTests_0mmcchj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0wyu9we">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_18lp1fn">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1a54w8a">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0b22u70">
+          <text>"GULF_WAR_OFFRAMP_NO_SPECIAL_ISSUE_OR_FLASH"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0sx7tnw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0cg6bij">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1juoug3">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1v19nbq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_19m98ay">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0dfgyjh">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0nm99c1">
+          <text>"GULF_WAR"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0kr9cgy">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1sqxv74">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1at4mkj">
+          <text>"RATING"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0n7muob">
+          <text>"129"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0gyc1kp">
+        <description>PresumptiveDecisions - 4</description>
+        <inputEntry id="UnaryTests_1d47xmf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05djvzq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1yfbw8d">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0xds40i">
+          <text>"AGENT_ORANGE_OFFRAMP_BENEFIT_ISSUE"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_00lfu42">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0phwimo">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ezgyvl">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0xzjccl">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1h5xrmg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1m6zrb4">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0t29w2x">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0w344zb">
+          <text>"AGENT_ORANGE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0awp7vd">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0wg6dcg">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0cgrafi">
+          <text>"RATING"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0wzlbxu">
+          <text>"127"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1vswxnx">
+        <description>PresumptiveDecisions - 3</description>
+        <inputEntry id="UnaryTests_1e3vpgx">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_01o9sj2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0d10ptj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0klw3a6">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1dp6s2p">
+          <text>"GULF_WAR_OFFRAMP_BENEFIT_ISSUE"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0prwkne">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0lfe7ba">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_128tluk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16t1etr">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0u8xmec">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1df8apu">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0a2i4o8">
+          <text>"GULF_WAR"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_02s8joz">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_19nlfj6">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_14h7pz8">
+          <text>"RATING"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_07zm2uh">
+          <text>"128"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1xq0qtv">
+        <description>PresumptiveDecisions - 5</description>
+        <inputEntry id="UnaryTests_1eyoogo">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0vdjyk0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1dhqa52">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1iyhu7a">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0l0bbjj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ute4kr">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_11mh7bi">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1l6qq5n">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0qdm8ml">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1cymlj9">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_10k4bxx">
+          <text>"NONE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1ve0yc3">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0nby34v">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0twb9ew">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1e3n846">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0ed310r">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_01mi61x">
+        <description>PresumptiveDecisions - 6</description>
+        <inputEntry id="UnaryTests_02eft34">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16hk691">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0c9aany">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12p37rh">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13o9mc5">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_09jbfi4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0elhphr">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1uq4s7f">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1l4d64x">
+          <text>"CHRONIC_ALS_PRIMARY"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1eg6q4v">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1eeh2iy">
+          <text>"GRANT"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1bzo8u1">
+          <text>"ALS"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_13nqzu9">
+          <text>"PRIMARY"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1k1x1os" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getChronicConditionDmnResult().get("matchedChronicCondition")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0gzbc2z">
+          <text>"CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1c3t108">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0laefj8">
+        <description>PresumptiveDecisions - 7</description>
+        <inputEntry id="UnaryTests_0zrad4d">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12ktqsk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_06mmo0u">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1vjtxoq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12nx12o">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_00rjroh">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1hlh5vm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0043quu">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0j0lzwn">
+          <text>"CHRONIC_ALS_CONTRIBUTORY"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0oyma01">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_189updm">
+          <text>"GRANT"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0uurh6a">
+          <text>"ALS"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1ha5n6t">
+          <text>"CONTRIBUTORY"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_02zu0zy" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getChronicConditionDmnResult().get("matchedChronicCondition")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1vlf1aj">
+          <text>"CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1lbx8ub">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1hm52or">
+        <description>PresumptiveDecisions - 8</description>
+        <inputEntry id="UnaryTests_0kmfiof">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0wr4ff1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0nq074e">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1cmgqen">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0m92p0j">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ik2xqe">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15leuv0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0jw0zsa">
+          <text>"VITAL_ORGAN_OFF_RAMP_ACCIDENTAL"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0cqh2p3">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ei82nm">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0tth3fm">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0wk6d8q">
+          <text>"VITAL_ORGAN_OFFRAMP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0b4c6jn">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1cvjp76" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getVitalOrganDmnResult().get("matchedVitalOrganDisability")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0yf2n4e">
+          <text>"CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0okv2gy">
+          <text>"115"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1t66219">
+        <description>PresumptiveDecisions - 9</description>
+        <inputEntry id="UnaryTests_0zcdp8c">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_156o1rs">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0z2st5w">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1c79i65">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1atbrmq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_10i7k2b">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1fw9iqa">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15sm548">
+          <text>"VITAL_ORGAN_OFF_RAMP_MISSING_DEATH_CERT"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1u8h299">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1j3lerd">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0esn0qg">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1mikzja">
+          <text>"VITAL_ORGAN_OFFRAMP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_124gygm">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1dl4es6" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getVitalOrganDmnResult().get("matchedVitalOrganDisability")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_18svqjk">
+          <text>"CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0a4ywfw">
+          <text>"040"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_17kqbxl">
+        <description>PresumptiveDecisions - 10</description>
+        <inputEntry id="UnaryTests_1ma5aeb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1xqrvlg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_174kkbj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ggfb33">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1y28zxl">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_03lzmsu">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1a0tuah">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1f8rt7v">
+          <text>"VITAL_ORGAN"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0nyd9h0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_04hwltj">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0whyxsv">
+          <text>"GRANT"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0fvv2hv">
+          <text>"VITAL_ORGAN"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1n2eoo4">
+          <text>"CONTRIBUTORY"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_07mou0j" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getVitalOrganDmnResult().get("matchedVitalOrganDisability")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1pign2x">
+          <text>"CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0cgel3e">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1twe2tj">
+        <description>PresumptiveDecisions - 11</description>
+        <inputEntry id="UnaryTests_0p0tofk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1s9xkgm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1plzq3j">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1uun4km">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0l0980b">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ef2nai">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1x1anz7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0v4v396">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0jpu14d">
+          <text>"CHRONIC_CONDITION"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15dqo2u">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_13n7f4t">
+          <text>"GRANT"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_16p26xv">
+          <text>"CHRONIC_CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0yxva3s">
+          <text>"CONTRIBUTORY"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0vpzdbe" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getChronicConditionDmnResult().get("matchedChronicCondition")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_092ljfe">
+          <text>"CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1p7anwt">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_02lrvr4">
+        <description>PresumptiveDecisions - 12</description>
+        <inputEntry id="UnaryTests_050pi5f">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15wv242">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0uyk65x">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0skohkd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_07pljr0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1q1payw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0iw6bkg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0q38bzd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1cxcsxi">
+          <text>"CHRONIC_MS"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0rf6e9i">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0z40ghx">
+          <text>"GRANT"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0onvyj0">
+          <text>"CHRONIC_CONDITION_MS"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_18iqxzn">
+          <text>"CONTRIBUTORY"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_19uo09w" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getChronicConditionDmnResult().get("matchedChronicCondition")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0anxhf0">
+          <text>"CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_03uw9mb">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_10qzpam">
+        <description>PresumptiveDecisions - 13</description>
+        <inputEntry id="UnaryTests_0j78jkr">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0qtvqim">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0f7p59j">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_03khcws">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0y8jyya">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_070f393">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0iaf7ez">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_11dbeuo">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08pjlkq">
+          <text>"CHRONIC_TUBERCULOSIS"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1p7jinj">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1tidkl2">
+          <text>"GRANT"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1g244du">
+          <text>"CHRONIC_CONDITION_TUBERCULOSIS"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1e6ky0f">
+          <text>"CONTRIBUTORY"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1wmn3nm" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getChronicConditionDmnResult().get("matchedChronicCondition")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_15c1fmz">
+          <text>"CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1vxaiv2">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0fnw4ei">
+        <description>PresumptiveDecisions - 14</description>
+        <inputEntry id="UnaryTests_1rfkbeq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_192zr8e">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_06pwk3m">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17huep4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08jfew1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1h016vt">
+          <text>"CAMP_LEJEUNE"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0tcyo96">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_07s8jdi">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0io85ie">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0wh3lzh">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_08zmhm7">
+          <text>"GRANT"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0jkjxb2">
+          <text>"CAMP_LEJEUNE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0jsina4">
+          <text>"CONTRIBUTORY"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0u28r54" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getCampLejeuneDmnResult().get("matchedCampLejeuneCondition")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0lbb7iq">
+          <text>"CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0v18n38">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0r5am0k">
+        <description>PresumptiveDecisions - 15</description>
+        <inputEntry id="UnaryTests_1qksi6o">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_01wizo2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1oces1r">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0x2tzxd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15uehy5">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1vype61">
+          <text>"CL_EFFECTIVE_DATE_REVIEW"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0btebug">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16crvig">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_140ymiu">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0e1u7qj">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1kvrjpp">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0nltyo6">
+          <text>"CAMP_LEJEUNE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1etq2ce">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1etaxid" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getCampLejeuneDmnResult().get("matchedCampLejeuneCondition")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1gvjwuy">
+          <text>"RATING"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0o7z70c">
+          <text>"132"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_10hgjwg">
+        <description>Radiation Exposure -VBMSD-257790</description>
+        <inputEntry id="UnaryTests_0csjlmk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12top8z">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0mmakvp">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0q62gni">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ow7j27">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05isdmb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0vfjuxs">
+          <text>"RDN"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1rwgxjh">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_04arw56">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_06xljc1">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0z35j7u">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1pn0t6c">
+          <text>"RADIATION_EXPOSURE_OFFRAMP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0x0aa6x">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1ubkd7x">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_19vxbhh">
+          <text>"RADIATION_SPECIAL_ISSUE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0vkcmxu">
+          <text>"136"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_04icye9">
+        <description> Radiation Radiogenic Disability Confirmed-VBMSD-257790</description>
+        <inputEntry id="UnaryTests_19zy80v">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1wc4qjo">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_156xyag">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_14ku5t3">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1fjr0mi">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1169hw7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0k45l3t">
+          <text>"RRDC"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1psin64">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1i49q0e">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0pul9x6">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_17blups">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0di43hz">
+          <text>"RADIATION_EXPOSURE_OFFRAMP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0tbguhm">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_10u52uu">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0361r9a">
+          <text>"RADIATION_SPECIAL_ISSUE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0zdohxv">
+          <text>"137"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1sgsdep">
+        <description>PresumptiveDecisions - 16</description>
+        <inputEntry id="UnaryTests_01095iy">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_159ti1e">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_01nwwub">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1097f9l">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0535fjy">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0zbc26d">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0z67sr7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_198hgh6">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0z5q7cn">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0k93xqf">
+          <text>"POW"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_11e24i3">
+          <text>"GRANT"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0ercazk">
+          <text>"POW_DISEASE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0uhwstp">
+          <text>"CONTRIBUTORY"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_096fpud" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getPowDmnResult().get("matchedPowCondition")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0d2nr43">
+          <text>"CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0mvonpz">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_15xukz0">
+        <description>PACT ACT REVIEW REQUIRED</description>
+        <inputEntry id="UnaryTests_048nbm8">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16nm22j">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0h11ts0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1x25l46">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1gf3dx7">
+          <text>"PACT_ACT_REVIEW_REQUIRED"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0bwlg92">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1up682o">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0x3odx2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1kxt1k6">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0s7lvbv">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_11r036l">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1lw1dp5">
+          <text>"GULF_WAR"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1ywnsqj">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1yfwv42">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0lt5uvg">
+          <text>"PACT"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0pozqzb">
+          <text>"3504"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_02abq3j">
+        <description>PACT ACT REVIEW REQUIRED</description>
+        <inputEntry id="UnaryTests_0cc3ggr">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_116s1qu">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1of6ise">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ds1xrk">
+          <text>"PACT_ACT_REVIEW_REQUIRED"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1qic0lp">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1m6ekr1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1e5q8lc">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0mffvay">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1yozxg8">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0yeus43">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1jh1cwy">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0yngf0z">
+          <text>"AGENT_ORANGE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1hawruv">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0whcshd">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1vbm5h8">
+          <text>"PACT"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0mttvfk">
+          <text>"3504"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0a2gqzh">
+        <description>PresumptiveDecisions - 19</description>
+        <inputEntry id="UnaryTests_0vc1tdg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ykbzvi">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ve44v4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0biiigs">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1x0s44t">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1hf4oyj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1bb4f5m">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ck0ccg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13es9b2">
+          <text>"CHRONIC_OFF_RAMP"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0xbyv2h">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0fvyy98">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1ssg45a">
+          <text>"CHRONIC_CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0u4omm9">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_19al659" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getChronicConditionDmnResult().get("matchedChronicCondition")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_04c98ud">
+          <text>"CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0j5a8d0">
+          <text>"117"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_06nv0uc">
+        <description>PresumptiveDecisions - 20</description>
+        <inputEntry id="UnaryTests_0schwr0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_07cue0y">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1nveyl8">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_11185ss">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_01k427h">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0nd62zf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_14o0ikq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0fswvvf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15vj45m">
+          <text>"CHRONIC_CONDITION_MISSING_RAD"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13kh1hx">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_16pc00m">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0p5290t">
+          <text>"CHRONIC_CONDITION_MISSING_RAD"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1jku3hp">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0xihmuc" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getChronicConditionDmnResult().get("matchedChronicCondition")</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0yxr8s8">
+          <text>"RATING"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0127to4">
+          <text>"114"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0h226bp">
+        <description>PresumptiveDecisions - 21</description>
+        <inputEntry id="UnaryTests_0fpi4x0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_00rr4vh">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ci8bx8">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1nzac4m">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1yrl0ru">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_04w89bc">
+          <text>"CAMP_LEJEUNE_OFFRAMP"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_00mhj9f">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_04ozjrb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0fd8c2m">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0be42yl">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0sf0mwv">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_01etw69">
+          <text>"CAMP_LEJEUNE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_05hxp4z">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0613tgr">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_08p505l">
+          <text>"RATING"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_114apio">
+          <text>"119"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_183skzz">
+        <description>PresumptiveDecisions - 22</description>
+        <inputEntry id="UnaryTests_1iydl6t">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ya6iji">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0htb08o">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1yy7bdn">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1vblte4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0j4lls2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_09wne2k">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1295900">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0z31frd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1xurzvm">
+          <text>"POW_OFF_RAMP"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0hluno9">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0cxsy61">
+          <text>"POW_DISEASE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_10hydau">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0lfk8vn">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0r146hr">
+          <text>"RATING"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0knfvv7">
+          <text>"118"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0xxui5t">
+        <description>PresumptiveDecisions - 23</description>
+        <inputEntry id="UnaryTests_0x4x124">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0vj4vm4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0hqquao">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_07ldzcj">
+          <text>"AGENT_ORANGE_OFF_RAMP"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0shgj16">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05xfgq6">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1kobeeb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1v2wfq1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1adrfk6">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_174i0e3">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1vbhlka">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_14wozwp">
+          <text>"AGENT_ORANGE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0hr4jmi">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1pcorip">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0dt6syt">
+          <text>"RATING"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0xooqz8">
+          <text>"120"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0leboz1">
+        <description>PresumptiveDecisions - 24</description>
+        <inputEntry id="UnaryTests_14w59lx">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0tvrlwx">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0i966m4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_19z5s1i">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0w3au7j">
+          <text>"GULF_WAR_OFFRAMP_RARE_CANCER"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1297txc">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1yyz2qo">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ub0g33">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1p1vkkj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0rurd7u">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0ax47w9">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0lw6y59">
+          <text>"GULF_WAR"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1ms1glu">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_10x7k0j">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0lw9ano">
+          <text>"RATING"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0r18bnp">
+          <text>"130"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1ftnrcl">
+        <description>PresumptiveDecisions - 25</description>
+        <inputEntry id="UnaryTests_1s2xdz9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0sifgkd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0qzv3z4">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12kf8nl">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1m77g63">
+          <text>"GULF_WAR_OFFRAMP_NO_COD_MATCH"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0swfzci">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1lfr1xu">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0jzhim1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1eom24g">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1lez79o">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0capppk">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1sy0wva">
+          <text>"GULF_WAR"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1g766vy">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0es4ph2">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1r94meo">
+          <text>"RATING"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1korm4e">
+          <text>"124"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1kfxpo6">
+        <description>PresumptiveDecisions - 26</description>
+        <inputEntry id="UnaryTests_1j5oktb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1x5o24e">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0rbbt83">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_18wl929">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1uauzhg">
+          <text>"GULF_WAR_OFFRAMP_REVIEW_YEARS_BETWEEN_RAD_AND_DOD"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13ctbdr">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0z43306">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0fivhys">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0oi5jsy">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_14nq5wn">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0mq01g6">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_074rw9u">
+          <text>"GULF_WAR"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0iaom49">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1m9h6r6">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0u892yw">
+          <text>"RATING"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0vt1kh4">
+          <text>"116"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0iywqw1">
+        <description>VBMSD-312500</description>
+        <inputEntry id="UnaryTests_1y88rjd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0r1t1xe">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ryluq7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_03dss5c">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1eauh8n">
+          <text>"AS21_AS27_INTERIM_FINAL_RULE_REVIEW"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0hrr9xe">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ev5nuw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1y5bmf7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08zyhjn">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1lvk3bx">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_14pe4pk">
+          <text>"INDETERMINATE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1a1z9p0">
+          <text>"GULF_WAR"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1hmla1i">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_181fyrg">
+          <text></text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1qh0z1p">
+          <text>"RATING"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1wpc8fg">
+          <text>"138"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="presumptive-decisions-all">
+        <dc:Bounds height="80" width="180" x="160" y="100" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
+

@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:camunda="http://camunda.org/schema/1.0/dmn" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" id="Definitions_1wv7rdn" name="DRD" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.27.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
+  <decision id="radiation-exposure" name="Radiation Exposures">
+    <informationRequirement id="InformationRequirement_0rwwyen">
+      <requiredDecision href="#radiation_literalExpression" />
+    </informationRequirement>
+    <decisionTable id="DecisionTable_15kyaai" hitPolicy="FIRST">
+      <input id="InputClause_12qb4bw" label="Has Radiation Match" camunda:inputVariable="radiationSpecialIssueType">
+        <inputExpression id="LiteralExpression_1ckq72m" typeRef="boolean" expressionLanguage="groovy">
+          <text>radiationSpecialIssueType != null</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_06mqhpv" label="Radiation Type" camunda:inputVariable="radiationSpecialIssueType">
+        <inputExpression id="LiteralExpression_0qpp7tg" typeRef="string" expressionLanguage="groovy">
+          <text>radiationSpecialIssueType</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="Radiation Result" name="radiationExposureResult" typeRef="string" biodi:width="208" />
+      <rule id="DecisionRule_048xkyq">
+        <description>Offramp for Radiation (RDN)</description>
+        <inputEntry id="UnaryTests_15g7f6j">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1rshumz">
+          <text>"RDN","RDN_RATING"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_04thk03">
+          <text>"RDN"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1is21ow">
+        <description>Offramp for  Radiation Radiogenic Disability Confirmed (RRDC)</description>
+        <inputEntry id="UnaryTests_1i6m496">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1gbh6lk">
+          <text>"RRDC"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_09b0rvu">
+          <text>"RRDC"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0lq3rxz">
+        <inputEntry id="UnaryTests_00z4is1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0m8lksi">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0gxxzr8">
+          <text>"NO_RADIATION_EXPOSURE"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <decision id="radiation_literalExpression" name="Radiation Exposure Logic">
+    <variable id="InformationItem_01aaao2" name="radiationSpecialIssueType" typeRef="string" />
+    <literalExpression id="LiteralExpression_0ikjz6q" expressionLanguage="groovy">
+      <text>def exposureCodes = ["RDN", "RRDC"] as Set
+def radiationSpecialIssueType = "NO MATCH"
+
+if (intake_pactPresumptiveCriteria.contentionSpecialIssues != null &amp;&amp;
+  !intake_pactPresumptiveCriteria.contentionSpecialIssues.isEmpty()) {
+    for (codeString in intake_pactPresumptiveCriteria.contentionSpecialIssues) {  
+        if (exposureCodes.contains(codeString )) { 
+            radiationSpecialIssueType = codeString
+            break
+        }
+    }
+}
+
+if (radiationSpecialIssueType.equals("NO MATCH") &amp;&amp; 
+  intake_pactPresumptiveCriteria.ratingSpecialIssues!= null &amp;&amp;
+  !intake_pactPresumptiveCriteria.ratingSpecialIssues.isEmpty()) {
+    for (issue in intake_pactPresumptiveCriteria.ratingSpecialIssues) {  
+        if (issue.spisTc.equals("RDN")) { 
+            radiationSpecialIssueType = "RDN_RATING"
+        }
+    }
+}
+
+return radiationSpecialIssueType</text>
+    </literalExpression>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="radiation-exposure">
+        <dc:Bounds height="80" width="180" x="160" y="240" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="DMNShape_0gdxgml" dmnElementRef="radiation_literalExpression">
+        <dc:Bounds height="80" width="180" x="160" y="80" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_0wl6mp3" dmnElementRef="InformationRequirement_0rwwyen">
+        <di:waypoint x="250" y="160" />
+        <di:waypoint x="250" y="220" />
+        <di:waypoint x="250" y="240" />
+      </dmndi:DMNEdge>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
+

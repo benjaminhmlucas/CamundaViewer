@@ -1,133 +1,83 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
   <meta charset="UTF-8">
-
   <title>Camunda Diagram Viewer</title>
-
   <style>
-
     body { font-family: sans-serif; padding: 1em; }
-
     #fileList button { margin: 0.2em; padding: 0.5em; cursor: pointer; }
-
     #canvas { height: 80vh; border: 1px solid #ccc; margin-top: 1em; }
-
+    .highlight > .djs-visual {
+      stroke: #1976d2 !important;
+      stroke-width: 3px !important;
+    }
   </style>
-
-  <script src=https://unpkg.com/bpmn-js/dist/bpmn-viewer.development.js></script>
-
 </head>
-
 <body>
-
-  <h2>Select a BPMN Diagram</h2>
-
+  <h2>Select a Diagram</h2>
   <div id="fileList">Loading diagrams...</div>
-
   <div id="canvas"></div>
 
- 
+  <!-- Load viewer libraries from local server -->
+  <script src="/scripts/bpmn-viewer.development.js"></script>
+  <script src="/scripts/dmn-viewer.development.js"></script>
 
   <script>
-
-    const viewer = new BpmnJS({ container: '#canvas' });
-
- 
+    const bpmnViewer = new BpmnJS({ container: '#canvas' });
+    const dmnViewer = new DmnJS({ container: '#canvas' });
 
     fetch('/list')
-
       .then(res => res.json())
-
       .then(files => {
-
         const listDiv = document.getElementById('fileList');
-
         listDiv.innerHTML = '';
-
-        files.filter(f => f.endsWith('.bpmn')).forEach(file => {
-
-          const btn = document.createElement('button');
-
-          btn.textContent = file;
-
-          btn.onclick = () => loadDiagram(file);
-
-          listDiv.appendChild(btn);
-
+        files.forEach(file => {
+          if (file.endsWith('.bpmn') || file.endsWith('.dmn')) {
+            const btn = document.createElement('button');
+            btn.textContent = file;
+            btn.onclick = () => loadDiagram(file);
+            listDiv.appendChild(btn);
+          }
         });
-
       });
-
- 
 
     function loadDiagram(fileName) {
-
-      const jsonFile = fileName.replace('.bpmn', '.json');
-
- 
+      const xmlUrl = `/diagrams/${fileName}`;
+      const jsonFile = fileName.replace(/\.(bpmn|dmn)/, '.json');
+      const jsonUrl = `/diagrams/${jsonFile}`;
 
       Promise.all([
-
-        fetch(`/${fileName}`).then(res => res.text()),
-
-        fetch(`/${jsonFile}`).then(res => res.json()).catch(() => ({ executedActivities: [] }))
-
+        fetch(xmlUrl).then(res => res.text()),
+        fetch(jsonUrl).then(res => res.json()).catch(() => ({}))
       ])
+      .then(([xml, pathData]) => {
+        const canvasEl = document.getElementById('canvas');
+        canvasEl.innerHTML = '';
 
-      .then(([xml, activityData]) => {
+        if (fileName.endsWith('.bpmn')) {
+          bpmnViewer.importXML(xml).then(() => {
+            const canvas = bpmnViewer.get('canvas');
+            canvas.zoom('fit-viewport');
+            (pathData.executedActivities || []).forEach(id => {
+              canvas.addMarker(id, 'highlight');
+            });
+          }).catch(err => console.error("BPMN load failed:", err));
+        } else if (fileName.endsWith('.dmn')) {
+          dmnViewer.importXML(xml).then(() => {
+            const activeView = dmnViewer.getActiveViewer();
+            const elementRegistry = activeView.get('elementRegistry');
+			const rawRules = pathData.evaluatedRules;
+			const activeRules = Array.isArray(rawRules) ? rawRules : [];
 
-        viewer.importXML(xml).then(() => {
-
-          const canvas = viewer.get('canvas');
-
-          canvas.zoom('fit-viewport');
-
- 
-
-          // Clear markers
-
-          canvas.getRootElement().children.forEach(el => canvas.removeMarker(el.id, 'highlight'));
-
- 
-
-          // Highlight executed steps
-
-          activityData.executedActivities.forEach(id => {
-
-            canvas.addMarker(id, 'highlight');
-
-          });
-
-        });
-
+            elementRegistry.getAll().forEach(el => {
+              if (activeRules.includes(el.id)) {
+                canvas.addMarker(el.id, 'highlight');
+              }
+            });
+          }).catch(err => console.error("DMN load failed:", err));
+        }
       });
-
     }
-
- 
-
-    const style = document.createElement('style');
-
-    style.innerHTML = `
-
-      .djs-element.highlight > .djs-visual {
-
-        stroke: #1976d2 !important;
-
-        stroke-width: 4px !important;
-
-      }
-
-    `;
-
-    document.head.appendChild(style);
-
   </script>
-
 </body>
-
 </html>

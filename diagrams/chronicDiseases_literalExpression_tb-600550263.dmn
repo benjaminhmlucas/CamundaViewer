@@ -1,0 +1,530 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:camunda="http://camunda.org/schema/1.0/dmn" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" id="Definitions_14not6w" name="DRD" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.27.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
+  <decision id="chronic-condition" name="Chronic Conditions">
+    <informationRequirement id="InformationRequirement_1kjxg5y">
+      <requiredDecision href="#chronicDiseases_literalExpression_all" />
+    </informationRequirement>
+    <informationRequirement id="InformationRequirement_1jtr8xw">
+      <requiredDecision href="#chronicDiseases_literalExpression_als" />
+    </informationRequirement>
+    <informationRequirement id="InformationRequirement_0tgd8bp">
+      <requiredDecision href="#chronicDiseases_literalExpression_ms" />
+    </informationRequirement>
+    <informationRequirement id="InformationRequirement_10h3wbe">
+      <requiredDecision href="#chronicDiseases_literalExpression_tb" />
+    </informationRequirement>
+    <decisionTable id="DecisionTable_1sgpa5s" hitPolicy="FIRST">
+      <input id="Input_1" label="ALS COD Match Type" camunda:inputVariable="alsCodMatchType">
+        <inputExpression id="InputExpression_1" typeRef="string" expressionLanguage="groovy">
+          <text>alsCodMatchType</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0nlz82w" label="MS COD Match" camunda:inputVariable="msCodMatch">
+        <inputExpression id="LiteralExpression_0d5eudg" typeRef="boolean" expressionLanguage="groovy">
+          <text>msCodMatch</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_18x41fe" label="Tuberculosis COD Match" camunda:inputVariable="tbCodMatch">
+        <inputExpression id="LiteralExpression_00rpkaw" typeRef="boolean" expressionLanguage="groovy">
+          <text>tbCodMatch</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0kr3onx" label="Other Chronic Conditionn COD Match" camunda:inputVariable="chronicCondition">
+        <inputExpression id="LiteralExpression_1gxiq5y" typeRef="boolean" expressionLanguage="groovy">
+          <text>chronicCondition != null</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1tewliq" label="Missing RAD Date?">
+        <inputExpression id="LiteralExpression_0agdlvq" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.missingMostRecentRAD</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1rufzq5" label="Years Between RAD and DOD">
+        <inputExpression id="LiteralExpression_1v0z8qw" typeRef="long" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getYearsBetweenRadAndDateOfDeath()</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="Chronic Condition Result" name="chronicConditionResult" typeRef="string" biodi:width="233" />
+      <output id="OutputClause_1pgpvyr" label="Matched Condition" name="matchedChronicCondition" typeRef="string" />
+      <rule id="DecisionRule_0ypgknt">
+        <description>For ALS, years between are irrelevant</description>
+        <inputEntry id="UnaryTests_0ebojsz">
+          <text>"primaryALS"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1sykkjp">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0cin3wr">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1lcbrzs">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_14j7pww">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0jslwfn">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0p4x5sf">
+          <text>"CHRONIC_ALS_PRIMARY"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0fd9zvb">
+          <text>"als"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1o4cylf">
+        <description>For ALS, years between are irrelevant</description>
+        <inputEntry id="UnaryTests_0kqdulw">
+          <text>"contributoryALS"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0arrbkb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1dflmsi">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0qbmtxq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ho2akp">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1hpiicw">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0pe5zwt">
+          <text>"CHRONIC_ALS_CONTRIBUTORY"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_06nbh8y">
+          <text>"als"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_021vrkg">
+        <description>For MS, years between must be less than 7</description>
+        <inputEntry id="UnaryTests_0bzo35n">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_02zba74">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1tvqxv3">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ajhtgs">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1mt84yo">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1e31wq1">
+          <text>&lt;7</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1kdvju4">
+          <text>"CHRONIC_MS"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0cfwqxs">
+          <text>"ms"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1pcagaq">
+        <description>For Tuberculosis, years between must be less than 3</description>
+        <inputEntry id="UnaryTests_044szkt">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1xffxyw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0k6uyl6">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17i1laz">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0tmzmfv">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12xxb98">
+          <text>&lt;3</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0qtfp1f">
+          <text>"CHRONIC_TUBERCULOSIS"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_169g29j">
+          <text>"tuberculosis"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1p00j1m">
+        <description>For any other chronic condition, must be less than 1 year between effective date and RAD</description>
+        <inputEntry id="UnaryTests_0jjhsht">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1yl3lzg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ynz8k6">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0d4tovq">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ez714k">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1lan7z3">
+          <text>&lt;1</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1kdycan">
+          <text>"CHRONIC_CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1f1ffba">
+          <text>chronicCondition</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_09ui29d">
+        <description>Missing RAD date, For Multiple Sclerosis</description>
+        <inputEntry id="UnaryTests_0akm88l">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0u38npy">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1kif99z">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0dagkl2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_10o0nx0">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0a54wx2">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0fhlmyi">
+          <text>"CHRONIC_CONDITION_MISSING_RAD"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1wlco8g">
+          <text>"ms"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1yr7vr9">
+        <description>Missing RAD date, For Tuberculosis</description>
+        <inputEntry id="UnaryTests_1et6ag2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0671wvc">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_01s43lp">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0kbkyas">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1r136s8">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1n6mwty">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0cj8bdr">
+          <text>"CHRONIC_CONDITION_MISSING_RAD"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1q567r3">
+          <text>"tuberculosis"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0ehvj4h">
+        <description>Missing RAD date, For Other Chronic Condition</description>
+        <inputEntry id="UnaryTests_1okvjfi">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_09rqtyy">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0k7n5kp">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17vpe66">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1u9bx32">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1c2ie9y">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1x4qx4m">
+          <text>"CHRONIC_CONDITION_MISSING_RAD"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_054pbzi">
+          <text>chronicCondition</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0fpncgl">
+        <description>RAD to Date of Death check is not met</description>
+        <inputEntry id="UnaryTests_0k3nm27">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05mp1x5">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ucbzkv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_047gvec">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1o947lc">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0llol7r">
+          <text>&gt;=7</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0p2aieh">
+          <text>"CHRONIC_OFF_RAMP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0cglg1b">
+          <text>"ms"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_13m6pq4">
+        <description>RAD to Date of Death check is not met</description>
+        <inputEntry id="UnaryTests_0e77jgn">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1c5i2r2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1hw4227">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0zhmoi7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0hxpe8l">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1tdv8i2">
+          <text>&gt;=3</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0nbcpqz">
+          <text>"CHRONIC_OFF_RAMP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_08p0ibg">
+          <text>"tuberculosis"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1nnzn27">
+        <description>RAD to Date of Death check is not met</description>
+        <inputEntry id="UnaryTests_0no33o9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0vplh1m">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1tm92is">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_02koqvz">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16flnln">
+          <text>false</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_19f4qff">
+          <text>&gt;=1</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0glq76i">
+          <text>"CHRONIC_OFF_RAMP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0b0ny4g">
+          <text>chronicCondition</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_19qsica">
+        <inputEntry id="UnaryTests_0p1zn53">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ppidxc">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0oh5w9x">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ec9tkl">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ttxrvm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1h6kekq">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1q48oin">
+          <text>"NO_CHRONIC_CONDITION"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1hwcbgo">
+          <text></text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <decision id="chronicDiseases_literalExpression_all" name="Chronic Diseases">
+    <variable id="InformationItem_143f4hz" name="chronicCondition" typeRef="string" />
+    <literalExpression id="LiteralExpression_01dty05" expressionLanguage="groovy">
+      <text>chronicConditions = [
+    "anemia primary",
+    "arteriosclerosis",
+    "brain hemorrhage",
+    "brain thrombosis",
+    "bronchiectasis",
+    "buergers disease",
+    "calculi of the bladder",
+    "calculi of the gallbladder",
+    "calculi of the kidney",
+    "calculus in bladder",
+    "calculus in gallbladder",
+    "calculus in kidney",
+    "cardiovascular renal disease",
+    "cirrhosis liver",
+    "coccidiodomycosis",
+    "degenerative arthritis",
+    "diabetes mellitus",
+    "dm",
+    "dmii",
+    "encephalitis",
+    "endocarditis",
+    "endocrinopathies",
+    "epilepsis",
+    "hansens disease",
+    "hodgkins disease",
+    "htn",
+    "hypertension",
+    "leukemia",
+    "lupus",
+    "malignant tumor",
+    "multiple sclerosis",
+    "muscular atrophy",
+    "myatheia gravis",
+    "myelitis",
+    "myocarditis",
+    "nephritis",
+    "organic disease of the nervous system",
+    "osteitis deformans",
+    "osteomalacia",
+    "pagets disease",
+    "palsey bulbar",
+    "paralysis agitans",
+    "peptic ulcer",
+    "primary anemia",
+    "psychosis",
+    "purpura",
+    "raynauds disease",
+    "renal calculi",
+    "renal calculus",
+    "sarchoidosis",
+    "scleroderma",
+    "stomach ulcer",
+    "syringomyelia",
+    "thromboangitis"
+]
+
+if (intake_pactPresumptiveCriteria.causesOfDeathFromDeathCert == null) return null;
+
+cods = intake_pactPresumptiveCriteria.causesOfDeathFromDeathCert as String[]
+for(int i = 0; i &lt; cods.size(); i++) {
+   cods[i] = cods[i].replaceAll("pulmonary[^A-Za-z0-9]*?(hypertension|htn)", "")
+}
+
+chronicConditions.find{condition -&gt; cods.any{cause_of_death -&gt; cause_of_death.matches(".*\\b$condition\\b.*")}}</text>
+    </literalExpression>
+  </decision>
+  <decision id="chronicDiseases_literalExpression_als" name="Chronic ALS">
+    <variable id="InformationItem_0q2o9tz" name="alsCodMatchType" typeRef="string" />
+    <literalExpression id="LiteralExpression_1j0kbqq" expressionLanguage="groovy">
+      <text>gov.va.bip.pensionautomation.engine.service.util.CauseOfDeathALSPredicate predicate = new 
+        gov.va.bip.pensionautomation.engine.service.util.CauseOfDeathALSPredicate();
+
+alsCodMatchType = ""
+
+if(intake_pactPresumptiveCriteria.causesOfDeathFromDeathCert != null &amp;&amp; !intake_pactPresumptiveCriteria.causesOfDeathFromDeathCert.isEmpty()){
+   primaryCod = intake_pactPresumptiveCriteria.causesOfDeathFromDeathCert.get(0)
+   contributoryCods = intake_pactPresumptiveCriteria.causesOfDeathFromDeathCert.findAll { it != primaryCod }
+   
+   primaryMatch = predicate.test(primaryCod)
+   contributoryMatch = contributoryCods.any{ cause_of_death -&gt; predicate.test(cause_of_death) }
+
+   alsCodMatchType = primaryMatch ? "primaryALS" : contributoryMatch ? "contributoryALS" : ""
+
+}
+
+alsCodMatchType</text>
+    </literalExpression>
+  </decision>
+  <decision id="chronicDiseases_literalExpression_ms" name="Chronic MS">
+    <variable id="InformationItem_1kcqg6f" name="msCodMatch" typeRef="boolean" />
+    <literalExpression id="LiteralExpression_0ri660l" expressionLanguage="groovy">
+      <text>msConditions = ["ms", "multiple sclerosis"]
+
+msCodMatch = msConditions.any{ 
+    condition -&gt; intake_pactPresumptiveCriteria.causesOfDeathFromDeathCert.any{
+        cause_of_death -&gt; cause_of_death.matches(".*\\b$condition\\b.*")
+    } 
+}</text>
+    </literalExpression>
+  </decision>
+  <decision id="chronicDiseases_literalExpression_tb" name="Chronic TB">
+    <variable id="InformationItem_1j42eeq" name="tbCodMatch" typeRef="boolean" />
+    <literalExpression id="LiteralExpression_0tp7zz3" expressionLanguage="groovy">
+      <text>tbConditions = ["tuberculosis"]
+
+tbCodMatch = tbConditions.any{ 
+    condition -&gt; intake_pactPresumptiveCriteria.causesOfDeathFromDeathCert.any{
+        cause_of_death -&gt; cause_of_death.matches(".*\\b$condition\\b.*")
+    } 
+}</text>
+    </literalExpression>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="chronic-condition">
+        <dc:Bounds height="80" width="180" x="410" y="230" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_0cgn1c0" dmnElementRef="InformationRequirement_1kjxg5y">
+        <di:waypoint x="500" y="160" />
+        <di:waypoint x="500" y="210" />
+        <di:waypoint x="500" y="230" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNShape id="DMNShape_1o3sl2c" dmnElementRef="chronicDiseases_literalExpression_all">
+        <dc:Bounds height="80" width="180" x="410" y="80" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_1lblgrl" dmnElementRef="InformationRequirement_1jtr8xw">
+        <di:waypoint x="340" y="270" />
+        <di:waypoint x="390" y="270" />
+        <di:waypoint x="410" y="270" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNShape id="DMNShape_1jnx1j2" dmnElementRef="chronicDiseases_literalExpression_als">
+        <dc:Bounds height="80" width="180" x="160" y="230" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_07nwhtz" dmnElementRef="InformationRequirement_0tgd8bp">
+        <di:waypoint x="500" y="380" />
+        <di:waypoint x="500" y="330" />
+        <di:waypoint x="500" y="310" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNShape id="DMNShape_0tzfjp7" dmnElementRef="chronicDiseases_literalExpression_ms">
+        <dc:Bounds height="80" width="180" x="410" y="380" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_06e1fur" dmnElementRef="InformationRequirement_10h3wbe">
+        <di:waypoint x="650" y="270" />
+        <di:waypoint x="610" y="270" />
+        <di:waypoint x="590" y="270" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNShape id="DMNShape_19n3adi" dmnElementRef="chronicDiseases_literalExpression_tb">
+        <dc:Bounds height="80" width="180" x="650" y="230" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
+

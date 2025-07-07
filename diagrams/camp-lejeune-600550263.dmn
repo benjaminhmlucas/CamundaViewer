@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:camunda="http://camunda.org/schema/1.0/dmn" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" id="Definitions_1usb1z7" name="DRD" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.27.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
+  <decision id="camp-lejeune" name="Camp Lejeune">
+    <informationRequirement id="InformationRequirement_0jltwk3">
+      <requiredDecision href="#campLejeune_literalExpression_all" />
+    </informationRequirement>
+    <decisionTable id="DecisionTable_05n0n1z" hitPolicy="FIRST">
+      <input id="Input_1" label="Has EHCL Rating Special Issue">
+        <inputExpression id="InputExpression_1" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.getRatingSpecialIssues() != null &amp;&amp; !intake_pactPresumptiveCriteria.getRatingSpecialIssues().isEmpty() &amp;&amp; intake_pactPresumptiveCriteria.getRatingSpecialIssues().spisTc.any{ 'EHCL'.equalsIgnoreCase(it) }</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0vhnft4" label="Has EHCL Death Special Issue">
+        <inputExpression id="LiteralExpression_0kq7sjd" typeRef="boolean" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.deathSpecialIssues != null &amp;&amp; !intake_pactPresumptiveCriteria.deathSpecialIssues.isEmpty() &amp;&amp; intake_pactPresumptiveCriteria.deathSpecialIssues.any{ 'EHCL'.equalsIgnoreCase(it)}</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0o3i19z" label="Date of Death">
+        <inputExpression id="LiteralExpression_0yxx3rn" typeRef="date" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.dateOfDeath.atStartOfDay()</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0ndg20q" label="Claim Lifecycle Status">
+        <inputExpression id="LiteralExpression_17pejcq" typeRef="string" expressionLanguage="groovy">
+          <text>intake_pactPresumptiveCriteria.claimLifecycleStatus</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1c2617g" label="Has Camp Lejeune COD Match" camunda:inputVariable="campLejeuneCondition">
+        <inputExpression id="LiteralExpression_0mz3oj3" typeRef="boolean" expressionLanguage="groovy">
+          <text>campLejeuneCondition != null</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0fohv5o" label="VBMSD-198696 FF - evaluateCampLejeune">
+        <inputExpression id="LiteralExpression_1ej3v3w" typeRef="boolean" expressionLanguage="groovy">
+          <text>evaluateCampLejeune</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="Camp Lejeune Result" name="campLejeuneResult" typeRef="string" biodi:width="231" />
+      <output id="OutputClause_1m016zb" label="Matched Condition" name="matchedCampLejeuneCondition" typeRef="string" />
+      <rule id="DecisionRule_1s62002">
+        <description>VBMSD-198696: If claim is in RDC, DOD is before 3/14/2017, and Veteran has a Death Special Issue of "Environmental Hazard Camp Lejeune" (EHCL) â offramp for Effective Date Review</description>
+        <inputEntry id="UnaryTests_0nxr78e">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_08jq9os">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_07kicrs">
+          <text>&lt; date and time("2017-03-14T00:00:00")</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0u9xkpm">
+          <text>"Rating Decision Complete"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0n4iajm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_01mcrxp">
+          <text>true</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0434y13">
+          <text>"CL_EFFECTIVE_DATE_REVIEW"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1131huk">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_10sqib0">
+        <inputEntry id="UnaryTests_1mdej0e">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_19nmeks">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_084p5xp">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0nmtudf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_02bgqdb">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0iww9gy">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0o144h7">
+          <text>"CAMP_LEJEUNE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_03pkl7u">
+          <text>campLejeuneCondition</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1qr43az">
+        <inputEntry id="UnaryTests_0gfcf5z">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_00020i2">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0q5zk1n">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1v2vf6j">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1dmh2wm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1lj2dl0">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1uoz3no">
+          <text>"CAMP_LEJEUNE_OFFRAMP"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_1je3q92">
+          <text></text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0uh42gz">
+        <inputEntry id="UnaryTests_00opvcr">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1sciewe">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1hqkidg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1msmesf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1n8lj7r">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16oqdic">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_02h0b6f">
+          <text>"NO_CAMP_LEJEUNE"</text>
+        </outputEntry>
+        <outputEntry id="LiteralExpression_0zdpmrl">
+          <text></text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <decision id="campLejeune_literalExpression_all" name="Camp Lejeune Conditions">
+    <variable id="InformationItem_1t1qzml" name="campLejeuneCondition" typeRef="string" />
+    <literalExpression id="LiteralExpression_0uz68qg" expressionLanguage="groovy">
+      <text>campLejeuneCODS = [
+    "adult leukemia", 
+    "aplastic anemia", 
+    "bladder cancer", 
+    "cancer of the bladder", 
+    "cancer of the kidney", 
+    "cancer of the liver", 
+    "kidney cancer", 
+    "liver cancer", 
+    "multiple myeloma", 
+    "myelodysplastic syndrome", 
+    "non hodgkins lymphoma", 
+    "parkinsons", 
+    "parkinsons disease"
+]
+
+campLejeuneCODS.find{condition -&gt; 
+  intake_pactPresumptiveCriteria.causesOfDeathFromDeathCert.any{cause_of_death -&gt; 
+    cause_of_death.matches(".*\\b$condition\\b.*")
+  }
+}</text>
+    </literalExpression>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="camp-lejeune">
+        <dc:Bounds height="80" width="180" x="160" y="240" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_0m9vya2" dmnElementRef="InformationRequirement_0jltwk3">
+        <di:waypoint x="250" y="160" />
+        <di:waypoint x="250" y="220" />
+        <di:waypoint x="250" y="240" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNShape id="DMNShape_0eq9zya" dmnElementRef="campLejeune_literalExpression_all">
+        <dc:Bounds height="80" width="180" x="160" y="80" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
+

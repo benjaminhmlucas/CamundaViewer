@@ -1,0 +1,9 @@
+﻿{
+    "executedActivities":  [
+                               "checkExistingBurialDecisions",
+                               "burialAwardDecisionsEnd",
+                               "burialAwardDecisionsStart",
+                               "burialAwardStatusCheck",
+                               "saveBurialDecisionsTask"
+                           ]
+}

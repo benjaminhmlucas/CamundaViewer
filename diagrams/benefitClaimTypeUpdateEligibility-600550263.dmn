@@ -1,0 +1,496 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/1.0" id="Definitions_1dgyken" name="DRD" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="3.7.0">
+  <decision id="benefitClaimTypeUpdateEligibility" name="Evaluate Benefit Claim Type Update Eligibility">
+    <extensionElements>
+      <biodi:bounds x="410" y="150" width="180" height="80" />
+    </extensionElements>
+    <decisionTable id="decisionTable_1" hitPolicy="FIRST">
+      <input id="input_1" label="EP Code">
+        <inputExpression id="inputExpression_1" typeRef="integer">
+          <text>eligibility_benefitClaimTypeUpdateCriteria.currentEPCode</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0wj5l37" label="Death by Suicide">
+        <inputExpression id="LiteralExpression_0v2v4qb" typeRef="boolean" expressionLanguage="Groovy">
+          <text>eligibility_benefitClaimTypeUpdateCriteria.isMannerOfDeathSuicide</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0pkul7c" label="Is Service Connected To PTSD Related">
+        <inputExpression id="LiteralExpression_0rkj9co" typeRef="boolean" expressionLanguage="Groovy">
+          <text>eligibility_benefitClaimTypeUpdateCriteria.isServiceConnectedForPTSDRelated</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1ag7ukb" label="Form 534 Block 7 Claiming Service Connected Cause of Death">
+        <inputExpression id="LiteralExpression_0qh70ib" typeRef="boolean" expressionLanguage="Groovy">
+          <text>eligibility_benefitClaimTypeUpdateCriteria.block7ClaimingServiceConnectedForCoD</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0nf5odu" label="Form 534 Block 17 Dic Compensation">
+        <inputExpression id="LiteralExpression_0rkw4ds" typeRef="boolean" expressionLanguage="Groovy">
+          <text>eligibility_benefitClaimTypeUpdateCriteria.block17DicCompensation</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_14ceu85" label="Form 534 Block 35 Get Dic">
+        <inputExpression id="LiteralExpression_0sf75yt" typeRef="boolean" expressionLanguage="Groovy">
+          <text>eligibility_benefitClaimTypeUpdateCriteria.block35GetDic</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1rc3ltb" label="Form 534 Block 35 Get Dic Under 38 Usc 1151">
+        <inputExpression id="LiteralExpression_0zmma1x" typeRef="boolean" expressionLanguage="Groovy">
+          <text>eligibility_benefitClaimTypeUpdateCriteria.block35GetDicUnder38Usc1151</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_0w9mnry" label="Form 534 EZ Block 7A Get Dic Under PACT">
+        <inputExpression id="LiteralExpression_024voq7" typeRef="boolean">
+          <text>eligibility_benefitClaimTypeUpdateCriteria.block7AGetDicUnderPACT</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1ewl3sv" label="Form 530 Block 13A Service Connected Death Pending">
+        <inputExpression id="LiteralExpression_1791nf5" typeRef="boolean" expressionLanguage="Groovy">
+          <text>eligibility_benefitClaimTypeUpdateCriteria.block13AGetServiceConnectedPending</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1f3kx9y" label="Service Connected Death">
+        <inputExpression id="LiteralExpression_1roihg3" typeRef="boolean" expressionLanguage="groovy">
+          <text>claimExecution.ratingResult != null &amp;&amp; claimExecution.ratingResult.eligible</text>
+        </inputExpression>
+      </input>
+      <input id="InputClause_1s001h7" label="Rating Eligibiliity Reason">
+        <inputExpression id="LiteralExpression_031u6pa" typeRef="string" expressionLanguage="groovy">
+          <text>claimExecution.ratingResult?.eligibilityReason</text>
+        </inputExpression>
+      </input>
+      <output id="output_1" label="Benefit Claim Type Update Eligibility Reason" name="updateBenefitClaimTypeReason" typeRef="string" />
+      <rule id="DecisionRule_0kdxmyq">
+        <description>Manner of Death was Suicide, and Veteran was SC for PTSD</description>
+        <inputEntry id="UnaryTests_08fqpp3">
+          <text>[190..199]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17ilan6">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ptq6iy">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0wm4in8">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_18drfys">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_02v6tvz">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0imnsvg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_09htsvu">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0opj4he">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1k3s2ku">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0lo5xn0">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0dbgjn6">
+          <text>"SURVIVORS_PENSION_SUICIDE_AND_PTSD"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0cscves">
+        <description>SC Death</description>
+        <inputEntry id="UnaryTests_0gl083q">
+          <text>[190..199]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1f5osmh">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1b0pyy1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1rnzp4i">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_19vv6bk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_11x6ehi">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0chg0t9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ju712h">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1sg977w">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1cjphi5">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_02ieuts">
+          <text>"GSCDP","GSCDC"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0nuhq31">
+          <text>"SURVIVORS_PENSION_SC_DEATH"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1k6o2k1">
+        <description>SC Death Under 1318</description>
+        <inputEntry id="UnaryTests_04z9cvt">
+          <text>[190..199]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_00bcxjk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1u7graf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0wpy079">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0okoqjf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16zjatq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_19zat3g">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1r4ugjb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0o56pxo">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0u0djua">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1kuqbmn">
+          <text>"G1810","G185","G181POW"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_09oz15m">
+          <text>"SURVIVORS_PENSION_SC_DEATH_UNDER_1318"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0xfndnt">
+        <description>SC Death Under 1151</description>
+        <inputEntry id="UnaryTests_0usc1hn">
+          <text>[190..199]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1smv7i7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_15ln777">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0tb0865">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0v6r13k">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1xbvgts">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1t052wj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0c9e8nr">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1h4daxh">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0wvkocj">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17tojw5">
+          <text>"G51H","G51M","G51V","G51E"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1619m2z">
+          <text>"SURVIVORS_PENSION_SC_DEATH_UNDER_1151"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1n2k738">
+        <description>The claimant filed for DIC on Form 534/534EZ</description>
+        <inputEntry id="UnaryTests_15ooiv0">
+          <text>[190..199]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0x6nipm">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0vyc5n5">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1q42r2j">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0bxa06z">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_19ymoii">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ehvisj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0zeoech">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17xj02p">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1b5qx8x">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1qxkfxd">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0jrjwh0">
+          <text>"SURVIVORS_PENSION_DIC_CLAIMED_ON_FORM_534"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1eifgea">
+        <description>The claimant filed for DIC on Form 534/534EZ</description>
+        <inputEntry id="UnaryTests_0j6eh2a">
+          <text>[190..199]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05a3fkw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_174lciw">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1gqym9g">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1607pq8">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0ln8qxq">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1d5r1lp">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0p3tnvn">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1bwczlj">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1jkb838">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1rmbfwg">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1edr80d">
+          <text>"SURVIVORS_PENSION_DIC_CLAIMED_ON_FORM_534"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0m7du4p">
+        <description>The claimant filed for DIC on Form 534/534EZ</description>
+        <inputEntry id="UnaryTests_1pfpni0">
+          <text>[190..199]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_05sb2zr">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1pik2m0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1otmvin">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_03qsngr">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0yxqui7">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_03ai55b">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0zxacrz">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0mkjb2f">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1r4bvw9">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_17fprdy">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_15xckzj">
+          <text>"SURVIVORS_PENSION_DIC_CLAIMED_ON_FORM_534"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1wvt52s">
+        <description>The claimant filed for DIC on Form 534/534EZ</description>
+        <inputEntry id="UnaryTests_0dtyo0l">
+          <text>[190..199]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_04m7w8e">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_088wbyb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1fx77bl">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1vkcknb">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1hnu3m1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1yiger8">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13s4ssk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ttlzad">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1j19ohi">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0hjq5fw">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0lzgelg">
+          <text>"SURVIVORS_PENSION_DIC_CLAIMED_ON_FORM_534"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1l70314">
+        <description>The claimant filed for DIC Under PACT on Form 534EZ</description>
+        <inputEntry id="UnaryTests_1uygn5f">
+          <text>[190-199]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0m4c3yd">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_12fgim1">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1snnogg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1og9tkg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_13vqsmh">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_10a8szn">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1uvn7is">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_172wy42">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1y9rk00">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0b4rwmk">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_067pcpy">
+          <text>"SURVIVORS_PENSION_DIC_CLAIMED_ON_FORM_534"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1o4jcca">
+        <description>The claimant indicated there is a pending SC Death claim on Form 530</description>
+        <inputEntry id="UnaryTests_0h0xvvo">
+          <text>[190..199]</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1sr53hc">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0cvgcym">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0c5v3qf">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0n2j049">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_14uf0x0">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0t2nn79">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_16znlyk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1fd59j9">
+          <text>true</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0cu6yhp">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0t7g22i">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0gywqht">
+          <text>"SURVIVORS_PENSION_PENDING_SC_BURIAL_CLAIM"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_124w7dj">
+        <description>The claim is ineligible for a Benefit Claim Type update</description>
+        <inputEntry id="UnaryTests_0vwdyf5">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1ywguzk">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0n87i0h">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1oa5mb7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_14phwcv">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_00es6mo">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1rd1vb7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0jnm70p">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_0e74qoz">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_04472wg">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_1g17pzi">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1uleatw">
+          <text>"INELIGIBLE"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
+
