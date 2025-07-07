@@ -1,7 +1,0 @@
-﻿{
-    "executedActivities":  [
-                               "saveDirectDepositInformation",
-                               "endVetRecordProcessAwards",
-                               "startVetRecordViaAwards"
-                           ]
-}

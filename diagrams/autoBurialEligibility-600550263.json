@@ -1,7 +1,0 @@
-﻿{
-    "executedActivities":  [
-                               "endAutoBurialEligibility",
-                               "scEligibilityViaDic",
-                               "startAutoBurialEligibility"
-                           ]
-}

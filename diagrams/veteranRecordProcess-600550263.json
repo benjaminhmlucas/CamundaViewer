@@ -1,7 +1,0 @@
-﻿{
-    "executedActivities":  [
-                               "endVetRecordProcess",
-                               "savePeriodOfServiceTask",
-                               "startVetRecordProcess"
-                           ]
-}

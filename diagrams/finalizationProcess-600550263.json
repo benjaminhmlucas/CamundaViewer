@@ -1,9 +1,0 @@
-﻿{
-    "executedActivities":  [
-                               "callUploadDocumentFromFinalization",
-                               "Activity_1lbnhpf",
-                               "Event_19ekxx6",
-                               "callPacmanFromFinalization",
-                               "startFinalization"
-                           ]
-}
