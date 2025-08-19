@@ -1,83 +1,4385 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <title>Camunda Diagram Viewer</title>
+  <link rel="stylesheet" href="/viewer.css">
   <style>
-    body { font-family: sans-serif; padding: 1em; }
-    #fileList button { margin: 0.2em; padding: 0.5em; cursor: pointer; }
-    #canvas { height: 80vh; border: 1px solid #ccc; margin-top: 1em; }
-    .highlight > .djs-visual {
-      stroke: #1976d2 !important;
-      stroke-width: 3px !important;
-    }
+
   </style>
 </head>
 <body>
-  <h2>Select a Diagram</h2>
-  <div id="fileList">Loading diagrams...</div>
-  <div id="canvas"></div>
+  <!--#region [================== LEFT PANEL ==================]-->
+  <div id="leftPanel">
+    <!-- Action Buttons - Positioned at the top -->
+    <div class="quit-section">
+      <button id="quitButton" class="quit-button" onclick="quitApplication()" title="Stop server and close application">
+        <div class="button-container">
+          <img src="/images/exit-door.png" alt="Exit" class="exit-icon" onerror="this.style.display='none'; this.nextSibling.style.display='inline';">
+          <span class="hidden">Exit</span>
+          <span class="text-with-margin">Quit Application</span>
+        </div>
+      </button>
+      <button id="newTabButton" class="new-tab-button" onclick="openNewClaimTab()" title="Open a new claim tab">
+        <div class="button-container-with-margin">
+          ➕ New Tab
+        </div>
+      </button>
+    </div>
+    
+    <!--#region [================== Business Key INPUT SECTION ==================]-->
+    <!-- Business Key Input Section -->
+    <div class="process-input-section">
+      <div class="menu-title menu-title-bordered">🔍 Search By Business Key</div>
+      <div class="input-group">
+        <div class="input-container-relative">
+          <input type="text" id="businessKeyInput" placeholder="Enter Business Key" maxlength="20" class="input-full-width" autocomplete="off">
+          <div id="historyDropdown" class="history-dropdown">
+          </div>
+        </div>
+        <button id="getProcessButton" onclick="fetchProcessData()">Get Process</button>
+      </div>
+      <div class="input-group input-group-with-margin">
+        <div class="flex-gap">
+          <div class="flex-full">
+            <label for="environmentSelect" class="form-label">Environment:</label>
+            <select id="environmentSelect" class="input-full-width">
+              <option value="local">Loading...</option>
+            </select>
+          </div>
+          <div class="flex-fixed">
+            <label for="maxRunsInput" class="form-label">Max Runs:</label>
+            <input type="number" id="maxRunsInput" min="1" max="50" value="5" class="input-full-width" title="Maximum number of runs to process (1-50)">
+          </div>
+        </div>
+      </div>
+      <div id="validationMessage" class="validation-message"></div>
+      <div id="progressCounter" class="progress-counter"></div>
+      <div id="progressMessage" class="progress-message"></div>
+      <div id="logActions" class="log-actions hidden">
+        <button id="copyLogButton" class="log-button" onclick="copyLogToClipboard()">📋 Copy Log</button>
+        <button id="openLogButton" class="log-button" onclick="viewSessionLog()">📄 View Log</button>
+      </div>
+    </div>
+    <!--#endregion-->
+    
+    <!--#region [================== PROCESS TIMELINE SECTION ==================]-->
+    <div class="menu-title">📋 Process Execution Timeline</div>
+    
+    <div id="fileList">Loading diagrams...</div>
+    <!--#endregion-->
+  </div>
+  <!--#endregion-->
+  
+  <!--#region [================== SPLITTER ==================]-->
+  <div id="splitter"></div>
+  <!--#endregion-->
+  
+  <!--#region [================== RIGHT PANEL ==================]-->
+  <div id="rightPanel">
+    <!--#region [================== HEADER SECTION ==================]-->
+    <div id="header">
+      <div class="header-left">
+        <h1>Camunda Viewer</h1>
+        <h2 id="currentDiagram">Select a diagram from the left menu</h2>
+      </div>
+      <div class="header-center" id="headerCenter">
+        <!-- Zoom controls will be inserted here -->
+      </div>
+      <div class="header-right">
+        <div id="businessKeyDisplay" class="business-key-display"></div>
+      </div>
+    </div>
+    <!--#endregion-->
+    
+    <!-- ================== CANVAS SECTION ================== -->
+    <!--#region-->
+    <div id="canvas"></div>
+    <!--#endregion-->
+  </div>
+  <!--#endregion-->
 
-  <!-- Load viewer libraries from local server -->
-  <script src="/scripts/bpmn-viewer.development.js"></script>
-  <script src="/scripts/dmn-viewer.development.js"></script>
+  <!--#region [================== SCRIPT LIBRARIES ==================]-->
+  <!-- Load libraries from local -->
+  <script src="/lib/bpmn-viewer.development.js"></script>
+  <script src="/lib/dmn-viewer.development.js"></script>
+  <!--#endregion-->
 
   <script>
-    const bpmnViewer = new BpmnJS({ container: '#canvas' });
-    const dmnViewer = new DmnJS({ container: '#canvas' });
+    // Safe ID generation for DOM elements
+    // Ensures valid HTML IDs that start with a letter and contain only safe characters
+    /**
+     * Sanitize a string to create a valid HTML DOM element ID
+     * @param {string} str - The input string to sanitize
+     * @returns {string} A valid HTML ID that starts with a letter and contains only safe characters
+     */
+    function sanitizeId(str) {
+      if (!str) return 'id-default';
+      
+      let sanitized = String(str)
+        .replace(/\s+/g, '-')           // Replace spaces with dashes
+        .replace(/[^A-Za-z0-9-_]/g, '-') // Replace invalid chars with dashes (allow underscores)
+        .replace(/-+/g, '-')            // Collapse multiple dashes
+        .replace(/^-|-$/g, '');         // Remove leading/trailing dashes
 
-    fetch('/list')
-      .then(res => res.json())
-      .then(files => {
-        const listDiv = document.getElementById('fileList');
-        listDiv.innerHTML = '';
-        files.forEach(file => {
-          if (file.endsWith('.bpmn') || file.endsWith('.dmn')) {
-            const btn = document.createElement('button');
-            btn.textContent = file;
-            btn.onclick = () => loadDiagram(file);
-            listDiv.appendChild(btn);
-          }
+      // Ensure ID starts with a letter (HTML requirement)
+      if (!/^[a-zA-Z]/.test(sanitized)) {
+        sanitized = 'id-' + sanitized;
+      }
+      
+      // Ensure minimum length
+      return sanitized || 'id-fallback';
+    }
+    
+    /**
+     * Generate consistent ID for deserialized variable containers
+     * @param {string} variableName - Name of the variable
+     * @param {string} processKey - Process definition key
+     * @param {string} processInstanceId - Process instance identifier
+     * @param {boolean} isExecution - Whether this is for execution variable display
+     * @returns {string} Sanitized DOM element ID for the container
+     */
+    function generateDeserializedContainerId(variableName, processKey, processInstanceId, isExecution = false) {
+      if (isExecution) {
+        return sanitizeId(`deserialized-${variableName}-execution-${processInstanceId}`);
+      }
+      return sanitizeId(`deserialized-${variableName}-${processKey}-${processInstanceId}`);
+    }
+    
+    /**
+     * Escape HTML special characters to prevent XSS attacks
+     * @param {string} text - The text to escape
+     * @returns {string} HTML-escaped text safe for DOM insertion
+     */
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    //#region [================== SESSION MANAGEMENT ==================]
+    
+    /**
+     * Generate a cryptographically secure random ID with a given prefix
+     * @param {string} prefix - The prefix for the ID (e.g., 'session', 'tab')
+     * @returns {string} A secure random ID with timestamp and cryptographically secure random component
+     */
+    function generateSecureId(prefix = 'session') {
+      const array = new Uint32Array(3); // Generate 3 random 32-bit integers
+      window.crypto.getRandomValues(array);
+      return (
+        prefix +
+        '_' +
+        Date.now() +
+        '_' +
+        Array.from(array).map(n => n.toString(36)).join('')
+      );
+    }
+    
+    // Always generate unique session and tab IDs for each tab instance
+    // This ensures proper isolation even when tabs are duplicated
+    const sessionId = generateSecureId('session');
+    const tabId = generateSecureId('tab');
+    
+    // Update the URL with the new session ID (without page reload)
+    const newUrl = new URL(window.location);
+    newUrl.searchParams.set('sessionId', sessionId);
+    window.history.replaceState({}, '', newUrl);
+    
+    /**
+     * Helper function to add session ID parameter to URLs
+     * @param {string} url - The base URL to modify
+     * @returns {string} URL with sessionId parameter appended
+     */
+    function addSessionParam(url) {
+      const separator = url.includes('?') ? '&' : '?';
+      return `${url}${separator}sessionId=${encodeURIComponent(sessionId)}`;
+    }
+    
+    // Multiple event listeners for reliable tab close detection
+    let pageHidden = false;
+    let deregistrationSent = false;
+    let isLastTab = false; // Cache last tab status
+    
+    /**
+     * Safely deregister tab from server tracking
+     * @param {string} source - Source of the deregistration call (for debugging)
+     * @description Prevents duplicate deregistration calls and handles network failures gracefully
+     */
+    function safeDeregisterTab(source) {
+      if (deregistrationSent || isShuttingDown) {
+        console.log(`🔄 Tab deregistration skipped (${source}): already sent=${deregistrationSent}, shutting down=${isShuttingDown}`);
+        return;
+      }
+      
+      console.log(`📱 Deregistering tab: ${tabId} (source: ${source})`);
+      deregistrationSent = true;
+      
+      if (navigator.sendBeacon) {
+        const data = new Blob([JSON.stringify({ tabId: tabId })], { type: 'application/json' });
+        navigator.sendBeacon('/deregister-tab', data);
+      } else {
+        // Fallback for older browsers - synchronous request
+        try {
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', '/deregister-tab', false); // false = synchronous
+          xhr.setRequestHeader('Content-Type', 'application/json');
+          xhr.send(JSON.stringify({ tabId: tabId }));
+        } catch (error) {
+          console.warn('Failed to deregister tab:', error);
+        }
+      }
+    }
+
+    /**
+     * Check if this is the last tab and update cached status
+     * @description Updates isLastTab flag for use in beforeunload warnings
+     * @returns {Promise<void>} Resolves when status check is complete
+     */
+    async function updateLastTabStatus() {
+      try {
+        const response = await fetch('/check-last-tab', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tabId: tabId })
         });
+        
+        if (response.ok) {
+          const data = await response.json();
+          isLastTab = data.isLastTab;
+        }
+      } catch (error) {
+        console.warn('Failed to check last tab status:', error);
+      }
+    }
+
+    // Update last tab status periodically and when visibility changes
+    setInterval(updateLastTabStatus, 5000); // Check every 5 seconds
+    updateLastTabStatus(); // Check immediately on load
+
+    // Track when page becomes hidden (tab switch, minimize, close, etc.)
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'hidden') {
+        pageHidden = true;
+        // DO NOT deregister on visibilitychange - tabs should stay registered when hidden
+        // Only deregister on actual page unload events (pagehide, beforeunload, unload)
+      } else if (document.visibilityState === 'visible') {
+        pageHidden = false;
+        // Update last tab status when tab becomes visible
+        updateLastTabStatus();
+      }
+    });
+
+    // Page hide event (more reliable than unload for tab close)
+    window.addEventListener('pagehide', function(event) {
+      if (!event.persisted) {
+        // Page is actually being unloaded (not going into cache)
+        // This should only fire when the tab is actually being closed, not when switching tabs
+        safeDeregisterTab('pagehide');
+      }
+    });
+
+    // Beforeunload - show appropriate warning based on cached last tab status
+    window.addEventListener('beforeunload', function(event) {
+      if (isShuttingDown) {
+        return;
+      }
+
+      let message = null;
+      
+      if (isLastTab) {
+        message = 'If you close this tab, all data will be lost and the server will shut down.';
+      } else if (availableDiagrams > 0) {
+        message = 'If you close this tab, all data will be lost.';
+      }
+      
+      if (message) {
+        event.preventDefault();
+        event.returnValue = message;
+        return message;
+      }
+    });
+
+    // Unload event as final fallback
+    window.addEventListener('unload', function() {
+      safeDeregisterTab('unload');
+    });
+    //#endregion
+
+    //#region [================== GLOBAL VARIABLES ==================]
+    let bpmnViewer = null;
+    let dmnViewer = null;
+    let currentViewer = null;
+    let currentActiveLink = null;
+    let currentInstance = -1; // -1 means Ready, 0+ means processing
+    let totalInstances = 0;
+    let availableDiagrams = 0; // Track number of available diagrams
+    let isFetching = false; // Flag to track if we're in the middle of a fetch operation
+    let tableZoomLevel = 1.0; // Current table zoom level
+    let originalZoomLevel = 1.0; // Original zoom level set when diagram loads (for reset function)
+    let isLoadingDiagrams = false; // Flag to prevent simultaneous loadExistingDiagrams calls
+    let isShuttingDown = false; // Flag to bypass beforeunload confirmation during shutdown
+    
+    // Constants for timing
+    const UI_TIMEOUT_DELAY = 500; // ms - general UI update delay
+    
+    //#endregion
+
+    //#region [================== INITIALIZATION ==================]
+    /**
+     * Initialize the Camunda Viewer application when the page loads.
+     * Sets up all necessary event handlers, loads existing diagrams,
+     * and prepares the user interface for interaction.
+     */
+    document.addEventListener('DOMContentLoaded', async function() {
+      setupBusinessKeyValidation();
+      await loadExistingDiagrams('DOMContentLoaded');
+      loadConfigFiles();
+      checkForExistingLog();
+      currentInstance = -1;
+      updateProgressDisplay();
+      initializeSplitter();
+      setupBusinessKeyControls();
+      loadProcessHistory();
+      setupShutdownListeners(); // Setup cross-tab shutdown coordination
+      await restoreCurrentBusinessKey(); // Restore Business Key from memory on page load
+      hideZoomControls();
+      
+      // Register this tab for tracking
+      await registerTab();
+      
+      // Setup window resize handler for third row positioning
+      window.addEventListener('resize', function() {
+        // Debounce the resize event to avoid excessive recalculations
+        clearTimeout(window.thirdRowResizeTimeout);
+        window.thirdRowResizeTimeout = setTimeout(recalculateThirdRowPosition, 150);
+      });
+    });
+    //#endregion
+
+    //#region [================== UI SPLITTER FUNCTIONALITY ==================]
+    /**
+     * Initialize the resizable splitter between left panel (menu) and right panel (diagram view).
+     * Allows users to drag the splitter to resize panels between 15% and 60% width.
+     * @description Sets up mouse event handlers for drag-to-resize functionality
+     */
+    function initializeSplitter() {
+      const splitter = document.getElementById('splitter');
+      const leftPanel = document.getElementById('leftPanel');
+      const rightPanel = document.getElementById('rightPanel');
+      let isResizing = false;
+
+      splitter.addEventListener('mousedown', function(e) {
+        isResizing = true;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
       });
 
-    function loadDiagram(fileName) {
-      const xmlUrl = `/diagrams/${fileName}`;
-      const jsonFile = fileName.replace(/\.(bpmn|dmn)/, '.json');
-      const jsonUrl = `/diagrams/${jsonFile}`;
+      document.addEventListener('mousemove', function(e) {
+        if (!isResizing) return;
+        
+        const containerWidth = window.innerWidth;
+        const newLeftWidth = (e.clientX / containerWidth) * 100;
+        
+        // Set minimum and maximum widths (15% to 60%)
+        if (newLeftWidth >= 15 && newLeftWidth <= 60) {
+          leftPanel.style.width = newLeftWidth + '%';
+          rightPanel.style.flex = 'none';
+          rightPanel.style.width = (100 - newLeftWidth) + '%';
+        }
+      });
 
-      Promise.all([
-        fetch(xmlUrl).then(res => res.text()),
-        fetch(jsonUrl).then(res => res.json()).catch(() => ({}))
-      ])
-      .then(([xml, pathData]) => {
-        const canvasEl = document.getElementById('canvas');
-        canvasEl.innerHTML = '';
-
-        if (fileName.endsWith('.bpmn')) {
-          bpmnViewer.importXML(xml).then(() => {
-            const canvas = bpmnViewer.get('canvas');
-            canvas.zoom('fit-viewport');
-            (pathData.executedActivities || []).forEach(id => {
-              canvas.addMarker(id, 'highlight');
-            });
-          }).catch(err => console.error("BPMN load failed:", err));
-        } else if (fileName.endsWith('.dmn')) {
-          dmnViewer.importXML(xml).then(() => {
-            const activeView = dmnViewer.getActiveViewer();
-            const elementRegistry = activeView.get('elementRegistry');
-			const rawRules = pathData.evaluatedRules;
-			const activeRules = Array.isArray(rawRules) ? rawRules : [];
-
-            elementRegistry.getAll().forEach(el => {
-              if (activeRules.includes(el.id)) {
-                canvas.addMarker(el.id, 'highlight');
-              }
-            });
-          }).catch(err => console.error("DMN load failed:", err));
+      document.addEventListener('mouseup', function() {
+        if (isResizing) {
+          isResizing = false;
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
         }
       });
     }
+    //#endregion
+
+    //#region [================== ZOOM FUNCTIONALITY ==================]
+    /**
+     * Zoom functions for both BPMN/DMN native viewers and custom DMN tables.
+     * Uses font size scaling for custom tables to maintain readability and proper layout.
+     * Supports mouse wheel zoom (Ctrl+scroll) and manual zoom controls.
+     */
+    
+    /**
+     * Increase zoom level by 10% (maximum 200%)
+     * @description Calls setTableZoom with incremented zoom level
+     */
+    function zoomTableIn() {
+      setTableZoom(tableZoomLevel + 0.1);
+    }
+
+    /**
+     * Decrease zoom level by 10% (minimum 10%)
+     * @description Calls setTableZoom with decremented zoom level
+     */
+    function zoomTableOut() {
+      setTableZoom(tableZoomLevel - 0.1);
+    }
+
+    /**
+     * Reset table/diagram zoom to the original level and recenter BPMN diagrams
+     * @description For BPMN: uses fitToScreen to reset zoom and recenter. For DMN: resets to original zoom level.
+     */
+    function resetTableZoom() {
+      // For BPMN diagrams, use existing fitToScreen function to reset zoom and recenter
+      if (currentViewer === bpmnViewer && bpmnViewer) {
+        fitToScreen();
+      } else {
+        // For DMN tables or other content, just reset zoom level
+        setTableZoom(originalZoomLevel);
+      }
+    }
+
+    /**
+     * Fit BPMN diagram to screen and update zoom level tracking
+     * @description Uses bpmn-js canvas.zoom('fit-viewport') and syncs zoom level with UI controls
+     */
+    function fitToScreen() {
+      if (currentViewer === bpmnViewer && bpmnViewer) {
+        try {
+          const canvas = bpmnViewer.get('canvas');
+          if (canvas && typeof canvas.zoom === 'function') {
+            canvas.zoom('fit-viewport');
+            
+            // Get the actual zoom level after fit-viewport and sync our tracking
+            setTimeout(() => {
+              try {
+                const actualZoom = canvas.zoom();
+                if (actualZoom && !isNaN(actualZoom)) {
+                  tableZoomLevel = actualZoom;
+                  originalZoomLevel = actualZoom; // Update original zoom level when manually fitting to screen
+                  // Update the zoom input to reflect the actual zoom level
+                  const zoomInput = document.querySelector('.zoom-input');
+                  if (zoomInput) {
+                    zoomInput.value = Math.round(tableZoomLevel * 100);
+                  }
+                }
+              } catch (e) {
+                console.warn('Could not sync zoom level after fit-to-screen:', e);
+              }
+            }, 100);
+          }
+        } catch (e) {
+          console.error('Error fitting to screen:', e);
+        }
+      }
+    }
+
+    /**
+     * Set specific zoom level within allowed range (10% to 200%)
+     * @param {number} zoomValue - Target zoom level (0.1 to 2.0)
+     * @description Clamps value, updates state, and ensures consistent application and header alignment
+     */
+    function setTableZoom(zoomValue) {
+      tableZoomLevel = Math.max(0.1, Math.min(2.0, zoomValue));
+      applyTableZoom();
+      recalculateThirdRowPosition();
+    }
+
+    /**
+     * Apply current zoom level to all zoomable elements
+     * @description Updates font sizes of elements with data-base-font-size attributes and zoom input display
+     */
+    function applyTableZoom() {
+      const zoomInput = document.querySelector('.zoom-input');
+      
+      if (currentViewer) {
+        try {
+          if (currentViewer.get && typeof currentViewer.get === 'function') {
+            const canvas = currentViewer.get('canvas');
+            if (canvas && typeof canvas.zoom === 'function') {
+              // For BPMN diagrams, always use numeric zoom for smooth transitions
+              if (currentViewer === bpmnViewer) {
+                canvas.zoom(tableZoomLevel);
+              } else {
+                // For DMN and other viewers, use numeric zoom
+                canvas.zoom(tableZoomLevel);
+              }
+              if (zoomInput) {
+                zoomInput.value = Math.round(tableZoomLevel * 100);
+              }
+              return;
+            }
+          }
+        } catch (err) {
+          console.error('Native zoom failed, falling back to font scaling:', err);
+        }
+      }
+      
+      const zoomContainer = document.querySelector('.table-zoom-container');
+      if (zoomContainer) {
+        // Apply font size scaling for DMN tables
+        const baseFontSize = 11; // Base font size in pixels
+        const scaledFontSize = baseFontSize * tableZoomLevel;
+        
+        requestAnimationFrame(() => {
+          // Apply font size to the table content
+          const scrollContainer = zoomContainer.querySelector('.dmn-table-scroll-container');
+          if (scrollContainer) {
+            scrollContainer.style.fontSize = `${scaledFontSize}px`;
+            
+            // CSS handles: overflow, maxWidth, maxHeight
+            
+            // Also update any nested table elements to inherit the font size
+            const table = scrollContainer.querySelector('table');
+            if (table) {
+              // CSS handles: fontSize inherit, width, minWidth
+            }
+          }
+          
+          // Apply font size scaling to literal expressions using data attributes
+          const literalExpressions = zoomContainer.querySelectorAll('.literal-expression-container');
+          literalExpressions.forEach(container => {
+            // Update the main container font size
+            const baseSize = parseInt(container.getAttribute('data-base-font-size')) || 11;
+            container.style.fontSize = `${baseSize * tableZoomLevel}px`;
+            
+            // Update all child elements with data-base-font-size attributes
+            const childElements = container.querySelectorAll('[data-base-font-size]');
+            childElements.forEach(child => {
+              const childBaseSize = parseInt(child.getAttribute('data-base-font-size'));
+              if (!isNaN(childBaseSize)) {
+                child.style.fontSize = `${childBaseSize * tableZoomLevel}px`;
+              }
+            });
+          });
+          
+          // Wait for DOM to fully update before recalculating third row position
+          setTimeout(() => {
+            recalculateThirdRowPosition();
+          }, 10); // Small delay to ensure font changes are applied
+        });
+      }
+      
+      if (zoomInput) {
+        zoomInput.value = Math.round(tableZoomLevel * 100);
+      }
+    }
+    //#endregion
+
+    //#region [================== THIRD ROW HEADER POSITIONING ==================] 
+    /**
+     * Recalculate and update the sticky position of the third header row in DMN tables.
+     * This ensures proper positioning when window is resized or zoom level changes.
+     */
+    function recalculateThirdRowPosition() {
+      // Find all DMN tables with multiple header rows that need repositioning
+      const scrollContainers = document.querySelectorAll('.dmn-table-scroll-container');
+      
+      scrollContainers.forEach(scrollContainer => {
+        const table = scrollContainer.querySelector('#dmn-decision-table');
+        if (!table) return;
+        
+        const thead = table.querySelector('thead');
+        if (!thead) return;
+        
+        const rows = thead.querySelectorAll('tr');
+        if (rows.length < 2) return;
+        
+        const firstRow = rows[0];
+        const secondRow = rows[1];
+        
+        // Calculate actual height of first row for second row positioning
+        const firstHeight = firstRow.getBoundingClientRect().height;
+        
+        // Set CSS custom properties for dynamic positioning
+        scrollContainer.style.setProperty('--first-row-height', `${firstHeight}px`);
+        
+        // If there's a third row, calculate combined height
+        if (rows.length >= 3) {
+          const thirdRow = rows[2];
+          const secondHeight = secondRow.getBoundingClientRect().height;
+          const combinedHeight = firstHeight + secondHeight;
+          
+          scrollContainer.style.setProperty('--first-two-rows-height', `${combinedHeight}px`);
+        }
+      });
+    }
+
+    function handleZoomInputChange(event) {
+      const value = parseInt(event.target.value);
+      if (!isNaN(value) && value > 0) {
+        setTableZoom(value / 100);
+      } else {
+        event.target.value = Math.round(tableZoomLevel * 100);
+      }
+    }
+
+    function handleZoomInputKeyPress(event) {
+      if (event.key === 'Enter') {
+        event.target.blur();
+      }
+    }
+
+    function setupTableZoomMouseWheel() {
+      const canvas = getCanvas();
+      canvas.removeEventListener('wheel', handleTableZoomWheel);
+      canvas.addEventListener('wheel', handleTableZoomWheel, { passive: false });
+    }
+
+    function handleTableZoomWheel(event) {
+      if (!event.ctrlKey) return;
+      
+      const elementUnderCursor = document.elementFromPoint(event.clientX, event.clientY);
+      if (!elementUnderCursor) return;
+      
+      const isOverNativeViewer = currentViewer && (
+        elementUnderCursor.closest('.bjs-container') || 
+        elementUnderCursor.closest('.dmn-js-container') ||
+        elementUnderCursor.closest('svg')
+      );
+      
+      const zoomContainer = document.querySelector('.table-zoom-container');
+      const isOverManualTable = zoomContainer && (
+        zoomContainer.contains(elementUnderCursor) || 
+        elementUnderCursor === zoomContainer
+      );
+      
+      if (!isOverNativeViewer && !isOverManualTable) {
+        return;
+      }
+      
+      event.preventDefault();
+      event.stopPropagation();
+      
+      const zoomDelta = event.deltaY < 0 ? 0.1 : -0.1;
+      const newZoom = Math.max(0.1, Math.min(5.0, tableZoomLevel + zoomDelta));
+      
+      setTableZoom(newZoom);
+    }
+
+    /**
+     * Show zoom controls when a diagram is loaded
+     */
+    function showZoomControls() {
+      const existingControls = document.querySelector('.table-zoom-controls');
+      if (existingControls) {
+        existingControls.classList.remove('hidden');
+        existingControls.classList.add('flex-visible');
+      }
+    }
+
+    /**
+     * Hide zoom controls when no diagram is displayed
+     */
+    function hideZoomControls() {
+      const existingControls = document.querySelector('.table-zoom-controls');
+      if (existingControls) {
+        existingControls.classList.remove('flex-visible');
+        existingControls.classList.add('hidden');
+      }
+    }
+
+    /**
+     * Create zoom control buttons for diagram/table zoom functionality.
+     * Removes any existing controls first to prevent duplicates.
+     */
+    function createZoomControls() {
+      // Remove any existing zoom controls
+      const existingControls = document.querySelector('.table-zoom-controls');
+      if (existingControls) {
+        existingControls.remove();
+      }
+      
+      const zoomControlsDiv = document.createElement('div');
+      zoomControlsDiv.className = 'table-zoom-controls';
+      
+      // Base zoom controls (always present)
+      let controlsHTML = `
+        <button class="zoom-button" onclick="zoomTableOut()" title="Zoom Out (Ctrl+Scroll)">-</button>
+        <input class="zoom-input" 
+               type="number" 
+               min="10" 
+               max="200" 
+               value="100" 
+               onchange="handleZoomInputChange(event)" 
+               onkeypress="handleZoomInputKeyPress(event)" 
+               title="Enter zoom percentage (10-200%)">
+        <span class="percentage-text">%</span>
+        <button class="zoom-button" onclick="zoomTableIn()" title="Zoom In (Ctrl+Scroll)">+</button>
+        <button class="zoom-button" onclick="resetTableZoom()" title="Reset to original zoom level">Reset</button>`;
+      
+      // Copy table button (for DMN tables)
+      controlsHTML += `
+        <button class="copy-table-button" id="copyTableButton" onclick="copyTableToClipboard()" title="Copy table data for Excel/spreadsheets">📋 Copy Table</button>
+      `;
+      
+      zoomControlsDiv.innerHTML = controlsHTML;
+      const headerCenter = document.getElementById('headerCenter');
+      headerCenter.appendChild(zoomControlsDiv);
+      showZoomControls();
+    }
+    //#endregion
+
+    //#region [================== PROGRESS AND UI UPDATES ==================]
+    /**
+     * Update the progress display based on current processing state.
+     * Shows different messages for Ready, Processing, or Error states.
+     */
+    function updateProgressDisplay() {
+      const progressCounter = getProgressCounter();
+      const progressMessage = getProgressMessage();
+      
+      if (isLoadingDiagrams) {
+        progressCounter.textContent = 'Loading Processes...';
+        progressMessage.classList.add('hidden');
+      } else if (currentInstance === -1) {
+        progressCounter.textContent = availableDiagrams === 0 ? 'No Diagrams Available' : 'Diagrams Ready';
+        progressMessage.classList.add('hidden');
+      } else {
+        // Show progress message for all processing states
+        progressMessage.classList.remove('hidden');
+        
+        if (currentInstance === 0 && totalInstances === 0) {
+          progressCounter.textContent = 'No process instances found';
+        } else if (currentInstance === 0) {
+          progressCounter.textContent = 'Initializing...';
+        } else if (totalInstances === 1) {
+          progressCounter.textContent = `Processing single instance`;
+        } else if (totalInstances > 1) {
+          progressCounter.textContent = `Processing ${currentInstance} of ${totalInstances} BPMN Files`;
+        } else if (currentInstance > 0) {
+          progressCounter.textContent = `Processing instance ${currentInstance}...`;
+        } else {
+          progressCounter.textContent = 'Processing...';
+        }
+      }
+    }
+    //#endregion
+
+    //#region [================== FORM VALIDATION ==================]
+    /**
+     * Set up real-time validation for the Business Key input field.
+     * Validates that input contains only numeric characters.
+     * Enables/disables the fetch button based on input validity.
+     */
+    function setupBusinessKeyValidation() {
+      const input = getBusinessKeyInput();
+      const button = getProcessButton();
+      const message = getValidationMessage();
+      
+      input.addEventListener('input', function() {
+        const value = input.value.trim();
+        const isValid = value.length > 0; // Business keys just need to be non-empty
+        
+        // Don't modify button state if we're currently fetching data
+        if (isFetching) {
+          return;
+        }
+        
+        if (value.length === 0) {
+          input.classList.remove('invalid');
+          button.disabled = false;
+          message.textContent = '';
+        } else if (isValid) {
+          input.classList.remove('invalid');
+          button.disabled = false;
+          message.textContent = '';
+        } else {
+          input.classList.add('invalid');
+          button.disabled = true;
+          message.textContent = 'Input is Numeric Characters only! No decimals!';
+        }
+      });
+      
+      button.addEventListener('click', function(event) {
+        if (button.disabled) {
+          event.preventDefault();
+          event.stopPropagation();
+          return false;
+        }
+      });
+    }
+    //#endregion
+
+    //#region [================== DATA LOADING FUNCTIONS ==================]
+    /**
+     * Load existing diagram files from the server and build the process hierarchy.
+     * Only loads if not currently fetching data to avoid conflicts.
+     * @param {string} caller - Identifier of the calling function for debugging
+     * @description Fetches diagram list from server and rebuilds the process hierarchy display
+     */
+    async function loadExistingDiagrams(caller = 'unknown') {
+      if (isFetching) {
+        return;
+      }
+      
+      if (isLoadingDiagrams) {
+        return;
+      }
+      
+      isLoadingDiagrams = true;
+      updateProgressDisplay(); // Show "Loading Processes..." immediately
+      
+      try {
+        availableDiagrams = 0;
+        
+        const res = await fetch(addSessionParam('/list'));
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const files = await res.json();
+        
+        // Ensure files is an array before processing
+        if (Array.isArray(files)) {
+          await buildProcessHierarchy(files);
+        } else {
+          await buildProcessHierarchy([]);
+        }
+      } catch (error) {
+        await buildProcessHierarchy([]);
+      } finally {
+        isLoadingDiagrams = false;
+        updateProgressDisplay(); // Show "Diagrams Ready" or appropriate state
+      }
+    }
+
+    /**
+     * Load available configuration files from server
+     * @description Fetches list of config-*.cfg files and populates environment dropdown
+     * @returns {Promise<void>} Resolves when config files are loaded and dropdown is populated
+     */
+    async function loadConfigFiles() {
+      try {
+        const response = await fetch('/config-files');
+        const data = await response.json();
+        
+        const environmentSelect = getEnvironmentSelect();
+        environmentSelect.innerHTML = '';
+        
+        if (data.configFiles && data.configFiles.length > 0) {
+          data.configFiles.forEach(config => {
+            const option = document.createElement('option');
+            option.value = config.env;
+            option.textContent = config.displayName;
+            environmentSelect.appendChild(option);
+          });
+          environmentSelect.value = 'local';
+        } else {
+          const option = document.createElement('option');
+          option.value = 'local';
+          option.textContent = 'Local (default)';
+          environmentSelect.appendChild(option);
+          environmentSelect.value = 'local';
+        }
+      } catch (error) {
+        const environmentSelect = getEnvironmentSelect();
+        environmentSelect.innerHTML = '<option value="local">Local (default)</option>';
+        environmentSelect.value = 'local';
+      }
+    }
+
+    /**
+     * Check for existing session log and update log action button visibility
+     * @description Queries server for log content and shows/hides log buttons accordingly
+     * @returns {Promise<void>} Resolves when log check is complete
+     */
+    async function checkForExistingLog() {
+      try {
+        const response = await fetch(`/get-log?sessionId=${sessionId}`);
+        const data = await response.json();
+        
+        if (data.exists && data.content && data.content.trim().length > 0) {
+          // Show log buttons if session has log entries
+          getLogActions().classList.add('flex-visible');
+        } else {
+          // Hide log buttons if no log entries for this session
+          getLogActions().classList.add('hidden');
+        }
+      } catch (error) {
+        // Hide log buttons on error
+        getLogActions().classList.add('hide');
+      }
+    }
+    //#endregion
+
+    //#region [================== CLAIM DATA FETCHING ==================]
+    /**
+     * Functions for fetching process execution data from Camunda via PowerShell scripts.
+     * Handles real-time progress updates and streaming responses from the server.
+     */
+    
+    /**
+     * Display a spinner overlay in the file list area during data fetching operations.
+     * Shows an animated loading indicator with descriptive text.
+     */
+    function showSpinner() {
+      const fileList = getFileList();
+      fileList.innerHTML = `
+        <div class="spinner-container">
+          <div class="spinner"></div>
+          <div class="spinner-text">Fetching process data...</div>
+        </div>
+      `;
+    }
+
+    /**
+     * Hide the spinner overlay and restore the file list area to its normal state.
+     * Used after data fetching operations complete (success or failure).
+     */
+    function hideSpinner() {
+      isFetching = false;
+      const fileList = getFileList();
+      fileList.innerHTML = '';
+    }
+
+    async function fetchProcessData() {
+      const businessKeyInput = getBusinessKeyInput();
+      const environmentSelect = getEnvironmentSelect();
+      const maxRunsInput = getMaxRunsInput();
+      const button = getProcessButton();
+      const progressCounter = getProgressCounter();
+      const progressMessage = getProgressMessage();
+      const validationMessage = getValidationMessage();
+      
+      let businessKey = businessKeyInput.value.trim();
+      let maxRuns = parseInt(maxRunsInput.value) || 5;
+      
+      // PHASE 1: Input validation and setup
+      // If input is empty, show validation error
+      if (businessKey === '') {
+        validationMessage.textContent = 'Please enter a Business Key!';
+        return;
+      }
+      
+      // Validate maxRuns
+      if (maxRuns < 1 || maxRuns > 50) {
+        validationMessage.textContent = 'Max Runs must be between 1 and 50!';
+        return;
+      }
+      
+      validationMessage.textContent = '';
+      updateBusinessKeyDisplay('');
+      
+      // Phase 1: Simple initialization
+      progressCounter.textContent = 'Initializing Data Fetch...';
+      progressMessage.textContent = 'Preparing for data fetch...';
+      progressMessage.className = 'progress-message';
+      progressMessage.classList.remove('hidden');
+      
+      // Reset progress message styling to clear any previous error states
+      progressMessage.style.color = '';
+      progressMessage.style.fontWeight = '';
+      progressMessage.className = progressMessage.className.replace(/message-(error|success|warning|info)/g, '');
+      
+      // Save to history immediately when user hits the button (before processing starts)
+      const environment = environmentSelect.value || 'local';
+      saveProcessToHistory(environment, businessKey);
+      
+      // Clear the canvas/display area when starting new data fetch
+      const canvas = getCanvas();
+      canvas.innerHTML = '<div class="canvas-placeholder">Select a diagram from the menu to view</div>';
+      hideZoomControls();
+      
+      // Clear the header title
+      const headerElement = getCurrentDiagram();
+      headerElement.textContent = 'Select a Diagram from the Menu';
+      
+      // Disable UI controls to prevent multiple concurrent fetches
+      setProcessFetchingUIState(false);
+      
+      isFetching = true; // Set flag to indicate we're fetching
+      currentInstance = 0; // Set to 0 to indicate we're starting
+      totalInstances = 0;
+      
+      // Hide log buttons during fetch
+      getLogActions().classList.add('hide');
+      
+      // Show spinner to replace the file list during processing
+      showSpinner();
+      
+      // Reset progress message styling
+      progressMessage.className = 'progress-message';
+      
+      // Transition to Phase 2
+      progressCounter.textContent = 'Starting data fetch from Camunda';
+      progressMessage.textContent = 'Connecting to Camunda APIs...';
+      
+      try {
+        // Call the PowerShell script via our server endpoint
+        const response = await fetch('/fetch-process', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            businessKey: businessKey,
+            environment: environment,
+            maxRuns: maxRuns,
+            sessionId: sessionId
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Check if the response is a streaming response
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('text/plain')) {
+          // Handle streaming progress updates (Phase 2)
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
+            
+            for (const line of lines) {
+              if (line.trim()) {
+                try {
+                  const data = JSON.parse(line);
+                  if (data.type === 'progress') {
+                    // Apply progress updates with controlled timing to prevent UI blocking
+                    const progressCounter = getProgressCounter();
+                    if (!progressCounter) return;
+                    
+                    // Update global variables first
+                    if (data.total !== undefined) {
+                      totalInstances = data.total;
+                    }
+                    if (data.current !== undefined) {
+                      currentInstance = data.current;
+                    }
+                    
+                    // Build progress text
+                    let progressText = `Saving BPMN file: ${currentInstance} of ${totalInstances}`;
+                    
+                    // Add DMN progress if available
+                    if (data.dmnCurrent !== undefined && data.dmnTotal !== undefined && data.dmnTotal > 0) {
+                      progressText += ` | Saving DMN file: ${data.dmnCurrent} of ${data.dmnTotal}`;
+                    }
+                    
+                    // Apply to DOM immediately
+                    progressCounter.textContent = progressText;
+                    
+                    // Add 500ms pause to slow down updates and prevent UI blocking
+                    await new Promise(resolve => setTimeout(resolve, 0.001));
+                  } else if (data.type === 'complete') {
+                    // STEP 1: Data fetch complete - update progress counter immediately
+                    const progressCounter = getProgressCounter();
+                    progressCounter.textContent = 'Correlating Processes...';
+                    
+                    if (totalInstances === 0) {
+                      progressMessage.textContent += '\nNo process instances found for this Business Key.';
+                    } else {
+                      progressMessage.textContent += '\nProcessing data files...';
+                    }
+                    
+                    // STEP 2: Process completion asynchronously for better performance
+                    // No delay needed since saving phase is already controlled
+                    (async () => {
+                      // Hide spinner first
+                      hideSpinner();
+                      
+                      // Load diagrams asynchronously - this can be fast now
+                      await loadExistingDiagrams('fetchClaim-complete');
+                      
+                      // STEP 3: Final UI updates - immediate since correlation/loading can be fast
+                      currentInstance = -1; // Set to -1 to indicate Ready
+                      isFetching = false; // Clear the fetching flag
+                      updateProgressDisplay();
+                      
+                      // Re-enable UI controls after completion
+                      setProcessFetchingUIState(true);
+                      
+                      // Show log buttons after completion
+                      getLogActions().classList.remove('hide');
+                      getLogActions().classList.add('show-flex');
+                    
+                      if (totalInstances === 0) {
+                        progressMessage.textContent = 'No process instances found. Try a different Business Key.';
+                      } else {
+                        progressMessage.textContent = 'Ready to explore diagrams!';
+                        // Update Business Key display after successful fetch
+                        updateBusinessKeyDisplay(businessKey);
+                      }
+                    })();
+                  } else if (data.type === 'connection_error') {
+                    // Handle connection errors specifically
+                    currentInstance = -1; // Reset to Ready state
+                    isFetching = false; // Clear the fetching flag
+                    
+                    // Show connection error message
+                    showErrorMessage(data.message, true, 'Connection Failed');
+                    
+                    // Hide spinner by replacing file list content
+                    const fileList = getFileList();
+                    fileList.innerHTML = `
+                      <div class="center-message">
+                        <div class="large-icon">⚠️</div>
+                        <div class="connection-error">Connection Error</div>
+                        <div class="small-text">Check network connectivity and server configuration</div>
+                      </div>
+                    `;
+                    
+                    // Show log buttons (there might be partial log data)
+                    getLogActions().classList.remove('hide');
+                    getLogActions().classList.add('show-flex');
+                    
+                    // Re-enable UI controls
+                    setProcessFetchingUIState(true);
+                    return; // Exit to prevent further processing
+                  } else if (data.type === 'error') {
+                    // Handle other types of errors
+                    currentInstance = -1; // Reset to Ready state
+                    isFetching = false; // Clear the fetching flag
+                    updateProgressDisplay();
+                    
+                    showErrorMessage(data.message);
+                    
+                    // Hide spinner on error
+                    hideSpinner();
+                    
+                    // Show log buttons (there might be partial log data)
+                    getLogActions().classList.remove('hide');
+                    getLogActions().classList.add('show-flex');
+                    
+                    // Re-enable UI controls
+                    setProcessFetchingUIState(true);
+                    return; // Exit to prevent further processing
+                  }
+                } catch (e) {
+                  // Not JSON, might be regular output - send immediately without batching
+                  if (line.trim().length > 0 && !line.includes('Decision instance details')) {
+                    // Send each line immediately to progress message
+                    const currentContent = progressMessage.textContent;
+                    const newContent = currentContent + (currentContent ? '\n' : '') + line.trim();
+                    progressMessage.textContent = newContent;
+                    progressMessage.scrollTop = progressMessage.scrollHeight;
+                  }
+                }
+              }
+            }
+            
+            // No more buffering - all output sent immediately above
+          }
+        } else {
+          // Handle regular JSON response (fallback)
+          const result = await response.json();
+          if (result.success) {
+            progressCounter.textContent = 'Correlating Processes...';
+            progressMessage.textContent += '\nProcessing data files...';
+            
+            setTimeout(async () => {
+              hideSpinner();
+              await loadExistingDiagrams('fetchClaim-regularJSON');
+              // Only reset to Ready after refresh is complete
+              setTimeout(() => {
+                currentInstance = -1; // Set to -1 to indicate Ready
+                updateProgressDisplay();
+                progressMessage.textContent = 'Ready to explore diagrams!';
+                // Update Business Key display after successful fetch
+                updateBusinessKeyDisplay(businessKey);
+              }, UI_TIMEOUT_DELAY);
+            }, 1000);
+          } else {
+            throw new Error(result.error || 'Unknown error occurred');
+          }
+        }
+        
+      } catch (error) {
+        currentInstance = -1; // Reset to Ready state
+        isFetching = false; // Clear the fetching flag
+        updateProgressDisplay();
+        
+        // Show error message
+        showErrorMessage(error.message);
+        
+        // Show log buttons even on error (there might be partial log data)
+        getLogActions().classList.remove('hide');
+        getLogActions().classList.add('show-flex');
+        
+        // Hide spinner on error and reload existing diagrams
+        hideSpinner();
+        await loadExistingDiagrams('fetchClaim-error'); // Load existing diagrams on error
+      } finally {
+        // Re-enable UI controls if input is valid or if empty (can use current claim)
+        const inputValue = businessKeyInput.value.trim();
+        if (inputValue === '' || inputValue.length > 0) {
+          setProcessFetchingUIState(true);
+        }
+      }
+    }
+    //#endregion
+
+    //#region [================== PROCESS HIERARCHY BUILDING ==================]
+    /**
+     * Functions for organizing and displaying process instances in a hierarchical structure.
+     * Groups BPMN processes with their related DMN decisions, sorted by execution time.
+     * 
+     * PHASE 3: Synchronous processing with clear progress reporting
+     */
+    async function buildProcessHierarchy(files) {
+      const listDiv = getFileList();
+      
+      // Clear previous content
+      listDiv.innerHTML = '';
+      
+      // Separate BPMN and DMN files
+      const bpmnFiles = files.filter(file => file.endsWith('.bpmn'));
+      const dmnFiles = files.filter(file => file.endsWith('.dmn'));
+      
+      // Process BPMN files synchronously (no progress updates - moves quick)
+      const bpmnData = [];
+      for (let i = 0; i < bpmnFiles.length; i++) {
+        const bpmnFile = bpmnFiles[i];
+        
+        const jsonFile = bpmnFile.replace('.bpmn', '.json');
+        try {
+          const response = await fetch(addSessionParam(`/diagrams/${jsonFile}`));
+          const data = await response.json();
+          bpmnData.push({
+            file: bpmnFile,
+            processKey: bpmnFile.replace(/-.+\.bpmn$/, '').replace('.bpmn', ''),
+            processInstanceId: data.processInstanceId || 'unknown',
+            startTime: data.startTime || null,
+            endTime: data.endTime || null,
+            displayName: bpmnFile.replace(/-.+\.bpmn$/, '').replace('.bpmn', ''),
+            displayTime: data.startTime ? new Date(data.startTime).toLocaleString() : ''
+          });
+        } catch (err) {
+          bpmnData.push({
+            file: bpmnFile,
+            processKey: bpmnFile.replace(/-.+\.bpmn$/, '').replace('.bpmn', ''),
+            processInstanceId: 'unknown',
+            startTime: null,
+            endTime: null,
+            displayName: bpmnFile.replace(/-.+\.bpmn$/, '').replace('.bpmn', ''),
+            displayTime: ''
+          });
+        }
+      }
+
+      // Process DMN files synchronously (no progress updates - moves quick)
+      const dmnData = [];
+      for (let i = 0; i < dmnFiles.length; i++) {
+        const dmnFile = dmnFiles[i];
+        
+        const jsonFile = dmnFile.replace('.dmn', '.json');
+        try {
+          const response = await fetch(addSessionParam(`/diagrams/${jsonFile}`));
+          const data = await response.json();
+          
+          // Handle different JSON structures our script creates
+          let decisionName = null;
+          let hasExecutedRules = false;
+          
+          // Check if we have instanceDetails (our newer format)
+          if (data.instanceDetails && data.instanceDetails.decisionDefinitionName) {
+            decisionName = data.instanceDetails.decisionDefinitionName;
+          } else {
+            // Extract decision name from filename as fallback
+            decisionName = dmnFile.replace(/-.+\.dmn$/, '').replace('.dmn', '');
+          }
+          
+          // Check for executed rules in various formats
+          if (data.executedRules) {
+            if (Array.isArray(data.executedRules) && data.executedRules.length > 0) {
+              hasExecutedRules = true;
+            } else if (typeof data.executedRules === 'string' && data.executedRules.length > 0) {
+              hasExecutedRules = true;
+            } else if (typeof data.executedRules === 'object' && Object.keys(data.executedRules).length > 0) {
+              hasExecutedRules = true;
+            }
+          }
+          
+          // Also check if we have outputs with ruleId (indicates execution)
+          if (!hasExecutedRules && data.outputs && Array.isArray(data.outputs)) {
+            hasExecutedRules = data.outputs.some(output => output.ruleId);
+          }
+          
+          // More lenient filtering - include if we have ANY useful data
+          // Only filter out if we have absolutely no usable data
+          if (!decisionName && !hasExecutedRules && (!data.outputs || data.outputs.length === 0) && 
+              !data.instanceDetails && !data.evaluationTime && !data.startTime) {
+            // Skip DMN files with no useful execution data - don't add to array
+            continue;
+          }
+          
+          // Try multiple sources for evaluation time
+          let evaluationTime = '';
+          let displayTime = '';
+          
+          // Try to get timestamp from decisionInstances array first
+          if (data.decisionInstances && Array.isArray(data.decisionInstances) && data.decisionInstances.length > 0) {
+            const firstInstance = data.decisionInstances[0];
+            
+            if (firstInstance.evaluationTime) {
+              evaluationTime = firstInstance.evaluationTime;
+              displayTime = new Date(firstInstance.evaluationTime).toLocaleString();
+            } else if (firstInstance.startTime) {
+              evaluationTime = firstInstance.startTime;
+              displayTime = new Date(firstInstance.startTime).toLocaleString();
+            }
+          }
+          
+          // Fall back to other locations if not found in decisionInstances
+          if (!evaluationTime && data.instanceDetails?.evaluationTime) {
+            evaluationTime = data.instanceDetails.evaluationTime;
+            displayTime = new Date(data.instanceDetails.evaluationTime).toLocaleString();
+          } else if (!evaluationTime && data.evaluationTime) {
+            evaluationTime = data.evaluationTime;
+            displayTime = new Date(data.evaluationTime).toLocaleString();
+          } else if (!evaluationTime && data.startTime) {
+            evaluationTime = data.startTime;
+            displayTime = new Date(data.startTime).toLocaleString();
+          }
+          
+          dmnData.push({
+            file: dmnFile,
+            processKey: data.instanceDetails?.processDefinitionKey || 'unknown',
+            processInstanceId: data.instanceDetails?.processInstanceId || 'unknown',
+            evaluationTime: evaluationTime,
+            decisionName: decisionName,
+            displayTime: displayTime,
+            hasRuleData: hasExecutedRules,
+            hasOutputData: data.outputs && data.outputs.length > 0
+          });
+        } catch (err) {
+          // Skip files that can't be loaded - continue to next iteration
+          continue;
+        }
+      }
+      
+      // Use dmnData directly (already filtered during processing)
+      const validDmnData = dmnData;
+      
+      // Group BPMN files by process type (not individual instances)
+      const bpmnByProcessType = new Map();
+      bpmnData.forEach(bpmn => {
+        if (!bpmnByProcessType.has(bpmn.processKey)) {
+          bpmnByProcessType.set(bpmn.processKey, []);
+        }
+        bpmnByProcessType.get(bpmn.processKey).push(bpmn);
+      });
+      
+      // Sort instances within each process type by start time
+      bpmnByProcessType.forEach(instances => {
+        instances.sort((a, b) => {
+          if (!a.startTime || !b.startTime) return 0;
+          return new Date(a.startTime) - new Date(b.startTime);
+        });
+      });
+      
+      // Group DMN files by process key and process instance
+      const dmnByProcess = new Map();
+      validDmnData.forEach(dmn => {
+        const key = `${dmn.processKey}-${dmn.processInstanceId}`;
+        if (!dmnByProcess.has(key)) {
+          dmnByProcess.set(key, []);
+        }
+        dmnByProcess.get(key).push(dmn);
+      });
+      
+      dmnByProcess.forEach(dmnList => {
+        dmnList.sort((a, b) => {
+          if (!a.evaluationTime || !b.evaluationTime) return 0;
+          return new Date(a.evaluationTime) - new Date(b.evaluationTime);
+        });
+      });
+
+      // Sort process types by earliest execution time
+      const sortedProcessTypes = Array.from(bpmnByProcessType.entries()).sort((a, b) => {
+        const aEarliest = a[1][0]?.startTime;
+        const bEarliest = b[1][0]?.startTime;
+        
+        if (!aEarliest && !bEarliest) return 0;
+        if (!aEarliest) return 1;
+        if (!bEarliest) return -1;
+        
+        return new Date(aEarliest) - new Date(bEarliest);
+      });
+      
+      // Create run numbering based on starter process execution times
+      // Find the process that executes first (earliest overall start time) - this is our "starter" process
+      let starterProcessKey = null;
+      let earliestTime = null;
+      
+      bpmnData.forEach(bpmn => {
+        if (bpmn.startTime) {
+          const startTime = new Date(bpmn.startTime).getTime();
+          if (!earliestTime || startTime < earliestTime) {
+            earliestTime = startTime;
+            starterProcessKey = bpmn.processKey;
+          }
+        }
+      });
+      
+      // Get all execution times of the starter process to define run boundaries
+      const starterExecutions = bpmnData
+        .filter(bpmn => bpmn.processKey === starterProcessKey && bpmn.startTime)
+        .map(bpmn => ({
+          startTime: bpmn.startTime,
+          startTimeMs: new Date(bpmn.startTime).getTime()
+        }))
+        .sort((a, b) => a.startTimeMs - b.startTimeMs);
+      
+      // Create mapping from any BPMN to its run number based on starter process timing
+      const bpmnToRunNumber = new Map();
+      
+      bpmnData.forEach(bpmn => {
+        if (!bpmn.startTime) return;
+        
+        const bpmnTime = new Date(bpmn.startTime).getTime();
+        const bpmnKey = `${bpmn.processKey}-${bpmn.processInstanceId}`;
+        
+        // Find the most recent starter execution before or at this BPMN's time
+        let runNumber = 1; // Default to run 1
+        
+        for (let i = starterExecutions.length - 1; i >= 0; i--) {
+          if (starterExecutions[i].startTimeMs <= bpmnTime) {
+            runNumber = i + 1;
+            break;
+          }
+        }
+        
+        bpmnToRunNumber.set(bpmnKey, runNumber);
+      });
+      
+      // Create the collapsible structure grouped by process type
+      sortedProcessTypes.forEach(([processKey, instances]) => {
+        
+        // Create process type group
+        const processGroup = document.createElement('div');
+        processGroup.className = 'process-group';
+        
+        // Process type header (collapsible)
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'process-header';
+        headerDiv.onclick = () => toggleProcess(headerDiv, processGroup);
+        
+        const collapseIcon = document.createElement('span');
+        collapseIcon.className = 'collapse-icon';
+        collapseIcon.textContent = '▶';
+        headerDiv.appendChild(collapseIcon);
+        
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'process-title';
+        
+        // Get the earliest timestamp from instances
+        const earliestInstance = instances.reduce((earliest, current) => {
+          if (!earliest || !earliest.startTime) return current;
+          if (!current.startTime) return earliest;
+          return new Date(current.startTime) < new Date(earliest.startTime) ? current : earliest;
+        });
+        
+        const headerText = earliestInstance && earliestInstance.displayTime 
+          ? `${processKey} - ${earliestInstance.displayTime}`
+          : processKey;
+        
+        titleSpan.textContent = headerText;
+        headerDiv.appendChild(titleSpan);
+        
+        processGroup.appendChild(headerDiv);
+        
+        // Process content (collapsible)
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'process-content';
+        
+          // Create instances
+        instances.forEach((bpmn, index) => {
+          const instanceDiv = document.createElement('div');
+          instanceDiv.className = 'process-instance margin-left-20 margin-bottom-10';
+          
+          // Get run number based on starter process timing
+          const bpmnKey = `${bpmn.processKey}-${bpmn.processInstanceId}`;
+          const runNumber = bpmnToRunNumber.get(bpmnKey) || (index + 1);
+          
+          // Instance header
+          const instanceHeader = document.createElement('div');
+          instanceHeader.className = 'font-bold margin-bottom-5';
+          instanceHeader.textContent = `Run ${runNumber}`;
+          if (bpmn.displayTime) {
+            instanceHeader.textContent += ` - ${bpmn.displayTime}`;
+          }
+          instanceDiv.appendChild(instanceHeader);          // BPMN link
+          const bpmnLink = document.createElement('a');
+          bpmnLink.href = '#';
+          bpmnLink.className = 'bpmn-link';
+          bpmnLink.onclick = (e) => {
+            e.preventDefault();
+            setActiveLink(bpmnLink);
+            loadDiagram(bpmn.file);
+          };
+          
+          const bpmnText = document.createElement('span');
+          
+          // Create ordinal suffix for run number
+          const getOrdinalSuffix = (num) => {
+            const j = num % 10;
+            const k = num % 100;
+            if (j == 1 && k != 11) return num + "st";
+            if (j == 2 && k != 12) return num + "nd";
+            if (j == 3 && k != 13) return num + "rd";
+            return num + "th";
+          };
+          
+          bpmnText.textContent = `📊 ${bpmn.displayName} Process (${getOrdinalSuffix(runNumber)} Run)`;
+          bpmnLink.appendChild(bpmnText);
+          
+          instanceDiv.appendChild(bpmnLink);
+          
+          // Add Variable View link
+          const variableLink = document.createElement('a');
+          variableLink.href = '#';
+          variableLink.className = 'variable-link margin-left-10';
+          variableLink.onclick = (e) => {
+            e.preventDefault();
+            setActiveLink(variableLink);
+            loadVariableView(bpmn.processKey, bpmn.processInstanceId);
+          };
+          
+          const variableText = document.createElement('span');
+          variableText.textContent = `📋 Camunda Objects`;
+          variableLink.appendChild(variableText);
+          
+          instanceDiv.appendChild(variableLink);
+
+          // Add New Variables link (execution variables)
+          const executionVarLink = document.createElement('a');
+          executionVarLink.href = '#';
+          executionVarLink.className = 'variable-link margin-left-10';
+          executionVarLink.onclick = (e) => {
+            e.preventDefault();
+            setActiveLink(executionVarLink);
+            loadExecutionVariableView(bpmn.processKey, bpmn.processInstanceId);
+          };
+          
+          const executionVarText = document.createElement('span');
+          executionVarText.textContent = `🔧 Java Objects`;
+          executionVarLink.appendChild(executionVarText);
+          
+          instanceDiv.appendChild(executionVarLink);
+          
+          // Get related DMNs for this specific instance
+          const instanceKey = `${bpmn.processKey}-${bpmn.processInstanceId}`;
+          const relatedDmns = dmnByProcess.get(instanceKey) || [];
+          
+          // DMN links
+          if (relatedDmns.length > 0) {
+            const dmnDiv = document.createElement('div');
+            dmnDiv.className = 'dmn-links margin-left-10';
+            
+            relatedDmns.forEach(dmn => {
+              const dmnLink = document.createElement('a');
+              dmnLink.href = '#';
+              dmnLink.className = 'dmn-link';
+              dmnLink.onclick = (e) => {
+                e.preventDefault();
+                setActiveLink(dmnLink);
+                loadDiagram(dmn.file);
+              };
+              
+              const nameSpan = document.createElement('span');
+              nameSpan.className = 'dmn-name';
+              nameSpan.textContent = `🔗 ${dmn.decisionName}`;
+              dmnLink.appendChild(nameSpan);
+              
+              if (dmn.displayTime) {
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'execution-time';
+                timeSpan.textContent = dmn.displayTime;
+                dmnLink.appendChild(timeSpan);
+              }
+              
+              dmnDiv.appendChild(dmnLink);
+            });
+            
+            instanceDiv.appendChild(dmnDiv);
+          }
+          
+          contentDiv.appendChild(instanceDiv);
+        });
+        
+        processGroup.appendChild(contentDiv);
+        listDiv.appendChild(processGroup);
+      });
+      
+      // Handle orphaned DMN files
+      const orphanedDmns = validDmnData.filter(dmn => 
+        dmn.processKey === 'unknown' || 
+        !Array.from(bpmnByProcessType.keys()).includes(dmn.processKey)
+      );
+      
+      if (orphanedDmns.length > 0) {
+        const orphanGroup = document.createElement('div');
+        orphanGroup.className = 'process-group';
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'process-header';
+        headerDiv.onclick = () => toggleProcess(headerDiv, orphanGroup);
+        
+        const collapseIcon = document.createElement('span');
+        collapseIcon.className = 'collapse-icon';
+        collapseIcon.textContent = '▶';
+        headerDiv.appendChild(collapseIcon);
+        
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'process-title';
+        titleSpan.textContent = 'Other Decisions';
+        headerDiv.appendChild(titleSpan);
+        
+        orphanGroup.appendChild(headerDiv);
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'process-content';
+        
+        orphanedDmns.forEach(dmn => {
+          const dmnLink = document.createElement('a');
+          dmnLink.href = '#';
+          dmnLink.className = 'dmn-link';
+          dmnLink.onclick = (e) => {
+            e.preventDefault();
+            setActiveLink(dmnLink);
+            loadDiagram(dmn.file);
+          };
+          
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'dmn-name';
+          nameSpan.textContent = `🔗 ${dmn.decisionName}`;
+          dmnLink.appendChild(nameSpan);
+          
+          if (dmn.displayTime) {
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'execution-time';
+            timeSpan.textContent = dmn.displayTime;
+            dmnLink.appendChild(timeSpan);
+          }
+          
+          contentDiv.appendChild(dmnLink);
+        });
+        
+        orphanGroup.appendChild(contentDiv);
+        listDiv.appendChild(orphanGroup);
+      }
+      
+      // Update available diagrams count and handle empty state
+      availableDiagrams = bpmnData.length + validDmnData.length;
+      
+      if (availableDiagrams === 0) {
+        const noDataDiv = document.createElement('div');
+        noDataDiv.className = 'no-data-message';
+        noDataDiv.innerHTML = `
+          <div class="center-message">
+            <div class="large-icon">📁</div>
+            <div class="medium-text">No diagrams available</div>
+            <div class="small-text">Enter a Business Key above to fetch and view process diagrams</div>
+          </div>
+        `;
+        listDiv.appendChild(noDataDiv);
+      }
+      
+      // Update the progress display to reflect current state
+      updateProgressDisplay();
+    }
+    //#endregion
+
+    //#region [================== DIAGRAM INTERACTION FUNCTIONS ==================]
+    /**
+     * Functions for handling user interactions with diagrams and the process hierarchy.
+     * Manages diagram loading, active link highlighting, and navigation between processes.
+     */
+    
+    /**
+     * Toggle the expanded/collapsed state of a process group in the navigation tree.
+     * @param {HTMLElement} header - The clickable header element of the process group
+     * @param {HTMLElement} group - The entire process group container element
+     */
+    function toggleProcess(header, group) {
+      const content = group.querySelector('.process-content');
+      const icon = header.querySelector('.collapse-icon');
+      
+      if (content.classList.contains('expanded')) {
+        content.classList.remove('expanded');
+        header.classList.remove('expanded');
+        icon.classList.remove('expanded');
+        icon.textContent = '▶';
+      } else {
+        content.classList.add('expanded');
+        header.classList.add('expanded');
+        icon.classList.add('expanded');
+        icon.textContent = '▼';
+      }
+    }
+
+    /**
+     * Set the active link in the navigation tree and remove active state from other links.
+     * @param {HTMLElement} link - The link element to set as active
+     */
+    function setActiveLink(link) {
+      if (currentActiveLink) {
+        currentActiveLink.classList.remove('active');
+      }
+      currentActiveLink = link;
+      link.classList.add('active');
+    }
+
+    /**
+     * Setup mouse-based panning controls for a BPMN diagram canvas.
+     * Enables drag-to-pan functionality with mouse button state tracking.
+     * @param {HTMLElement} bpmnCanvas - The BPMN canvas element to add panning to
+     * @param {HTMLElement} container - The container element that holds the canvas
+     */
+    function setupBpmnPanControls(bpmnCanvas, container) {
+      let isPanning = false;
+      let startX, startY, startViewbox;
+
+      // Styles are now defined in viewer.css - no need for inline styles
+
+      container.classList.add('bpmn-pan-container');
+
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey) {
+          container.classList.add('ctrl-pressed');
+        }
+      });
+
+      document.addEventListener('keyup', (e) => {
+        if (!e.ctrlKey) {
+          container.classList.remove('ctrl-pressed');
+        }
+      });
+
+      window.addEventListener('blur', () => {
+        container.classList.remove('ctrl-pressed');
+      });
+
+      container.addEventListener('mousedown', (e) => {
+        if (e.button === 1 || (e.button === 0 && e.ctrlKey)) {
+          e.preventDefault();
+          e.stopPropagation();
+          isPanning = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          startViewbox = bpmnCanvas.viewbox();
+          container.classList.add('panning');
+          document.body.style.userSelect = 'none';
+        }
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isPanning) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+        
+        const scale = startViewbox.scale || 1;
+        const moveX = -deltaX / scale;
+        const moveY = -deltaY / scale;
+        
+        bpmnCanvas.viewbox({
+          x: startViewbox.x + moveX,
+          y: startViewbox.y + moveY,
+          width: startViewbox.width,
+          height: startViewbox.height
+        });
+      });
+
+      document.addEventListener('mouseup', (e) => {
+        if (isPanning) {
+          isPanning = false;
+          container.classList.remove('panning');
+          document.body.style.userSelect = '';
+        }
+      });
+
+      document.addEventListener('mouseleave', (e) => {
+        if (isPanning) {
+          isPanning = false;
+          container.classList.remove('panning');
+          document.body.style.userSelect = '';
+        }
+      });
+
+      const hint = document.createElement('div');
+      hint.className = 'pan-hint';
+      hint.textContent = 'Hold Ctrl and drag to pan, or use middle-click+drag';
+      container.appendChild(hint);
+
+      setTimeout(() => {
+        if (hint.parentNode) {
+          hint.style.opacity = '0';
+          hint.style.transition = 'opacity 1s';
+          setTimeout(() => hint.remove(), 1000);
+        }
+      }, 5000);
+    }
+    //#endregion
+
+    //#region [================== DIAGRAM LOADING FUNCTIONS ==================]
+    /**
+     * Functions for loading and displaying BPMN process diagrams and DMN decision tables.
+     * Handles both native viewer rendering and custom table formatting with execution highlighting.
+     */
+    
+    /**
+     * Load and display a diagram file (BPMN or DMN) from the server.
+     * Determines the file type and delegates to appropriate rendering function.
+     * @param {string} fileName - The name of the diagram file to load (with extension)
+     */
+    function loadDiagram(fileName) {
+      // Update header
+      const headerElement = getCurrentDiagram();
+      headerElement.textContent = `Loading: ${fileName}`;
+      
+      const isDMN = fileName.endsWith('.dmn');
+      const xmlUrl = `/diagrams/${fileName}`;
+      const jsonUrl = `/diagrams/${fileName.replace(/\.(bpmn|dmn)/, '.json')}`;
+
+      Promise.all([
+        fetch(addSessionParam(xmlUrl)).then(res => res.text()),
+        fetch(addSessionParam(jsonUrl)).then(res => res.json()).catch(() => ({}))
+      ])
+      .then(([xml, pathData]) => {
+        
+        // Add filename to pathData for decision matching
+        pathData.fileName = fileName;
+        
+        // Update header with loaded diagram
+        const displayName = fileName.replace(/-.+\.(bpmn|dmn)$/, '').replace(/\.(bpmn|dmn)$/, '');
+        headerElement.textContent = `${isDMN ? 'Decision' : 'Process'}: ${displayName}`;
+        
+        // Clear the canvas
+        const canvas = getCanvas();
+        canvas.innerHTML = '';
+        
+        // Destroy existing viewers
+        if (currentViewer) {
+          try {
+            currentViewer.destroy();
+          } catch (e) {
+            // Viewer destruction failed - continue anyway
+          }
+          currentViewer = null;
+        }
+
+        if (fileName.endsWith('.bpmn')) {
+          loadBpmnDiagram(xml, pathData);
+        } else if (fileName.endsWith('.dmn')) {
+          loadDmnDiagram(xml, pathData);
+        }
+      }).catch(err => {
+        console.error('Failed to load diagram:', err);
+        headerElement.textContent = `Error loading: ${fileName}`;
+      });
+    }
+
+    /**
+     * Load and render a BPMN diagram using the bpmn-js viewer.
+     * Handles pan controls setup and execution path highlighting.
+     * @param {string} xml - The BPMN XML content to render
+     * @param {Object} pathData - Execution path data for highlighting activity instances
+     */
+    function loadBpmnDiagram(xml, pathData) {
+      // Reset table zoom when loading new diagram
+      tableZoomLevel = 1.0;
+      originalZoomLevel = 1.0; // Will be updated after fit-viewport completes
+      
+      const canvas = getCanvas();
+      
+      // Create container div for BPMN with zoom controls
+      const containerDiv = document.createElement('div');
+      containerDiv.className = 'viewer-container';
+      
+      // Remove any existing zoom controls and add new ones for BPMN
+      createZoomControls();
+      
+      const viewerContainer = document.createElement('div');
+      viewerContainer.className = 'viewer-inner';
+      containerDiv.appendChild(viewerContainer);
+      
+      canvas.innerHTML = '';
+      canvas.appendChild(containerDiv);
+      
+      bpmnViewer = new BpmnJS({ 
+        container: viewerContainer,
+        keyboard: {
+          bindTo: window
+        }
+      });
+      currentViewer = bpmnViewer;
+      
+      bpmnViewer.importXML(xml).then((result) => {
+        
+        try {
+          const bpmnCanvas = bpmnViewer.get('canvas');
+          const viewport = bpmnCanvas.viewbox();
+          
+          bpmnCanvas.zoom('fit-viewport');
+          
+          // Get the actual zoom level after fit-viewport and sync our tracking variable
+          setTimeout(() => {
+            try {
+              const actualZoom = bpmnCanvas.zoom();
+              if (actualZoom && !isNaN(actualZoom)) {
+                tableZoomLevel = actualZoom;
+                originalZoomLevel = actualZoom; // Store the original zoom level for reset function
+                // Update the zoom input to reflect the actual zoom level
+                const zoomInput = document.querySelector('.zoom-input');
+                if (zoomInput) {
+                  zoomInput.value = Math.round(tableZoomLevel * 100);
+                }
+              }
+            } catch (e) {
+              console.warn('Could not sync zoom level after fit-viewport:', e);
+            }
+          }, 100);
+          
+          // Add pan/drag functionality to BPMN viewer
+          setupBpmnPanControls(bpmnCanvas, viewerContainer);
+          
+          // Add highlighting with light blue background
+          (pathData.executedActivities || []).forEach(id => {
+            try {
+              bpmnCanvas.addMarker(id, 'highlight');
+              
+              setTimeout(() => {
+                const element = document.querySelector(`[data-element-id="${id}"]`);
+                if (element) {
+                  const visual = element.querySelector('.djs-visual');
+                  if (visual) {
+                    const shapes = visual.querySelectorAll('rect, circle, ellipse, path, polygon');
+                    shapes.forEach(shape => {
+                      shape.style.fill = 'rgba(173, 216, 230, 0.6)';
+                      shape.style.stroke = '#1976d2';
+                      shape.style.strokeWidth = '2px';
+                    });
+                  }
+                  
+                  const textElements = element.querySelectorAll('text, tspan');
+                  textElements.forEach(text => {
+                    text.style.fill = '#000';
+                    text.classList.add('text-black');
+                  });
+                  
+                  const labels = element.querySelectorAll('.djs-label text, .djs-label tspan');
+                  labels.forEach(label => {
+                    label.style.fill = '#000';
+                    label.classList.add('text-black');
+                  });
+                }
+              }, 100);
+            } catch (e) {
+              // Could not highlight element - element may not exist
+            }
+          });
+          
+        } catch (e) {
+          console.error('Error accessing BPMN canvas:', e);
+        }
+        
+        // Set up mouse wheel zoom support for BPMN
+        setupTableZoomMouseWheel();
+        updateCopyTableButtonVisibility();
+        
+      }).catch(err => {
+        console.error('BPMN load failed:', err);
+      });
+    }
+
+    /**
+     * Load and render a DMN diagram, using either custom table formatting or dmn-js viewer.
+     * Automatically detects decision table format and chooses appropriate rendering method.
+     * @param {string} xml - The DMN XML content to render
+     * @param {Object} pathData - Execution path data for highlighting decision instances
+     */
+    function loadDmnDiagram(xml, pathData) {
+      // Reset table zoom when loading new diagram
+      tableZoomLevel = 1.0;
+      originalZoomLevel = 1.0; // DMN diagrams start at 100% zoom
+      
+      // Check if we have a decision table and render it with custom formatting
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xml, 'text/xml');
+      const decisionTable = xmlDoc.querySelector('decisionTable');
+      
+      if (decisionTable) {
+        renderManualDmnTable(xml, pathData);
+        return;
+      }
+      
+      const canvas = getCanvas();
+      
+      const containerDiv = document.createElement('div');
+      containerDiv.className = 'viewer-container';
+      
+      createZoomControls();
+      
+      const viewerContainer = document.createElement('div');
+      viewerContainer.className = 'viewer-inner';
+      containerDiv.appendChild(viewerContainer);
+      
+      canvas.innerHTML = '';
+      canvas.appendChild(containerDiv);
+      
+      dmnViewer = new DmnJS({ 
+        container: viewerContainer,
+        keyboard: {
+          bindTo: window
+        }
+      });
+      currentViewer = dmnViewer;
+      
+      dmnViewer.importXML(xml).then((result) => {
+        // DMN loaded successfully - set up mouse wheel zoom support
+        setupTableZoomMouseWheel();
+        updateCopyTableButtonVisibility();
+      }).catch(err => {
+        console.error('DMN load failed:', err);
+      });
+    }
+
+    function renderManualDmnTable(xml, pathData) {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xml, 'text/xml');
+      
+      // Get all decisions in the DMN file
+      const decisions = xmlDoc.querySelectorAll('decision');
+      
+      if (decisions.length === 0) {
+        const canvasDiv = getCanvas();
+        canvasDiv.innerHTML = `
+          <div class="error-page-container">
+            <h3>⚠️ No Decision Tables Found</h3>
+            <p>This DMN file contains no decision tables or is malformed.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // Set currentViewer to null since we're using manual rendering
+      currentViewer = null;      
+     
+      const canvasDiv = getCanvas();
+      const containerDiv = document.createElement('div');
+      containerDiv.className = 'manual-dmn-container';
+      
+      createZoomControls();
+      
+      const zoomContainer = document.createElement('div');
+      zoomContainer.className = 'table-zoom-container';
+      
+      // Extract decision key from filename as the primary key
+      const fileName = pathData.fileName || '';
+      
+      // Check if this is a reference file (not executed for this claim)
+      const isReferenceFile = fileName.includes('-REFERENCE-');
+      
+      if (isReferenceFile) {
+        // Handle reference files that weren't executed for this claim
+        const referenceDecisionKey = fileName.replace(/-REFERENCE-.*\.dmn$/, '');
+        
+        const referenceDiv = document.createElement('div');
+        referenceDiv.className = 'reference-container';
+        
+        referenceDiv.innerHTML = `
+          <div class="reference-icon">📋</div>
+          <h3 class="reference-title">Reference Decision</h3>
+          <p class="reference-key">${referenceDecisionKey}</p>
+          <p class="reference-description">This decision definition exists in the system but was not executed for this claim.</p>
+          <div class="reference-note">
+            <strong>Note:</strong> This DMN file is included for reference only. 
+            To see execution data and rule highlighting, view decisions that were actually executed during the claim processing.
+          </div>
+        `;
+        
+        zoomContainer.appendChild(referenceDiv);
+        containerDiv.appendChild(zoomContainer);
+        canvasDiv.innerHTML = '';
+        canvasDiv.appendChild(containerDiv);
+        return;
+      }
+      
+      // Pattern: {decision-key}-{businessKey}-{decision-instance-id}.dmn
+      // We need to remove the businessKey and instance ID parts but keep the decision key
+      // BusinessKey is typically numeric, instance ID is UUID format
+      let expectedDecisionId = fileName.replace('.dmn', '');
+      
+      // Remove the Business Key (numeric) and instance ID (UUID) from the end
+      // Pattern: -[businessKey]-[uuid-pattern]
+      expectedDecisionId = expectedDecisionId.replace(/-\d+-[a-f0-9-]+$/, '');
+      
+      let foundMatchingDecision = false;
+      decisions.forEach((decision, decisionIndex) => {
+        const currentDecisionName = decision.getAttribute('name');
+        const decisionId = decision.getAttribute('id');
+        
+        // Match primarily by decision ID extracted from filename
+        const isMatchingDecision = expectedDecisionId && expectedDecisionId === decisionId;
+        
+        if (!isMatchingDecision) {
+          return;
+        }
+        
+        foundMatchingDecision = true;
+        
+        const decisionTable = decision.querySelector('decisionTable');
+        const literalExpression = decision.querySelector('literalExpression');
+        
+        if (!decisionTable && !literalExpression) {
+          return;
+        }
+        
+        if (literalExpression) {
+          renderLiteralExpression(decision, literalExpression, pathData, zoomContainer, decisionIndex, decisions.length);
+          containerDiv.appendChild(zoomContainer);
+          return;
+        } else if (decisionTable) {
+          // Render decision table with frozen headers and execution highlighting
+        } else {
+          return;
+        }
+        
+        const decisionName = decision.getAttribute('name') || decision.getAttribute('id') || 'Decision Table';
+        const hitPolicy = decisionTable.getAttribute('hitPolicy') || 'UNIQUE';
+        
+        // Build table HTML from DMN XML - scope queries to this specific decision
+        // Build table HTML from DMN XML - scope queries to this specific decision
+        const inputs = decision.querySelectorAll('input');
+        const outputs = decision.querySelectorAll('output'); 
+        const rules = decision.querySelectorAll('rule');
+        
+        // Get evaluation data from new enhanced format - since we're only rendering the executed decision,
+        // we can use all the execution data for this table
+        const rawRules = pathData.executedRules || [];
+        const activeRules = Array.isArray(rawRules) ? rawRules : [rawRules].filter(Boolean);
+        
+        // Check if we have specific rule IDs
+        const hasSpecificRules = pathData.hasRuleIds === true || 
+          activeRules.some(rule => rule !== 'decision-table' && rule.startsWith && rule.startsWith('DecisionRule_'));
+        
+        // Create the information header (outside of zoom)
+        const infoHeaderHTML = `
+          <div class="dmn-header-container">
+            <h3 class="dmn-header-title">${decisionName}</h3>
+            <p class="dmn-header-subtitle">Hit Policy: ${hitPolicy}</p>
+            ${hasSpecificRules ? 
+              `<div class="execution-success"><p>✅ Specific rule execution data captured via enhanced API</p><p>Executed rules: ${activeRules.join(', ')}</p></div>` :
+              '<div class="execution-warning"><p>⚠️ Not Executed or No Lines Were Hit</p><p>This decision table was not executed with specific rule data. It may use literal expressions, have no matching conditions, or the Camunda instance may not provide detailed rule execution data.</p></div>'
+            }
+          </div>
+        `;
+        
+        // Create the table content (inside zoom container)
+        let tableHTML = `
+          <div class="dmn-table-scroll-container dmn-table-scroll-main">
+            <table id="dmn-decision-table" class="dmn-table-base">
+        `;
+        
+        // Headers - Camunda style with When/Then/And language and data types
+        tableHTML += '<thead>';
+        
+        // First row: When/Then labels (only show if we have columns)
+        if (inputs.length > 0 || outputs.length > 0) {
+          tableHTML += '<tr>';
+          
+          // Rule number column - spans 3 rows (When/Then, Column Labels, Type/Value)
+          tableHTML += `<th class="dmn-header-rule-rowspan" rowspan="3">Rule</th>`;
+          
+          // Input columns header (When)
+          if (inputs.length > 0) {
+            tableHTML += `<th class="dmn-header-when-colspan" colspan="${inputs.length}">When</th>`;
+          }
+          
+          // Output columns header (Then)
+          if (outputs.length > 0) {
+            tableHTML += `<th class="dmn-header-then-colspan" colspan="${outputs.length}">Then</th>`;
+          }
+          
+          // Annotations column header - first row (spans 3 rows)
+          tableHTML += `<th class="dmn-header-annotations-rowspan" rowspan="3">Annotations</th>`;
+          
+          tableHTML += '</tr>';
+        }
+        
+        // Second row: Column labels
+        tableHTML += '<tr>';
+        if (inputs.length === 0 && outputs.length === 0) {
+          tableHTML += `<th class="dmn-header-rule-single">Rule</th>`;
+        }
+        inputs.forEach((input, index) => {
+          const label = input.getAttribute('label') || input.getAttribute('id');
+          tableHTML += `<th class="dmn-header-input-label">${label}</th>`;
+        });
+        // Output columns - second row with column labels
+        outputs.forEach(output => {
+          const label = output.getAttribute('label') || output.getAttribute('name') || output.getAttribute('id');
+          tableHTML += `<th class="dmn-header-output-label">${label}</th>`;
+        });
+        
+        tableHTML += '</tr>';
+        // Third row: Data types and input values with color coding
+        tableHTML += '<tr>';
+        inputs.forEach((input, index) => {
+          const typeRef = input.querySelector('inputExpression')?.getAttribute('typeRef') || 'string';
+          // Find the corresponding input value from execution data
+          let inputValueDisplay = '';
+          let matchingInput = undefined;
+          if (pathData.inputs && Array.isArray(pathData.inputs)) {
+            const label = input.getAttribute('label') || input.getAttribute('id');
+            // Find input by clause name (most reliable) or clause ID
+            matchingInput = pathData.inputs.find(inp => 
+              inp.clauseName === label || 
+              inp.clauseId === input.getAttribute('id')
+            );
+            if (matchingInput) {
+              const inputValue = matchingInput.value;
+              // Format the input value for display
+              if (inputValue === null || inputValue === undefined) {
+                inputValueDisplay = 'null';
+              } else if (typeof inputValue === 'string') {
+                inputValueDisplay = `"${String(inputValue)}"`;
+              } else {
+                inputValueDisplay = String(inputValue);
+              }
+            }
+          }
+          // Determine CSS class for value type styling
+          let valueClass = 'input-value-default';
+          if (inputValueDisplay === 'null') {
+            valueClass = 'input-value-null';
+          } else if (typeof matchingInput?.value === 'string') {
+            valueClass = 'input-value-string';
+          } else if (typeof matchingInput?.value === 'number') {
+            valueClass = 'input-value-number';
+          } else if (typeof matchingInput?.value === 'boolean') {
+            valueClass = 'input-value-boolean';
+          }
+          tableHTML += `<th class="dmn-header-input-type">
+            <div>(${typeRef})</div>
+            ${inputValueDisplay ? `<div class="input-value-display ${valueClass}">Value: ${inputValueDisplay}</div>` : ''}
+          </th>`;
+        });
+        // Output columns - third row with data types only
+        outputs.forEach(output => {
+          const typeRef = output.getAttribute('typeRef') || 'string';
+          tableHTML += `<th class="dmn-header-output-type">
+            <div>(${typeRef})</div>
+          </th>`;
+        });
+        
+        tableHTML += '</tr></thead>';
+        
+        // Rules
+        tableHTML += '<tbody>';
+        rules.forEach((rule, ruleIndex) => {
+          const ruleNumber = ruleIndex + 1;
+          const ruleId = rule.getAttribute('id');
+          
+          
+          // Determine if this rule should be highlighted - since we're only showing the executed decision,
+          // we can directly check if this rule ID is in the active rules
+          const isHighlighted = hasSpecificRules && activeRules.includes(ruleId);
+          
+          const rowClass = isHighlighted ? 'dmn-row-highlighted' : 'dmn-row-normal';
+          
+          tableHTML += `<tr class="${rowClass}">`;
+          
+          // Rule number with conditional highlighting
+          const ruleNumberClass = isHighlighted ? 'dmn-rule-number-highlighted' : 'dmn-rule-number-normal';
+          tableHTML += `<td class="${ruleNumberClass}">${ruleNumber}</td>`;
+          
+          // Input entries - for each input column
+          const inputEntries = rule.querySelectorAll('inputEntry');
+          for (let i = 0; i < inputs.length; i++) {
+            const entry = inputEntries[i];
+            const text = entry ? (entry.querySelector('text')?.textContent || '') : '';
+            const cellClass = isHighlighted ? 'dmn-cell-highlighted' : 'dmn-cell-normal';
+            tableHTML += `<td class="${cellClass}">${text}</td>`;
+          }
+          
+          // Output entries - for each output column
+          const outputEntries = rule.querySelectorAll('outputEntry');
+          for (let i = 0; i < outputs.length; i++) {
+            const entry = outputEntries[i];
+            const text = entry ? (entry.querySelector('text')?.textContent || '') : '';
+            const cellClass = isHighlighted ? 'dmn-cell-highlighted' : 'dmn-cell-normal';
+            tableHTML += `<td class="${cellClass}">${text}</td>`;
+          }
+          
+          // Annotations column - extract description from rule
+          const descriptionElement = rule.querySelector('description');
+          const descriptionText = descriptionElement ? descriptionElement.textContent.trim() : '';
+          const annotationCellClass = isHighlighted ? 'dmn-annotation-highlighted' : 'dmn-annotation-normal';
+          tableHTML += `<td class="${annotationCellClass}" title="${descriptionText}">${descriptionText}</td>`;
+          
+          tableHTML += '</tr>';
+        });
+        tableHTML += '</tbody></table></div>';
+        
+        // Create info header div (inside zoom container like literal expressions)
+        const infoHeaderDiv = document.createElement('div');
+        infoHeaderDiv.innerHTML = infoHeaderHTML;
+        
+        const tableContentDiv = document.createElement('div');
+        tableContentDiv.innerHTML = tableHTML;
+        tableContentDiv.className = `dmn-table-content${decisionIndex < decisions.length - 1 ? ' has-margin' : ''}`;
+        
+        containerDiv.appendChild(zoomContainer);
+        zoomContainer.appendChild(infoHeaderDiv);
+        zoomContainer.appendChild(tableContentDiv);
+
+        // Add table size detection and responsive class application
+        setTimeout(() => {
+          const tableScrollContainer = tableContentDiv.querySelector('.dmn-table-scroll-main');
+          const table = tableScrollContainer.querySelector('.dmn-table-base');
+          
+          if (table && tableScrollContainer) {
+            // Count actual data columns by looking at the second header row (column labels)
+            const secondHeaderRow = table.querySelector('thead tr:nth-child(2)');
+            let totalColumns = 0;
+            
+            if (secondHeaderRow) {
+              // Count all th elements in the second row (this gives us the actual column count)
+              totalColumns = secondHeaderRow.querySelectorAll('th').length;
+            } else {
+              // Fallback: count from first row if second row doesn't exist
+              const firstHeaderRow = table.querySelector('thead tr:first-child');
+              totalColumns = firstHeaderRow ? firstHeaderRow.children.length : 0;
+            }
+            
+            // Apply appropriate class based on column count
+            if (totalColumns > 6) {
+              // Large table - many columns, use auto layout
+              tableScrollContainer.classList.add('large-table');
+              tableScrollContainer.classList.remove('small-table');
+            } else {
+              // Small table - fewer columns, use fixed layout for even distribution
+              tableScrollContainer.classList.add('small-table');
+              tableScrollContainer.classList.remove('large-table');
+            }
+          }
+          
+          // Wait for DOM to update, then recalculate third row positioning
+          recalculateThirdRowPosition();
+        }, 0);
+      });
+      
+      if (!foundMatchingDecision) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-container';
+        errorDiv.innerHTML = `
+          <h3 class="dmn-no-match-title">⚠️ No Matching Decision Table Found</h3>
+          <p class="dmn-no-match-text">Expected to find decision with ID: "<strong>${expectedDecisionId}</strong>"</p>
+          <p class="dmn-no-match-available">Available decisions in this DMN file: ${Array.from(decisions).map(d => d.getAttribute('name')).join(', ')}</p>
+        `;
+        zoomContainer.appendChild(errorDiv);
+      }
+      
+      // If no matching decision was found, show all decisions or a helpful message
+      if (!foundMatchingDecision) {
+        console.warn('No matching decision found. Expected decision ID:', expectedDecisionId);
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-container';
+        errorDiv.innerHTML = `
+          <h3>⚠️ Decision Not Found</h3>
+          <p>Expected decision ID: <strong>${expectedDecisionId || 'undefined'}</strong></p>
+          <p>Available decisions: ${Array.from(decisions).map(d => d.getAttribute('id') + ' (' + (d.getAttribute('name') || 'no name') + ')').join(', ')}</p>
+        `;
+        zoomContainer.appendChild(errorDiv);
+      }
+      
+      canvasDiv.innerHTML = '';
+      canvasDiv.appendChild(containerDiv);
+      
+      setupTableZoomMouseWheel();
+      updateCopyTableButtonVisibility();
+    }
+    //#endregion
+
+    //#region [================== DMN TABLE RENDERING FUNCTIONS ==================]
+    /**
+     * Render literal expressions (FEEL expressions) with syntax highlighting and execution status.
+     * Shows whether the expression was executed and provides process visibility.
+     */
+    function renderLiteralExpression(decision, literalExpression, pathData, containerDiv, decisionIndex, totalDecisions) {
+      const decisionName = decision.getAttribute('name') || decision.getAttribute('id') || 'Literal Expression';
+      const expressionLanguage = literalExpression.getAttribute('expressionLanguage') || 'feel';
+      const expressionText = literalExpression.querySelector('text')?.textContent || 'No expression text found';
+      
+      // Create the main container with font-based zoom support and data attributes for base sizes
+      const manualExpressionDiv = document.createElement('div');
+      manualExpressionDiv.className = 'literal-expression-container';
+      manualExpressionDiv.setAttribute('data-base-font-size', '11');
+      manualExpressionDiv.style.cssText = `
+        margin-bottom: ${decisionIndex < totalDecisions - 1 ? '40px' : '0'};
+        font-size: ${11 * tableZoomLevel}px;
+      `;
+      
+      // Check execution status
+      const hasExecutedRules = pathData.executedRules && pathData.executedRules.length > 0;
+      const hasRealExecutionData = hasExecutedRules && 
+        !(pathData.executedRules.length === 1 && pathData.executedRules[0] === 'decision-table');
+      
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'info-header';
+      
+      const titleElement = document.createElement('h3');
+      titleElement.className = 'literal-expression-title';
+      titleElement.setAttribute('data-base-font-size', '14');
+      titleElement.style.fontSize = `${14 * tableZoomLevel}px`;
+      titleElement.textContent = `${decisionName} (Literal Expression)`;
+      headerDiv.appendChild(titleElement);
+      
+      const languageElement = document.createElement('p');
+      languageElement.className = 'literal-expression-language';
+      languageElement.setAttribute('data-base-font-size', '11');
+      languageElement.style.fontSize = `${11 * tableZoomLevel}px`;
+      languageElement.textContent = `Language: ${expressionLanguage}`;
+      headerDiv.appendChild(languageElement);
+      
+      if (hasRealExecutionData) {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'literal-expression-success';
+        const successP = document.createElement('p');
+        successP.setAttribute('data-base-font-size', '12');
+        successP.style.fontSize = `${12 * tableZoomLevel}px`;
+        successP.textContent = '✅ Decision executed successfully';
+        successDiv.appendChild(successP);
+        headerDiv.appendChild(successDiv);
+      } else {
+        const warningContainer = document.createElement('div');
+        warningContainer.className = 'warning-container';
+        
+        const warningTitle = document.createElement('p');
+        warningTitle.className = 'literal-expression-warning-title';
+        warningTitle.setAttribute('data-base-font-size', '13');
+        warningTitle.style.fontSize = `${13 * tableZoomLevel}px`;
+        warningTitle.textContent = '⚠️ No specific execution data available';
+        warningContainer.appendChild(warningTitle);
+        
+        const warningDesc = document.createElement('p');
+        warningDesc.className = 'literal-expression-warning-desc';
+        warningDesc.setAttribute('data-base-font-size', '11');
+        warningDesc.style.fontSize = `${11 * tableZoomLevel}px`;
+        warningDesc.textContent = 'This literal expression was executed but only generic execution data is available.';
+        warningContainer.appendChild(warningDesc);
+        
+        headerDiv.appendChild(warningContainer);
+      }
+      
+      manualExpressionDiv.appendChild(headerDiv);
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'content-wrapper';
+      
+      const expressionTitle = document.createElement('h4');
+      expressionTitle.className = 'expression-title';
+      expressionTitle.setAttribute('data-base-font-size', '12');
+      expressionTitle.style.fontSize = `${12 * tableZoomLevel}px`;
+      expressionTitle.textContent = 'Expression:';
+      contentDiv.appendChild(expressionTitle);
+      
+      const expressionPre = document.createElement('pre');
+      expressionPre.className = 'expression-code';
+      expressionPre.setAttribute('data-base-font-size', '10');
+      expressionPre.style.fontSize = `${10 * tableZoomLevel}px`;
+      expressionPre.textContent = expressionText;
+      contentDiv.appendChild(expressionPre);
+      
+      manualExpressionDiv.appendChild(contentDiv);
+      
+      containerDiv.appendChild(manualExpressionDiv);
+    }
+    //#endregion
+
+    //#region [================== LOG MANAGEMENT FUNCTIONS ==================]
+    /**
+     * Functions for managing session-based log data from PowerShell data fetching operations.
+     * Each tab session maintains its own log history that persists during the session.
+     * Provides clipboard copy and file opening functionality for process analysis.
+     */
+    async function copyLogToClipboard() {
+      try {
+        const response = await fetch(`/get-log?sessionId=${sessionId}`);
+        const data = await response.json();
+        
+        if (!data.exists) {
+          showWarningMessage('No log entries found for this session.');
+          return;
+        }
+        
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(data.content);
+            showSuccessMessage('Session log copied to clipboard!');
+          } else {
+            throw new Error('Clipboard API not available');
+          }
+        } catch (clipboardError) {
+          const textArea = document.createElement('textarea');
+          textArea.value = data.content;
+          textArea.style.position = 'fixed';
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          document.execCommand('Copy');
+          document.body.removeChild(textArea);
+          showSuccessMessage('Session log copied to clipboard! (fallback method)');
+        }
+      } catch (error) {
+        console.error('Error copying log to clipboard:', error);
+        showErrorMessage('Failed to copy session log to clipboard. Please try again.');
+      }
+    }
+
+    /**
+     * Open the session log in the system's default text viewer.
+     * Creates a temporary log file and opens it with the default application.
+     */
+    async function viewSessionLog() {
+      try {
+        const response = await fetch(`/get-log?sessionId=${sessionId}`);
+        const data = await response.json();
+        
+        if (!data.exists) {
+          showWarningMessage('No log entries found for this session.');
+          return;
+        }
+        
+        const viewResponse = await fetch('/view-log', { 
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ sessionId: sessionId })
+        });
+        
+        if (!viewResponse.ok) {
+          throw new Error('Failed to open session log');
+        }
+        
+        const result = await viewResponse.json();
+        if (result.success) {
+          // Display the log content in a modal
+          document.getElementById('logModalTitle').textContent = `Session Log: ${result.sessionId}`;
+          document.getElementById('logModalBody').textContent = result.content;
+          document.getElementById('logModal').style.display = 'block';
+          
+          showInfoMessage('Session log opened', false);
+          setTimeout(() => hideMessage(), 2000);
+        }
+      } catch (error) {
+        console.error('Error opening session log:', error);
+        showErrorMessage('Failed to open session log. Please try again.');
+      }
+    }
+
+    /**
+     * Close the log modal
+     */
+    function closeLogModal() {
+      document.getElementById('logModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside of it
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('logModal');
+      if (event.target === modal) {
+        closeLogModal();
+      }
+    });
+
+    /**
+     * Copy DMN table data to clipboard for Excel and Word
+     */
+    async function copyTableToClipboard() {
+      try {
+        // Find the table
+        const customTable = document.querySelector('#dmn-decision-table');
+        const nativeTable = document.querySelector('.dmn-js-container table');
+        const table = customTable || nativeTable;
+        
+        if (!table) {
+          showWarningMessage('No table found to copy.');
+          return;
+        }
+        
+        // Get all rows and build TSV for Excel
+        const rows = table.querySelectorAll('tr');
+        const tsvRows = [];
+        const htmlRows = [];
+        
+        rows.forEach(row => {
+          const cells = row.querySelectorAll('th, td');
+          const cellTexts = [];
+          const htmlCells = [];
+          
+          cells.forEach(cell => {
+            let text = cell.textContent || '';
+            text = text.trim().replace(/\s+/g, ' ');
+            
+            // Handle colspan by adding empty cells for TSV
+            const colspan = parseInt(cell.getAttribute('colspan') || '1');
+            cellTexts.push(text);
+            for (let i = 1; i < colspan; i++) {
+              cellTexts.push('');
+            }
+            
+            // Create HTML cell for Word with proper attributes
+            const cellTag = cell.tagName.toLowerCase();
+            
+            // Check if this cell/row is highlighted (execution path)
+            const computedStyle = getComputedStyle(cell);
+            const bgColor = computedStyle.backgroundColor;
+            const isHighlighted = bgColor.includes('173, 216, 230') || // rgba(173, 216, 230, ...)
+                                 bgColor === 'rgba(173, 216, 230, 0.6)' ||
+                                 bgColor === 'rgb(173, 216, 230)' ||
+                                 cell.closest('tr').style.background.includes('173, 216, 230');
+            
+            let style = ' style="border: 1px solid #000000; padding: 4pt 6pt 4pt 6pt; text-align: left; vertical-align: top; mso-border-alt: solid #000000 0.5pt;"';
+            
+            if (cellTag === 'th') {
+              style = ' style="border: 1px solid #000000; padding: 4pt 6pt 4pt 6pt; background-color: #f0f0f0; font-weight: bold; text-align: center; vertical-align: top; mso-border-alt: solid #000000 0.5pt;"';
+            } else if (isHighlighted) {
+              // Highlighted execution path cells - light blue background
+              style = ' style="border: 1px solid #000000; padding: 4pt 6pt 4pt 6pt; background-color: #ADD8E6; text-align: left; vertical-align: top; mso-border-alt: solid #000000 0.5pt; font-weight: bold;"';
+            }
+            
+            // Preserve colspan and rowspan for Word with proper MSO attributes
+            let attributes = '';
+            if (cell.hasAttribute('colspan') && cell.getAttribute('colspan') !== '1') {
+              const colspanVal = cell.getAttribute('colspan');
+              attributes += ` colspan="${colspanVal}"`;
+            }
+            if (cell.hasAttribute('rowspan') && cell.getAttribute('rowspan') !== '1') {
+              const rowspanVal = cell.getAttribute('rowspan');
+              attributes += ` rowspan="${rowspanVal}"`;
+            }
+            
+            // Escape HTML entities in cell text for proper Word rendering
+            const escapedText = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            htmlCells.push(`<${cellTag}${attributes}${style}>${escapedText}</${cellTag}>`);
+          });
+          
+          if (cellTexts.length > 0) {
+            tsvRows.push(cellTexts.join('\t'));
+            htmlRows.push(`<tr>${htmlCells.join('')}</tr>`);
+          }
+        });
+        
+        const tsvData = tsvRows.join('\n');
+        
+        // Create complete HTML document for Word
+        const htmlTable = `<table border="1" style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; border: 2px solid #000;">
+          ${htmlRows.join('\n')}
+        </table>`;
+        
+        const wordDocument = `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">
+<head>
+<meta charset="UTF-8">
+<meta name="ProgId" content="Word.Document">
+<meta name="Generator" content="Microsoft Word 15">
+<meta name="Originator" content="Microsoft Word 15">
+<!--[if !mso]>
+<style>
+v\\:* {behavior:url(#default#VML);}
+o\\:* {behavior:url(#default#VML);}
+w\\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style>
+<![endif]-->
+<style>
+@page {
+  margin: 1.0in;
+}
+body {
+  font-family: Arial, sans-serif;
+  font-size: 11pt;
+  margin: 0;
+  padding: 0;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: Arial, sans-serif;
+  border: 2px solid #000000;
+  mso-table-lspace: 0pt;
+  mso-table-rspace: 0pt;
+  mso-table-anchor-vertical: page;
+  mso-table-anchor-horizontal: column;
+  mso-table-left: left;
+  mso-table-margin-left: 0pt;
+  mso-table-margin-right: 0pt;
+}
+th, td {
+  border: 1px solid #000000;
+  padding: 4pt 6pt 4pt 6pt;
+  text-align: left;
+  vertical-align: top;
+  mso-border-alt: solid #000000 0.5pt;
+}
+th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+${htmlTable}
+</body>
+</html>`;
+        
+        // Copy both formats to clipboard
+        try {
+          if (navigator.clipboard && navigator.clipboard.write) {
+            const clipboardItem = new ClipboardItem({
+              'text/html': new Blob([wordDocument], { type: 'text/html' }),
+              'text/plain': new Blob([tsvData], { type: 'text/plain' })
+            });
+            
+            await navigator.clipboard.write([clipboardItem]);
+            showSuccessMessage('Table copied! Paste into Excel or Word for formatted table.');
+          } else {
+            // Fallback to plain text
+            await navigator.clipboard.writeText(tsvData);
+            showSuccessMessage('Table copied as text for Excel.');
+          }
+        } catch (clipboardError) {
+          // Final fallback
+          const textArea = document.createElement('textarea');
+          textArea.value = tsvData;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          showSuccessMessage('Table copied as text for Excel.');
+        }
+        
+      } catch (error) {
+        console.error('Error copying table:', error);
+        showErrorMessage('Failed to copy table. Please try again.');
+      }
+    }
+
+    /**
+     * Display a success message when table data is copied to clipboard.
+     * Temporarily updates button text and styling to provide user feedback.
+     * @param {string|null} customMessage - Optional custom message to display (defaults to "✅ Copied!")
+     */
+    function showCopySuccessMessage(customMessage = null) {
+      const button = document.getElementById('copyTableButton');
+      if (button) {
+        const originalText = button.textContent;
+        button.textContent = '✅ Copied!';
+        button.classList.add('button-success-state');
+        
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.classList.remove('button-success-state');
+        }, 3000);
+        
+        if (customMessage) {
+          // Show detailed message in console
+        }
+      } else {
+        const message = customMessage || 'Table copied to clipboard! Paste into Word for bordered table, Excel for highlighted data.';
+        showSuccessMessage(message);
+      }
+    }
+
+    /**
+     * Show or hide the copy table button based on whether a DMN table is currently displayed.
+     * Automatically detects table presence and updates button visibility accordingly.
+     */
+    function updateCopyTableButtonVisibility() {
+      const copyButton = document.getElementById('copyTableButton');
+      if (!copyButton) return;
+      
+      // Check if there's a table currently displayed
+      const hasCustomTable = document.querySelector('#dmn-decision-table');
+      const hasNativeTable = document.querySelector('.dmn-js-container table');
+      
+      if (hasCustomTable || hasNativeTable) {
+        copyButton.classList.remove('hide');
+        copyButton.classList.add('show-inline-block');
+      } else {
+        copyButton.classList.add('hide');
+      }
+    }
+    //#endregion
+
+    //#region [================== APPLICATION NAVIGATION FUNCTIONS ==================]
+    /**
+     * Open a new claim tab in the browser.
+     * Each new tab will automatically get its own unique session ID for proper isolation.
+     */
+    function openNewClaimTab() {
+      try {
+        // Open a new tab to the main page (without any sessionId parameter)
+        // The new tab will automatically generate its own unique session ID
+        const newTabUrl = window.location.origin + '/';
+        window.open(newTabUrl, '_blank');
+      } catch (error) {
+        console.error('Error opening new tab:', error);
+        showErrorMessage('Failed to open new tab. Please try manually opening a new tab to ' + window.location.origin);
+      }
+    }
+    //#endregion
+
+    //#region [================== APPLICATION SHUTDOWN AND TAB MANAGEMENT ==================]
+    /**
+     * Application shutdown functionality with cross-tab coordination and automatic server shutdown.
+     * 
+     * Features:
+     * - Manual quit via quit button with confirmation
+     * - Automatic server shutdown when last tab is closed
+     * - Cross-tab coordination to close all tabs when quit is triggered
+     * - Tab registration/deregistration for server-side tracking
+     * 
+     * Browser close detection limitation:
+     * When closing the last tab or entire browser, JavaScript events (beforeunload, unload, pagehide, visibilitychange)
+     * do not fire reliably or at all due to browser security restrictions. This means the server may not
+     * automatically shut down when the browser is closed abruptly. Users should use the "Quit Application"
+     * button for clean shutdown, or manually stop the server with Ctrl+C if needed.
+     */
+
+    /**
+     * Gracefully quit the application by closing the browser tab and stopping the server.
+     * Provides confirmation dialog to prevent accidental shutdown.
+     */
+    async function quitApplication() {
+      // Confirm before quitting
+      const confirmQuit = confirm('Are you sure you want to quit the application?\n\nThis will stop the server and close all tabs.');
+      
+      if (!confirmQuit) {
+        return;
+      }
+
+      // Set shutdown flag to bypass beforeunload confirmation
+      isShuttingDown = true;
+
+      try {
+        // Disable the quit button to prevent multiple clicks
+        const quitButton = document.getElementById('quitButton');
+        if (quitButton) {
+          quitButton.disabled = true;
+          quitButton.textContent = 'Shutting down...';
+        }
+        
+        // Send quit request to server FIRST (before any tabs close)
+        const response = await fetch('/quit', { 
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          // AFTER server confirms shutdown, broadcast to other tabs
+          try {
+            const shutdownChannel = new BroadcastChannel('camunda-viewer-shutdown');
+            shutdownChannel.postMessage({ type: 'shutdown', timestamp: Date.now() });
+            shutdownChannel.close();
+          } catch (error) {
+            // Fallback to localStorage for older browsers
+            localStorage.setItem('camunda-viewer-shutdown', Date.now().toString());
+            setTimeout(() => {
+              localStorage.removeItem('camunda-viewer-shutdown');
+            }, 5000);
+          }
+          
+          // Close this tab immediately (no delay, no alert)
+          setTimeout(() => {
+            try {
+              window.close();
+              setTimeout(() => {
+                document.body.innerHTML = `
+                  <div class="app-stopped-container">
+                    <div class="app-stopped-content">
+                      <h1 class="app-stopped-title">Application Stopped</h1>
+                      <p class="app-stopped-text">The Camunda Viewer server has been stopped successfully.</p>
+                      <p class="app-stopped-small">You can safely close this tab/window.</p>
+                    </div>
+                  </div>
+                `;
+              }, 1000);
+            } catch (error) {
+              // Browser may prevent window.close() in some cases
+            }
+          }, 100);
+        } else {
+          throw new Error('Failed to send quit request');
+        }
+      } catch (error) {
+        console.error('Error quitting application:', error);
+        showErrorMessage('Failed to quit application properly. You may need to stop the server manually (Ctrl+C in command line).');
+        
+        // Re-enable the quit button on error
+        const quitButton = document.getElementById('quitButton');
+        if (quitButton) {
+          quitButton.disabled = false;
+          quitButton.textContent = 'Quit Application';
+        }
+      }
+    }
+
+    /**
+     * Register this tab with the server for tracking
+     */
+    async function registerTab() {
+      try {
+        console.log(`📱 Registering tab: ${tabId}`);
+        const response = await fetch('/register-tab', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ tabId: tabId })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`📱 Tab registered successfully: ${tabId} (total: ${data.totalTabs})`);
+        }
+      } catch (error) {
+        console.warn('⚠️ Failed to register tab:', error);
+      }
+    }
+
+    /**
+     * Deregister this tab from the server.
+     * The server will automatically shutdown if this is the last tab.
+     */
+    async function deregisterTab() {
+      try {
+        const response = await fetch('/deregister-tab', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ tabId: tabId })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+        }
+      } catch (error) {
+        console.warn('⚠️ Failed to deregister tab:', error);
+      }
+    }
+
+    /**
+     * Setup cross-tab shutdown coordination.
+     * Listens for shutdown broadcasts from other tabs and handles automatic tab closure.
+     */
+    function setupShutdownListeners() {
+      try {
+        // Use BroadcastChannel API for modern browsers
+        const shutdownChannel = new BroadcastChannel('camunda-viewer-shutdown');
+        shutdownChannel.addEventListener('message', function(event) {
+          if (event.data.type === 'shutdown') {
+            // Set shutdown flag to bypass beforeunload confirmation
+            isShuttingDown = true;
+            // Close this tab immediately without confirmation
+            setTimeout(() => {
+              window.close();
+              // Fallback if window.close() doesn't work
+              setTimeout(() => {
+                document.body.innerHTML = `
+                  <div class="app-stopped-container">
+                    <div class="app-stopped-content">
+                      <h1 class="app-stopped-title">Application Stopped</h1>
+                      <p class="app-stopped-text">This tab was closed automatically when the application was shut down from another tab.</p>
+                      <p class="app-stopped-small">You can safely close this window.</p>
+                    </div>
+                  </div>
+                `;
+              }, 500);
+            }, 100);
+          }
+        });
+
+      } catch (error) {
+        // Fallback to localStorage for older browsers
+        let lastShutdownTime = 0;
+        setInterval(() => {
+          const shutdownTime = localStorage.getItem('camunda-viewer-shutdown');
+          if (shutdownTime && parseInt(shutdownTime) > lastShutdownTime) {
+            lastShutdownTime = parseInt(shutdownTime);
+            // Set shutdown flag to bypass beforeunload confirmation
+            isShuttingDown = true;
+            setTimeout(() => {
+              window.close();
+              setTimeout(() => {
+                document.body.innerHTML = `
+                  <div class="app-stopped-container">
+                    <div class="app-stopped-content">
+                      <h1 class="app-stopped-title">Application Stopped</h1>
+                      <p class="app-stopped-text">This tab was closed automatically when the application was shut down from another tab.</p>
+                      <p class="app-stopped-small">You can safely close this window.</p>
+                    </div>
+                  </div>
+                `;
+              }, 500);
+            }, 100);
+          }
+        }, 1000);
+      }
+    }
+    //#endregion
+
+    //#region [================== VARIABLE VIEW FUNCTIONS ==================]
+    /**
+     * Functions for loading and displaying process variables in an interactive format.
+     * Provides collapsible display for large objects and filtering by process instance.
+     */
+    
+    /**
+     * Load and display process variables for a specific process instance.
+     * Fetches variables from the server and renders them with interactive controls.
+     * @param {string} processKey - The key identifier of the process definition
+     * @param {string} processInstanceId - The ID of the specific process instance
+     */
+    function loadVariableView(processKey, processInstanceId) {
+      const headerElement = getCurrentDiagram();
+      headerElement.textContent = `Loading Variables: ${processKey} - ${processInstanceId}`;
+      
+      // Clear current viewer since we're not displaying a diagram
+      if (currentViewer) {
+        currentViewer.destroy();
+        currentViewer = null;
+      }
+      
+      // Fetch variables from the server
+      fetch(addSessionParam('/process-variables'))
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const allVariables = data.variables || data; // Handle both {variables: [...]} and [...] formats
+          
+          // Filter variables for this specific process instance
+          const processVariables = allVariables.filter(variable => 
+            variable.processInstanceId === processInstanceId
+          );
+          
+          if (processVariables.length === 0) {
+            displayVariableContent('No variables found for this process instance.', processKey, processInstanceId);
+            return;
+          }
+          
+          // Group variables by name and create display content
+          const variableGroups = {};
+          processVariables.forEach(variable => {
+            if (!variableGroups[variable.name]) {
+              variableGroups[variable.name] = {
+                name: variable.name,
+                type: variable.type,
+                value: variable.value,
+                scope: variable.activityInstanceId ? 'Activity' : 'Process',
+                processInstanceId: variable.processInstanceId, // Process instance that owns this variable
+                processKey: variable.processDefinitionKey || processKey // Use the variable's process key or fall back to the current one
+              };
+            }
+          });
+          
+          displayVariableContent(variableGroups, processKey, processInstanceId);
+        })
+        .catch(error => {
+          console.error('Error loading variables:', error);
+          const headerElement = getCurrentDiagram();
+          headerElement.textContent = `Error loading variables: ${processKey} - ${processInstanceId}`;
+          displayVariableContent('Failed to load variables. Please try again.', processKey, processInstanceId);
+        });
+    }
+
+    /**
+     * Display process variables in the canvas area with interactive formatting.
+     * Creates expandable sections for complex objects and Java serialized data.
+     * @param {Array} variables - Array of variable objects with name, value, type, and scope
+     * @param {string} processKey - The key identifier of the process definition
+     * @param {string} processInstanceId - The ID of the specific process instance
+     */
+    function displayVariableContent(variables, processKey, processInstanceId) {
+      const canvas = getCanvas();
+      
+      // Hide zoom controls for Variable View since they don't apply to variable content
+      hideZoomControls();
+      
+      // Create main container
+      const containerDiv = document.createElement('div');
+      containerDiv.className = 'monospace-container';
+      
+      if (typeof variables === 'string') {
+        // Error message case
+        containerDiv.innerHTML = `
+          <div class="status-message">
+            ${variables}
+          </div>
+        `;
+      } else {
+        // Variables display case
+        let htmlContent = `
+          <div class="process-variables-header">
+            <h2 class="process-variables-title">Camunda Process Variables & Nulls</h2>
+            <div class="process-variables-info">
+              <strong>Process:</strong> ${processKey}<br>
+              <strong>Instance ID:</strong> ${processInstanceId}<br>
+              <strong>Variable Count:</strong> ${Object.keys(variables).length}
+            </div>
+          </div>
+        `;
+        
+        // Create variable display (exclude Java objects)
+        for (const [varName, varData] of Object.entries(variables)) {
+          // Skip Java serialized objects - they belong in the New Variables section
+          if (varData.type === 'Object' && typeof varData.value === 'string' && varData.value.length > 0) {
+            continue; // Skip Java objects in regular Variables View
+          }
+          
+          const variableHtml = createVariableDisplay(varName, varData.value, varData.type, varData.scope, varData.processKey, varData.processInstanceId, false);
+          htmlContent += variableHtml;
+        }
+        
+        containerDiv.innerHTML = htmlContent;
+        
+        // Add click handlers for collapsible content
+        setupCollapsibleHandlers(containerDiv);
+      }
+      
+      canvas.innerHTML = '';
+      canvas.appendChild(containerDiv);
+    }
+
+    //#region [================== VARIABLE DISPLAY HELPERS ==================]
+    /**
+     * Shared helper functions for building collapsible variable content.
+     * Used by both createVariableDisplay and createExecutionVariableDisplay.
+     */
+    
+    // Helper to create collapsible Java serialized object content
+    function createJavaSerializedContent(name, processKey, processInstanceId, isExecution = false) {
+      const containerId = generateDeserializedContainerId(name, processKey, processInstanceId, isExecution);
+      
+      const processKeyParam = isExecution ? 'execution' : processKey;
+      
+      return `
+        <div class="java-serialized-variable collapsible-header-warning" 
+             onclick="toggleJavaContent(this, '${escapeHtml(name)}', '${escapeHtml(processKeyParam)}', '${escapeHtml(processInstanceId)}')">
+          ☕ Java Object - Click to expand
+        </div>
+        <div class="collapsible-content${isExecution ? ' collapsible-content-orange' : ''} collapsible-collapsed">
+          <div id="${containerId}" class="${isExecution ? 'margin-small' : 'java-execution-content'}">
+            <!-- Deserialized content will be loaded here -->
+          </div>
+        </div>
+      `;
+    }
+    
+    // Helper to create collapsible object content
+    function createCollapsibleObject(value, headerClass = 'collapsible-header clickable-link', contentClass = 'collapsible-content collapsible-content-static') {
+      const jsonStr = JSON.stringify(value, null, 2);
+      const lines = jsonStr.split('\n');
+      
+      if (lines.length > 10 || jsonStr.length > 200) {
+        return `
+          <div class="${headerClass}">
+            {Object} - Click to expand (${Object.keys(value).length} properties)
+          </div>
+          <div class="${contentClass}">
+            <pre class="pre-wrap">${escapeHtml(jsonStr)}</pre>
+          </div>
+        `;
+      } else {
+        return `<pre class="pre-wrap">${escapeHtml(jsonStr)}</pre>`;
+      }
+    }
+    
+    // Helper to create collapsible string content
+    function createCollapsibleString(value, isExecution = false) {
+      const headerClass = isExecution ? 'collapsible-header clickable-link' : 'collapsible-header';
+      const contentClass = isExecution ? 'collapsible-content collapsible-content-static' : 'collapsible-content';
+      
+      if (value.length > 100) {
+        return `
+          <div class="${headerClass}">
+            "${value.substring(0, 50)}..." - Click to expand (${value.length} chars)
+          </div>
+          <div class="${contentClass}">
+            <pre class="${isExecution ? 'pre-wrap' : 'pre-content'}">"${escapeHtml(value)}"</pre>
+          </div>
+        `;
+      } else {
+        const spanClass = isExecution ? 'text-string' : 'value-string';
+        return `<span class="${spanClass}">"${escapeHtml(value)}"</span>`;
+      }
+    }
+    
+    // Helper to create badge HTML
+    function createBadgeHtml(scope, type, extraBadges = '') {
+      const scopeClass = scope.toLowerCase() === 'global' ? 'orange' : 
+                        scope.toLowerCase() === 'local' ? 'blue' : 
+                        scope.toLowerCase() === 'process' ? 'green' : 'grey';
+      
+      return `
+        <span class="badge badge-${scopeClass}">${scope}</span>
+        <span class="badge badge-slate">${type}</span>
+        ${extraBadges}
+      `;
+    }
+    //#endregion
+
+    /**
+     * Create a formatted HTML display for a single process variable.
+     * Handles different data types with appropriate rendering and controls.
+     * @param {string} name - The variable name
+     * @param {*} value - The variable value (any type)
+     * @param {string} type - The variable type (e.g., String, Object, Serializable)
+     * @param {string} scope - The variable scope (e.g., local, global)
+     * @param {string} processKey - The process definition key (optional)
+     * @param {string} processInstanceId - The process instance ID (optional)
+     * @param {boolean} showJavaObjects - Whether to show expandable Java object controls
+     * @returns {string} HTML string for the variable display
+     */
+    function createVariableDisplay(name, value, type, scope, processKey = '', processInstanceId = '', showJavaObjects = false) {
+      // Handle undefined scope and type with default values
+      scope = scope || 'unknown';
+      type = type || 'unknown';
+      
+      let valueDisplay = '';
+      let deserializationInfo = '';
+      
+      // Check if this is a Java serialized object
+      if (type === 'Object' && typeof value === 'string' && value.length > 0) {
+        if (!showJavaObjects) {
+          return ''; // This should not appear in regular Variables View
+        }
+        
+        // This is a Java serialized object that needs deserialization
+        deserializationInfo = `
+          <div class="warning-info-small">
+            <div class="warning-info-text">
+              ☕ <strong>Java Serialized Object</strong> - Click below to deserialize and view
+            </div>
+          </div>
+        `;
+        
+        valueDisplay = createJavaSerializedContent(name, processKey, processInstanceId, false);
+      } else if (value === null || value === undefined) {
+        valueDisplay = '<span class="null-value">null</span>';
+      } else if (typeof value === 'object') {
+        valueDisplay = createCollapsibleObject(value);
+      } else if (typeof value === 'string') {
+        valueDisplay = createCollapsibleString(value, false);
+      } else {
+        valueDisplay = `<span class="value-other">${escapeHtml(String(value))}</span>`;
+      }
+      
+      return `
+        <div class="variable-container">
+          ${deserializationInfo}
+          <div class="variable-header">
+            <span class="variable-name">${escapeHtml(name)}</span>
+            ${createBadgeHtml(scope, type, processKey ? `<span class="badge badge-purple">${processKey}</span>` : '')}
+          </div>
+          ${processInstanceId ? `<div class="instance-info">Instance: ${processInstanceId}</div>` : ''}
+          <div class="variable-content">
+            ${valueDisplay}
+          </div>
+        </div>
+      `;
+    }
+
+    /**
+     * Toggle the display of Java serialized content and trigger auto-deserialization.
+     * Expands/collapses the content area and fetches deserialized data on first expand.
+     * @param {HTMLElement} element - The clickable header element that triggers the toggle
+     * @param {string} variableName - The name of the variable being toggled
+     * @param {string} processKey - The process definition key
+     * @param {string} processInstanceId - The process instance ID
+     */
+    function toggleJavaContent(element, variableName, processKey, processInstanceId) {
+      const content = element.nextElementSibling;
+      if (!content?.classList.contains('collapsible-content')) return;
+      
+      const isVisible = !content.classList.contains('collapsible-collapsed');
+      
+      if (isVisible) {
+        // Hide
+        content.classList.add('collapsible-collapsed');
+        content.classList.remove('collapsible-expanded');
+        element.innerHTML = '☕ Java Object - Click to expand';
+      } else {
+        // Show
+        content.classList.remove('collapsible-collapsed');
+        content.classList.add('collapsible-expanded');
+        element.innerHTML = '☕ Java Object - Click to collapse';
+        
+        // Only deserialize if container is empty or has only the placeholder (first time)
+        const containerId = generateDeserializedContainerId(variableName, processKey, processInstanceId);
+        const container = document.getElementById(containerId);
+        
+        if (container && (container.innerHTML.trim() === '' || container.innerHTML.trim() === '<!-- Deserialized content will be loaded here -->')) {
+          container.innerHTML = '<div class="auto-deserializing">⏳ Auto-deserializing...</div>';
+          
+          // Don't await - let it complete in background
+          performDeserialization(variableName, processKey, processInstanceId)
+            .then(result => {
+              container.innerHTML = result.success ? 
+                `<div class="deserialized-content"><strong>Object Type:</strong> ${escapeHtml(result.objectType || 'Unknown')}<br><strong>Value:</strong><br><pre class="java-content">${escapeHtml(JSON.stringify(result.value, null, 2))}</pre></div>` :
+                `<div class="error-text">❌ Deserialization failed: ${escapeHtml(result.error || 'Unknown error')}</div>`;
+            })
+            .catch(error => {
+              container.innerHTML = `<div class="error-text">❌ Auto-deserialization failed: ${escapeHtml(error.message)}</div>`;
+            });
+        }
+        // If container already has content, just show it (no re-deserialization)
+      }
+    }
+
+// Shared helper for deserializing variables without duplicating fetch logic
+/**
+ * Deserialize a Java variable by calling the server endpoint.
+ * @param {string} variableName
+ * @param {string} processKey
+ * @param {string} processInstanceId
+ * @returns {Promise<Object>} The deserialized result object
+ */
+async function performDeserialization(variableName, processKey, processInstanceId) {
+  const url = addSessionParam(`/deserialize-variable`);
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ variableName, processKey, processInstanceId })
+  });
+  
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`HTTP error! status: ${response.status} - ${errText}`);
+  }
+  
+  return response.json();
+}
+
+    /**
+     * Display error message in a container with enhanced troubleshooting information
+     */
+    function displayDeserializationError(container, result, variableName, processKey, processInstanceId, isFromToggle = false) {
+      const errorDetails = [];
+      if (result.error) errorDetails.push(`Error: ${result.error}`);
+      if (result.exitCode !== undefined) errorDetails.push(`Exit Code: ${result.exitCode}`);
+      if (result.stderr) errorDetails.push(`StdErr: ${result.stderr}`);
+      if (result.stdout) errorDetails.push(`StdOut: ${result.stdout}`);
+      
+      // If no detailed error info, provide generic troubleshooting
+      if (errorDetails.length === 0 || (errorDetails.length === 1 && result.error === '')) {
+        errorDetails.push('PowerShell deserialization failed with no error details');
+        errorDetails.push('Check server logs for more information');
+      }
+      
+      const troubleshootingTips = ['• Check server console for detailed PowerShell output',
+                                   '• Verify PowerShell can execute scripts (Get-ExecutionPolicy)',
+                                   '• Ensure Java runtime is available in PATH'];
+      
+      // Add specific troubleshooting for exit code 1
+      if (result.exitCode === 1) {
+        troubleshootingTips.unshift('Exit Code 1 typically indicates:',
+                                   '• PowerShell execution policy restrictions',
+                                   '• Missing Java deserialization dependencies',
+                                   '• Invalid/corrupted serialized data',
+                                   '• PowerShell script syntax errors');
+      }
+      
+      container.innerHTML = `
+        <div class="error-margin">
+          ❌ Deserialization Failed
+        </div>
+        <div class="error-container-bg">
+          <div><strong>Error Details:</strong> ${errorDetails.join(' | ')}</div>
+          <hr class="separator-line">
+          <div><strong>Variable:</strong> ${escapeHtml(variableName)}</div>
+          <div><strong>Process:</strong> ${escapeHtml(processKey)}</div>
+          <div><strong>Instance:</strong> ${escapeHtml(processInstanceId)}</div>
+          <hr class="separator-line">
+          <div><strong>Troubleshooting:</strong></div>
+          <div class="variable-indent">
+            ${troubleshootingTips.map(tip => `<div>${escapeHtml(tip)}</div>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    /**
+     * Display network/request error in a container
+     */
+    function displayRequestError(container, error, variableName, processKey, processInstanceId) {
+      container.innerHTML = `
+        <div class="error-margin">
+          ❌ Request Failed
+        </div>
+        <div class="error-container-bg">
+          <div><strong>Network/Request Error:</strong> ${escapeHtml(error.message)}</div>
+          <hr class="separator-line">
+          <div><strong>Variable:</strong> ${escapeHtml(variableName)}</div>
+          <div><strong>Process:</strong> ${escapeHtml(processKey)}</div>
+          <div><strong>Instance:</strong> ${escapeHtml(processInstanceId)}</div>
+          <hr class="separator-line">
+          <div><strong>Troubleshooting:</strong></div>
+          <div class="variable-indent">
+            <div>• Check network connection to server</div>
+            <div>• Verify server is running and accessible</div>
+            <div>• Check browser console for more details</div>
+          </div>
+        </div>
+      `;
+    }
+
+    /**
+     * Deserialize a Java serialized variable by calling the Camunda API
+     */
+    async function deserializeVariable(variableName, processKey, processInstanceId) {
+      const button = event?.target;
+      const originalText = button?.innerHTML;
+      
+      if (button) {
+        button.innerHTML = '⏳ Loading...';
+        button.disabled = true;
+      }
+      
+      try {
+        const result = await performDeserialization(variableName, processKey, processInstanceId);
+        const containerId = generateDeserializedContainerId(variableName, processKey, processInstanceId);
+        const container = document.getElementById(containerId);
+        
+        if (container) {
+          if (result.success) {
+            container.innerHTML = `
+              <div class="success-margin">
+                <strong>✅ Successfully Deserialized</strong><br>
+                <span class="text-small">
+                  Object Type: <code>${result.objectType || 'Unknown'}</code>
+                </span>
+              </div>
+              <pre class="pre-formatted">${escapeHtml(JSON.stringify(result.value, null, 2))}</pre>
+            `;
+            container.style.display = 'block';
+            
+            if (button) {
+              button.innerHTML = '✅ Deserialized';
+              button.className = button.className.replace(/\bbg-\w+\b/g, '') + ' bg-success';
+            }
+          } else {
+            displayDeserializationError(container, result, variableName, processKey, processInstanceId, false);
+            container.style.display = 'block';
+            
+            if (button) {
+              button.innerHTML = '❌ Failed';
+              button.className = button.className.replace(/\bbg-\w+\b/g, '') + ' bg-error';
+            }
+          }
+        }
+      } catch (error) {
+        const containerId = generateDeserializedContainerId(variableName, processKey, processInstanceId);
+        const container = document.getElementById(containerId);
+        
+        if (container) {
+          displayRequestError(container, error, variableName, processKey, processInstanceId);
+          container.style.display = 'block';
+        }
+        
+        if (button) {
+          button.innerHTML = originalText || 'Deserialize';
+          button.className = button.className.replace(/\bbg-\w+\b/g, '') + ' badge-orange';
+          button.disabled = false;
+        }
+      }
+    }
+
+    function setupCollapsibleHandlers(container) {
+      const headers = container.querySelectorAll('.collapsible-header');
+      headers.forEach(header => {
+        // Skip headers that have Java-specific onclick handlers (they handle their own toggle logic)
+        if (header.onclick || header.getAttribute('onclick')) {
+          return;
+        }
+        
+        header.addEventListener('click', function() {
+          const content = this.nextElementSibling;
+          if (content && content.classList.contains('collapsible-content')) {
+            // Use getComputedStyle for accurate visibility check
+            const computedStyle = window.getComputedStyle(content);
+            const isCurrentlyVisible = computedStyle.display !== 'none';
+            
+            if (!isCurrentlyVisible) {
+              content.style.display = 'block';
+              this.style.color = '#1976D2';
+              this.innerHTML = this.innerHTML.replace('Click to expand', 'Click to collapse');
+            } else {
+              content.style.display = 'none';
+              this.style.color = '#2196F3';
+              this.innerHTML = this.innerHTML.replace('Click to collapse', 'Click to expand');
+            }
+          }
+        });
+      });
+    }
+    //#endregion
+
+    //#region [================== EXECUTION VARIABLE VIEW FUNCTIONS ==================]
+    /**
+     * Functions for loading and displaying execution variables (local variables and variable history)
+     * collected by the enhanced data collection process.
+     */
+    function loadExecutionVariableView(processKey, processInstanceId) {
+      const headerElement = getCurrentDiagram();
+      headerElement.textContent = `Loading Execution Variables: ${processKey} - ${processInstanceId}`;
+      
+      // Clear current viewer since we're not displaying a diagram
+      if (currentViewer) {
+        currentViewer.destroy();
+        currentViewer = null;
+      }
+      
+      // Construct filename for execution variables based on our GetData.ps1 naming convention
+      const executionVarFileName = `${processKey}-${getBusinessKeyFromDisplay()}-${processInstanceId}-execution-variables.json`;
+      
+      // First check if we have any execution data files at all
+      fetch(addSessionParam('/list-files?type=execution-variables'))
+        .then(response => response.json())
+        .then(files => {
+          
+          if (files.includes(executionVarFileName)) {
+            // File exists, fetch it from execution data endpoint
+            return fetch(addSessionParam(`/get-file/${executionVarFileName}`));
+          } else {
+            // File not found - throw our custom error
+            throw new Error('EXECUTION_DATA_NOT_FOUND');
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          displayExecutionVariableContent(data, processKey, processInstanceId);
+        })
+        .catch(error => {
+          const headerElement = getCurrentDiagram();
+          headerElement.textContent = `Execution Variables: ${processKey} - ${processInstanceId}`;
+          
+          if (error.message === 'EXECUTION_DATA_NOT_FOUND') {
+            displayExecutionVariableContent('EXECUTION_DATA_NOT_FOUND', processKey, processInstanceId);
+          } else {
+            displayExecutionVariableContent('ERROR_LOADING_DATA', processKey, processInstanceId);
+          }
+        });
+    }
+
+    function displayExecutionVariableContent(data, processKey, processInstanceId) {
+      const canvas = getCanvas();
+      
+      // Hide zoom controls for Execution Variable View since they don't apply to variable content
+      hideZoomControls();
+      
+      // Create main container
+      const containerDiv = document.createElement('div');
+      containerDiv.className = 'monospace-container';
+      
+      if (typeof data === 'string') {
+        // Handle different error cases
+        if (data === 'EXECUTION_DATA_NOT_FOUND') {
+          // Instead of showing an error, load and display Java objects from regular variables
+          loadJavaObjectsForNewVariablesView(processKey, processInstanceId, containerDiv);
+        } else if (data === 'ERROR_LOADING_DATA') {
+          containerDiv.innerHTML = `
+            <div class="status-error-center">
+              ❌ Failed to load execution variables. Please try again.
+            </div>
+          `;
+        } else {
+          // Fallback for unexpected string response
+          containerDiv.innerHTML = `
+            <div class="status-info-center">
+              ${data}
+            </div>
+          `;
+        }
+      } else {
+        // Execution variables display case
+        const executionVariables = data.executionVariables || [];
+        const variableHistory = data.variableHistory || [];
+        const activityInstances = data.activityInstances || [];
+        
+        let htmlContent = `
+          <div class="section-container">
+            <h2 class="section-title">🔧 Execution Variables</h2>
+            <div class="section-description">
+              <strong>Process:</strong> ${processKey}<br>
+              <strong>Instance ID:</strong> ${processInstanceId}<br>
+              <strong>Collection Time:</strong> ${data.collectionTime || 'Unknown'}<br>
+              <strong>Execution Variables:</strong> ${executionVariables.length}<br>
+              <strong>Variable History Events:</strong> ${variableHistory.length}<br>
+              <strong>Activity Instances:</strong> ${activityInstances.length}
+            </div>
+          </div>
+        `;
+
+        // Display execution variables section
+        if (executionVariables.length > 0) {
+          htmlContent += `
+            <div class="section-container-large">
+              <h3 class="section-title-variables">Local Execution Variables</h3>
+              <div class="section-description-small">
+                Variables scoped to specific execution contexts within the process instance.
+              </div>
+          `;
+          
+          // Group execution variables by execution ID
+          const varsByExecution = {};
+          executionVariables.forEach(variable => {
+            const execId = variable.executionId;
+            if (!varsByExecution[execId]) {
+              varsByExecution[execId] = [];
+            }
+            varsByExecution[execId].push(variable);
+          });
+          
+          Object.entries(varsByExecution).forEach(([executionId, variables]) => {
+            const activityId = variables[0].activityId || 'Unknown';
+            htmlContent += `
+              <div class="summary-container">
+                <h4 class="summary-title">
+                  Execution: ${executionId}
+                  ${activityId !== 'Unknown' ? `<span class="summary-info"> (Activity: ${activityId})</span>` : ''}
+                </h4>
+            `;
+            
+            variables.forEach(variable => {
+              const variableHtml = createExecutionVariableDisplay(
+                variable.variableName, 
+                variable.variableValue, 
+                variable.variableType, 
+                variable.scope, 
+                variable.executionId, 
+                variable.activityId
+              );
+              htmlContent += variableHtml;
+            });
+            
+            htmlContent += '</div>';
+          });
+          
+          htmlContent += '</div>';
+        }
+
+        // Display variable history section
+        if (variableHistory.length > 0) {
+          htmlContent += `
+            <div class="section-container-large">
+              <h3 class="section-title-history">Variable Change History</h3>
+              <div class="section-description-small">
+                Chronological history of variable updates throughout process execution.
+              </div>
+          `;
+          
+          // Sort variable history by time
+          const sortedHistory = variableHistory.sort((a, b) => new Date(a.time) - new Date(b.time));
+          
+          sortedHistory.forEach((historyItem, index) => {
+            const timeDisplay = new Date(historyItem.time).toLocaleString();
+            htmlContent += `
+              <div class="history-item">
+                <div class="history-item-info">
+                  ${timeDisplay} | ${historyItem.operation || 'UPDATE'} | 
+                  ${historyItem.executionId ? `Execution: ${historyItem.executionId}` : ''} 
+                  ${historyItem.activityInstanceId ? `| Activity: ${historyItem.activityInstanceId}` : ''}
+                </div>
+                ${createExecutionVariableDisplay(
+                  historyItem.variableName, 
+                  historyItem.value, 
+                  historyItem.variableType, 
+                  'history', 
+                  historyItem.executionId, 
+                  historyItem.activityInstanceId
+                )}
+              </div>
+            `;
+          });
+          
+          htmlContent += '</div>';
+        }
+
+        // Display activity instances section (summary)
+        if (activityInstances.length > 0) {
+          htmlContent += `
+            <div class="section-container-large">
+              <h3 class="section-title-summary">Activity Instance Summary</h3>
+              <div class="section-description-small">
+                Summary of activity instances with execution details.
+              </div>
+              <div class="summary-background">
+                <strong>Total Activity Instances:</strong> ${activityInstances.length}<br>
+                <strong>Activity Types:</strong> ${[...new Set(activityInstances.map(a => a.activityType))].join(', ')}<br>
+                <strong>Start Time Range:</strong> ${activityInstances.length > 0 ? 
+                  `${new Date(Math.min(...activityInstances.map(a => new Date(a.startTime)))).toLocaleString()} - 
+                   ${new Date(Math.max(...activityInstances.map(a => new Date(a.endTime || a.startTime)))).toLocaleString()}` : 'N/A'}
+              </div>
+            </div>
+          `;
+        }
+
+        // If no data at all
+        if (executionVariables.length === 0 && variableHistory.length === 0 && activityInstances.length === 0) {
+          htmlContent += `
+            <div class="status-info-center">
+              No execution variables or variable history found for this process instance.<br>
+              <span class="status-text-small">
+                This data is collected by the enhanced execution variable collection process in GetData.ps1.
+              </span>
+            </div>
+          `;
+        }
+        
+        containerDiv.innerHTML = htmlContent;
+        
+        // Add click handlers for collapsible content
+        setupCollapsibleHandlers(containerDiv);
+      }
+      
+      canvas.innerHTML = '';
+      canvas.appendChild(containerDiv);
+    }
+
+    // Function to load and display Java objects when execution data is not available
+    async function loadJavaObjectsForNewVariablesView(processKey, processInstanceId, containerDiv) {
+      try {
+        // Fetch regular variables to extract Java objects
+        const response = await fetch(addSessionParam('/process-variables'));
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const variables = data.variables || [];
+        
+        // Filter only Java objects
+        const javaObjects = {};
+        for (const varData of variables) {
+          if (varData.type === 'Object' && typeof varData.value === 'string' && varData.value.length > 0) {
+            javaObjects[varData.name] = varData;
+          }
+        }
+        
+        let htmlContent = `
+          <div class="section-container">
+            <h2 class="section-title-java">☕ Java Serialized Objects</h2>
+            <div class="section-description">
+              <strong>Process:</strong> ${processKey}<br>
+              <strong>Instance ID:</strong> ${processInstanceId}<br>
+              <strong>Java Objects Found:</strong> ${Object.keys(javaObjects).length}
+            </div>
+            <div class="warning-info">
+              <div class="warning-info-text-only">
+                ℹ️ <strong>Note:</strong> These are Java serialized objects that require deserialization to view their contents. 
+                Click on any object below to deserialize and inspect its data.
+              </div>
+            </div>
+          </div>
+        `;
+        
+        if (Object.keys(javaObjects).length > 0) {
+          // Display Java objects
+          for (const [varName, varData] of Object.entries(javaObjects)) {
+            const variableHtml = createVariableDisplay(varName, varData.value, varData.type, varData.scope, varData.processKey, varData.processInstanceId, true);
+            htmlContent += variableHtml;
+          }
+        } else {
+          htmlContent += `
+            <div class="status-info-center">
+              No Java serialized objects found in this process instance.
+            </div>
+          `;
+        }
+        
+        containerDiv.innerHTML = htmlContent;
+        
+        // Add click handlers for collapsible content and Java deserialization
+        setupCollapsibleHandlers(containerDiv);
+        
+      } catch (error) {
+        console.error('Error loading Java objects:', error);
+        containerDiv.innerHTML = `
+          <div class="status-error-center">
+            ❌ Failed to load Java objects. Please try again.
+          </div>
+        `;
+      }
+      
+      const canvas = getCanvas();
+      canvas.innerHTML = '';
+      canvas.appendChild(containerDiv);
+    }
+
+    function createExecutionVariableDisplay(name, value, type, scope, executionId = '', activityId = '') {
+      let valueDisplay = '';
+      
+      // CHECK FOR JAVA SERIALIZED DATA IN STRING VALUES
+      // Java serialization signature: rO0ABX (base64 encoded java serialization header)
+      if (typeof value === 'string' && value.startsWith('rO0ABX')) {
+        valueDisplay = createJavaSerializedContent(name, 'execution', executionId, true);
+      }
+      // Handle different value types
+      else if (value === null || value === undefined) {
+        valueDisplay = '<span class="text-muted">null</span>';
+      } else if (typeof value === 'object') {
+        valueDisplay = createCollapsibleObject(value, 'collapsible-header clickable-link', 'collapsible-content collapsible-content-static');
+      } else if (typeof value === 'string') {
+        valueDisplay = createCollapsibleString(value, true);
+      } else {
+        valueDisplay = `<span class="text-primary">${String(value)}</span>`;
+      }
+      
+      return `
+        <div class="variable-list-container">
+          <div class="variable-list-header">
+            <strong class="variable-list-name">${escapeHtml(name)}</strong>
+            <span class="variable-list-scope-${scope.toLowerCase()}">${scope.toUpperCase()}</span>
+            <span class="variable-list-type">${type || 'unknown'}</span>
+            ${executionId ? `<span class="execution-badge">Exec: ${executionId.substring(0, 8)}...</span>` : ''}
+          </div>
+          <div class="variable-list-content">
+            ${valueDisplay}
+          </div>
+        </div>
+      `;
+    }
+
+    function getBusinessKeyFromDisplay() {
+      const claimDisplay = document.querySelector('.business-key-display');
+      if (claimDisplay && claimDisplay.textContent) {
+        return claimDisplay.textContent.replace('Business Key: ', '').trim();
+      }
+      
+      // Fallback to input field
+      const claimInput = getBusinessKeyInput();
+      return claimInput ? claimInput.value.trim() : '';
+    }
+    //#endregion
+
+    //#region [================== CLAIM HISTORY MANAGEMENT ==================]
+    /**
+     * Functions for managing Business Key history and auto-completion features.
+     * Stores recent Business Keys per environment for quick access and re-execution.
+     */
+    async function loadProcessHistory() {
+      try {
+        const response = await fetch(addSessionParam('/process-history'));
+        const data = await response.json();
+        
+        // Set selected environment (use exact value from claim history)
+        const environmentSelect = getEnvironmentSelect();
+        if (data.selected && environmentSelect) {
+          // Use exact environment name from claim history (matches config filename)
+          // Wait a bit for the config files to load first
+          setTimeout(() => {
+            environmentSelect.value = data.selected;
+          }, 100);
+        }
+        
+        // Populate Business Key dropdown for current environment
+        setTimeout(() => {
+          updateProcessHistoryDropdown(data);
+          // Also populate the input field with most recent claim for current environment
+          populateInputFromHistory(data);
+        }, 200);
+        
+        return data;
+      } catch (error) {
+        console.error('Error loading claim history:', error);
+        return null;
+      }
+    }
+    
+    /**
+     * Restore the current Business Key from server memory on page refresh.
+     * This maintains the Business Key header display when the user refreshes the page.
+     */
+    async function restoreCurrentBusinessKey() {
+      try {
+        const response = await fetch(addSessionParam('/current-process'));
+        const data = await response.json();
+        
+        if (data.businessKey) {
+          updateBusinessKeyDisplay(data.businessKey);
+        }
+      } catch (error) {
+        console.error('Error restoring current Business Key:', error);
+      }
+    }
+    
+    function populateInputFromHistory(historyData) {
+      const businessKeyInput = getBusinessKeyInput();
+      const environmentSelect = getEnvironmentSelect();
+      
+      if (!historyData || !businessKeyInput || !environmentSelect) {
+        return;
+      }
+      
+      // Never auto-populate the input - only set placeholder and button state
+      const currentValue = businessKeyInput.value.trim();
+      const currentEnv = environmentSelect.value || 'local';
+      const envHistory = historyData.environments[currentEnv] || [];
+      
+      if (envHistory.length > 0) {
+        // Set placeholder text
+        if (!currentValue) {
+          businessKeyInput.placeholder = 'Select from history or enter new Business Key';
+          
+          // Disable button since input is empty
+          const button = getProcessButton();
+          if (button) {
+            button.disabled = true;
+          }
+        }
+      } else {
+        // No history for this environment - set default placeholder
+        if (!currentValue) {
+          businessKeyInput.placeholder = 'Enter Business Key';
+          
+          // Disable button since we have no Business Key
+          const button = getProcessButton();
+          if (button) {
+            button.disabled = true;
+          }
+        }
+      }
+    }
+
+    function updateProcessHistoryDropdown(historyData) {
+      // Store the history data globally for autocomplete
+      window.currentHistoryData = historyData;
+    }
+
+    function showAutocomplete(filter = '') {
+      const historyDropdown = getHistoryDropdown();
+      const environmentSelect = getEnvironmentSelect();
+      
+      if (!window.currentHistoryData || !environmentSelect) {
+        historyDropdown.style.display = 'none';
+        return;
+      }
+      
+      // Use exact environment value from dropdown (matches config filename)
+      const currentEnv = environmentSelect.value;
+      const envHistory = window.currentHistoryData.environments[currentEnv] || [];
+      
+      // Filter history based on current input
+      const filteredHistory = envHistory.filter(businessKey => 
+        businessKey.includes(filter) || filter === ''
+      );
+      
+      // Clear and rebuild dropdown
+      historyDropdown.innerHTML = '';
+      
+      if (filteredHistory.length === 0) {
+        historyDropdown.style.display = 'none';
+        return;
+      }
+      
+      filteredHistory.forEach(businessKey => {
+        const div = document.createElement('div');
+        div.className = 'claim-history-item';
+        div.textContent = businessKey;
+        
+        // Highlight matching text if there's a filter
+        if (filter) {
+          const highlightedText = businessKey.replace(
+            new RegExp(filter, 'gi'), 
+            `<strong class="highlighted-text">$&</strong>`
+          );
+          div.innerHTML = highlightedText;
+        }
+        
+        div.onclick = function() {
+          const input = getBusinessKeyInput();
+          const button = getProcessButton();
+          input.value = businessKey;
+          hideAutocomplete();
+          
+          // Trigger validation and enable button only if not currently fetching
+          if (!isFetching) {
+            input.classList.remove('invalid');
+            button.disabled = false;
+            getValidationMessage().textContent = '';
+          }
+          
+          input.focus();
+        };
+        
+        div.onmouseover = function() { 
+          this.style.backgroundColor = '#f8f9fa'; 
+        };
+        div.onmouseout = function() { 
+          this.style.backgroundColor = 'white'; 
+        };
+        
+        historyDropdown.appendChild(div);
+      });
+      
+      historyDropdown.style.display = 'block';
+    }
+
+    function hideAutocomplete() {
+      const historyDropdown = getHistoryDropdown();
+      historyDropdown.style.display = 'none';
+    }
+
+    // Handle dropdown/input switching
+    function setupBusinessKeyControls() {
+      const businessKeyInput = getBusinessKeyInput();
+      const environmentSelect = getEnvironmentSelect();
+      const historyDropdown = getHistoryDropdown();
+      
+      if (businessKeyInput) {
+        // Show autocomplete when input gets focus
+        businessKeyInput.addEventListener('focus', function() {
+          showAutocomplete(this.value);
+        });
+        
+        // Update autocomplete as user types
+        businessKeyInput.addEventListener('input', function() {
+          showAutocomplete(this.value);
+        });
+        
+        // Handle keyboard navigation
+        businessKeyInput.addEventListener('keydown', function(e) {
+          const items = historyDropdown.querySelectorAll('div');
+          let selectedIndex = -1;
+          
+          // Find currently selected item
+          for (let i = 0; i < items.length; i++) {
+            if (items[i].style.backgroundColor === 'rgb(232, 240, 254)') {
+              selectedIndex = i;
+              break;
+            }
+          }
+          
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            // Clear previous selection
+            items.forEach(item => item.style.backgroundColor = 'white');
+            
+            // Select next item
+            selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+            if (items[selectedIndex]) {
+              items[selectedIndex].style.backgroundColor = '#e8f0fe';
+            }
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            // Clear previous selection
+            items.forEach(item => item.style.backgroundColor = 'white');
+            
+            // Select previous item
+            selectedIndex = Math.max(selectedIndex - 1, 0);
+            if (items[selectedIndex]) {
+              items[selectedIndex].style.backgroundColor = '#e8f0fe';
+            }
+          } else if (e.key === 'Enter' && selectedIndex >= 0) {
+            e.preventDefault();
+            // Use selected item
+            this.value = items[selectedIndex].textContent;
+            hideAutocomplete();
+          } else if (e.key === 'Escape') {
+            hideAutocomplete();
+          }
+        });
+      }
+      
+      // Hide autocomplete when clicking outside
+      document.addEventListener('click', function(event) {
+        if (!businessKeyInput.contains(event.target) && !historyDropdown.contains(event.target)) {
+          hideAutocomplete();
+        }
+      });
+      
+      // When environment changes, update claim history
+      if (environmentSelect) {
+        environmentSelect.addEventListener('change', async function() {
+          // Clear the Business Key textbox when environment changes
+          const claimInput = getBusinessKeyInput();
+          if (claimInput) {
+            claimInput.value = '';
+            // Clear any validation messages
+            const validationMessage = getValidationMessage();
+            if (validationMessage) {
+              validationMessage.textContent = '';
+            }
+            // Remove invalid styling
+            claimInput.classList.remove('invalid');
+          }
+          
+          // Save the selected environment using exact value from dropdown
+          const environment = this.value;
+          
+          try {
+            await fetch(addSessionParam('/process-history'), {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                environment: environment,
+                businessKey: 'dummy' // Just to trigger environment save
+              })
+            });
+          } catch (error) {
+            console.error('Error saving environment:', error);
+          }
+          
+          // Clear the input field to show available choices
+          const businessKeyInput = getBusinessKeyInput();
+          const claimButton = getProcessButton();
+          if (businessKeyInput) {
+            businessKeyInput.value = '';
+            businessKeyInput.placeholder = 'Select from history or enter new Business Key';
+            // Focus the input to show cursor and make it ready for interaction
+            setTimeout(() => businessKeyInput.focus(), 100);
+          }
+          
+          // Enable button since empty input is allowed (can use current claim)
+          if (claimButton) {
+            claimButton.disabled = false;
+          }
+          
+          // Update the history data for the NEW environment without resetting environment selection
+          try {
+            const response = await fetch(addSessionParam('/process-history'));
+            const historyData = await response.json();
+            if (historyData) {
+              updateProcessHistoryDropdown(historyData);
+              
+              // Show autocomplete to display available choices after input is focused
+              setTimeout(() => showAutocomplete(''), 150);
+            }
+          } catch (error) {
+            console.error('Error loading history for new environment:', error);
+          }
+        });
+      }
+    }
+
+    async function saveProcessToHistory(environment, businessKey) {
+      if (!environment || !businessKey) return;
+      
+      try {
+        const response = await fetch(addSessionParam('/process-history'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            environment: environment, // Use exact environment name
+            businessKey: businessKey
+          })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.history) {
+            updateProcessHistoryDropdown(data.history);
+          }
+        }
+      } catch (error) {
+        console.error('Error saving claim to history:', error);
+      }
+    }
+    //#endregion
+
+    //#region [================== UTILITY FUNCTIONS ==================]
+    /**
+     * Helper function to display error messages with consistent styling
+     */
+    // =================================================================
+    // Standardized Message System
+    // =================================================================
+    
+    /**
+     * Shows an error message with consistent styling
+     */
+    function showErrorMessage(message, includeProgressCounter = false, counterText = '') {
+      showMessage(message, 'error', includeProgressCounter, counterText);
+    }
+    
+    /**
+     * Shows a success message with consistent styling
+     */
+    function showSuccessMessage(message, includeProgressCounter = false, counterText = '') {
+      showMessage(message, 'success', includeProgressCounter, counterText);
+    }
+    
+    /**
+     * Shows a warning message with consistent styling
+     */
+    function showWarningMessage(message, includeProgressCounter = false, counterText = '') {
+      showMessage(message, 'warning', includeProgressCounter, counterText);
+    }
+    
+    /**
+     * Shows an info message with consistent styling
+     */
+    function showInfoMessage(message, includeProgressCounter = false, counterText = '') {
+      showMessage(message, 'info', includeProgressCounter, counterText);
+    }
+    
+    /**
+     * Core message display function with standardized styling
+     */
+    function showMessage(message, type = 'info', includeProgressCounter = false, counterText = '') {
+      const progressMessage = getProgressMessage();
+      
+      if (includeProgressCounter && counterText) {
+        const progressCounter = getProgressCounter();
+        progressCounter.textContent = counterText;
+      }
+      
+      // Message type styling
+      const styles = {
+        error: { color: '#d32f2f', icon: '❌', cssClass: 'message-error' },
+        success: { color: '#2e7d32', icon: '✅', cssClass: 'message-success' },
+        warning: { color: '#f57c00', icon: '⚠️', cssClass: 'message-warning' },
+        info: { color: '#1976d2', icon: 'ℹ️', cssClass: 'message-info' }
+      };
+      
+      const style = styles[type] || styles.info;
+      
+      // Clear previous message type classes
+      progressMessage.className = progressMessage.className.replace(/message-(error|success|warning|info)/g, '');
+      
+      progressMessage.style.display = 'block';
+      progressMessage.style.color = style.color;
+      progressMessage.style.fontWeight = 'bold';
+      progressMessage.classList.add(style.cssClass);
+      progressMessage.textContent = `${style.icon} ${message}`;
+    }
+    
+    /**
+     * Hides any currently displayed message
+     */
+    function hideMessage() {
+      const progressMessage = getProgressMessage();
+      progressMessage.style.display = 'none';
+      progressMessage.textContent = '';
+      // Clear any message type classes
+      progressMessage.className = progressMessage.className.replace(/message-(error|success|warning|info)/g, '');
+    }
+
+    /**
+     * Helper functions for accessing DOM elements by their IDs.
+     * These functions provide clean access to UI elements throughout the application.
+     */
+    function getEnvironmentSelect() {
+      return document.getElementById('environmentSelect');
+    }
+
+    function getBusinessKeyInput() {
+      return document.getElementById('businessKeyInput');
+    }
+
+    function getMaxRunsInput() {
+      return document.getElementById('maxRunsInput');
+    }
+
+    function getProcessButton() {
+      return document.getElementById('getProcessButton');
+    }
+
+    /**
+     * Enable or disable the claim fetching UI controls to prevent concurrent operations.
+     * @param {boolean} enabled - Whether to enable (true) or disable (false) the controls
+     */
+    function setProcessFetchingUIState(enabled) {
+      const businessKeyInput = getBusinessKeyInput();
+      const environmentSelect = getEnvironmentSelect();
+      const maxRunsInput = getMaxRunsInput();
+      const button = getProcessButton();
+      
+      if (businessKeyInput) businessKeyInput.disabled = !enabled;
+      if (environmentSelect) environmentSelect.disabled = !enabled;
+      if (maxRunsInput) maxRunsInput.disabled = !enabled;
+      if (button) button.disabled = !enabled;
+    }
+
+    function getProgressCounter() {
+      return document.getElementById('progressCounter');
+    }
+
+    function getProgressMessage() {
+      return document.getElementById('progressMessage');
+    }
+
+    function getValidationMessage() {
+      return document.getElementById('validationMessage');
+    }
+
+    function getFileList() {
+      return document.getElementById('fileList');
+    }
+
+    function getCanvas() {
+      return document.getElementById('canvas');
+    }
+
+    function getCurrentDiagram() {
+      return document.getElementById('currentDiagram');
+    }
+
+    function getLogActions() {
+      return document.getElementById('logActions');
+    }
+
+    function getHistoryDropdown() {
+      return document.getElementById('historyDropdown');
+    }
+
+    function getBusinessKeyDisplay() {
+      return document.getElementById('businessKeyDisplay');
+    }
+
+    /**
+     * Update the Business Key display in the header
+     */
+    function updateBusinessKeyDisplay(businessKey) {
+      const businessKeyDisplay = getBusinessKeyDisplay();
+      if (businessKey) {
+        businessKeyDisplay.textContent = `Business Key: ${businessKey}`;
+        businessKeyDisplay.style.display = 'block';
+      } else {
+        businessKeyDisplay.style.display = 'none';
+      }
+    }
+    //#endregion
   </script>
+
+  <!-- Log Modal -->
+  <div id="logModal" class="log-modal">
+    <div class="log-modal-content">
+      <div class="log-modal-header">
+        <h3 class="log-modal-title" id="logModalTitle">Session Log</h3>
+        <button class="log-modal-close" onclick="closeLogModal()">&times;</button>
+      </div>
+      <div class="log-modal-body" id="logModalBody">
+        <!-- Log content will be inserted here -->
+      </div>
+    </div>
+  </div>
 </body>
 </html>

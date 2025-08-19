@@ -1,0 +1,19 @@
+# Camunda Viewer Configuration Template
+# Copy this file to 'config-local.cfg' and update the values for your environment
+
+# Camunda REST API Base URL
+# Examples:
+#   http://localhost:8080/engine-rest          (local development)
+#   https://your-camunda-server.com/engine-rest (remote server)
+BASE_URL=http://localhost:8080/engine-rest
+
+# Authentication credentials for Camunda REST API
+# Replace with your actual username and password
+USERNAME=your-username
+PASSWORD=your-password
+
+# Proxy settings (optional - only needed for environments behind a proxy)
+# Uncomment and configure these lines if your environment requires proxy access:
+# PROXY_SERVER=127.0.0.1:9443
+# PROXY_USERNAME=your-proxy-username
+# PROXY_PASSWORD=your-proxy-password

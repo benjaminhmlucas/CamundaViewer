@@ -1,0 +1,2140 @@
+/*#region [================== LAYOUT STYLES ==================]*/
+body { 
+  font-family: sans-serif; 
+  margin: 0; 
+  padding: 0;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Left menu panel */
+#leftPanel {
+  width: 25%;
+  background: #f5f5f5;
+  border-right: 1px solid #ddd;
+  overflow-y: auto;
+  padding: 1em;
+  box-sizing: border-box;
+  min-width: 200px;
+}
+
+/* Resizable splitter */
+#splitter {
+  width: 4px;
+  background: #ddd;
+  cursor: col-resize;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+#splitter:hover {
+  background: #007acc;
+}
+
+/* Main content area */
+#rightPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 300px;
+}
+
+#header {
+  padding: 1em;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+}
+
+.header-left {
+  flex: 1;
+  text-align: left;
+}
+
+.header-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.business-key-display {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #2196F3;
+  background: #e3f2fd;
+  padding: 0.5em 1em;
+  border-radius: 4px;
+  border: 1px solid #90caf9;
+  display: none; /* Hidden by default until process is loaded */
+}
+
+#canvas { 
+  flex: 1;
+  background: #fafafa;
+  position: relative;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  margin: 0 0 0.5em 0;
+  font-size: 1.5em;
+  color: #333;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.2em;
+  color: #666;
+}
+/*#endregion*/
+
+/*#region [================== FORM STYLES ==================]*/
+.menu-title {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-bottom: 1em;
+  color: #333;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 0.5em;
+}
+
+/* Process Input Section */
+.process-input-section {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 1em;
+  margin-bottom: 1em;
+}
+
+.input-group {
+  display: flex;
+  gap: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+#businessKeyInput {
+  flex: 1;
+  padding: 0.5em;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 14px;
+}
+
+#businessKeyInput:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+#businessKeyInput.invalid {
+  border-color: #f44336;
+  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2);
+}
+
+#getProcessButton {
+  padding: 0.5em 1em;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+#getProcessButton:hover:not(:disabled) {
+  background: #1976D2;
+}
+
+#getProcessButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.validation-message {
+  color: #f44336;
+  font-size: 12px;
+  min-height: 16px;
+  margin-bottom: 0.5em;
+}
+
+.progress-counter {
+  color: #2196F3;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  min-height: 18px;
+}
+
+.progress-message {
+  color: #666;
+  font-size: 12px;
+  min-height: 16px;
+  font-family: monospace;
+  background: #f9f9f9;
+  padding: 0.3em;
+  border-radius: 3px;
+  border: 1px solid #e0e0e0;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+/* Message type styling enhancements */
+.progress-message.message-error {
+  background: #ffebee;
+  border-color: #ffcdd2;
+}
+
+.progress-message.message-success {
+  background: #e8f5e8;
+  border-color: #c8e6c9;
+}
+
+.progress-message.message-warning {
+  background: #fff8e1;
+  border-color: #ffecb3;
+}
+
+.progress-message.message-info {
+  background: #e3f2fd;
+  border-color: #bbdefb;
+}
+
+/* Log action buttons */
+.log-actions {
+  margin-top: 0.5em;
+  display: flex;
+  gap: 0.5em;
+}
+
+.log-button {
+  padding: 0.4em 0.8em;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s;
+  flex: 1;
+}
+
+.log-button:hover {
+  background: #45a049;
+}
+
+.log-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.quit-button {
+  width: 48%;
+  padding: 0.2em 0;
+  background: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 1%;
+  box-sizing: border-box;
+}
+
+.quit-button:hover {
+  background: #004499;
+}
+
+.quit-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.new-tab-button {
+  width: 48%;
+  padding: 0.2em 0;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 1%;
+  box-sizing: border-box;
+}
+
+.new-tab-button:hover {
+  background: #1e7e34;
+}
+/*#endregion*/
+
+/*#region [================== INTERACTIVE ELEMENTS ==================]*/
+/* Table zoom controls */
+.table-zoom-controls {
+  position: relative;
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 6px;
+  padding: 5px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.zoom-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.zoom-button:hover {
+  background: #0056b3;
+}
+
+.copy-table-button {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-left: 10px;
+  display: none;
+}
+
+.copy-table-button:hover {
+  background: #218838;
+}
+
+.copy-table-button:active {
+  background: #1e7e34;
+  transform: translateY(1px);
+}
+
+.zoom-input {
+  background: white;
+  border: 2px solid #007bff;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #333;
+  width: 60px;
+  text-align: center;
+}
+
+.zoom-input:focus {
+  outline: none;
+  border-color: #0056b3;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Spinner styles */
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2em;
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1em;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spinner-text {
+  color: #666;
+  font-size: 0.9em;
+}
+/*#endregion*/
+
+/*#region [================== PROCESS HIERARCHY STYLES ==================]*/
+.process-group {
+  margin-bottom: 1em;
+}
+
+.process-header {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.5em;
+  background: #e8e8e8;
+  border-radius: 4px;
+  margin-bottom: 0.3em;
+  transition: background 0.2s;
+}
+
+.process-header:hover {
+  background: #d0d0d0;
+}
+
+.process-header.expanded {
+  background: #2196F3;
+  color: white;
+}
+
+.collapse-icon {
+  margin-right: 0.5em;
+  font-size: 12px;
+  transition: transform 0.2s;
+}
+
+.collapse-icon.expanded {
+  transform: rotate(90deg);
+}
+
+.process-title {
+  font-weight: bold;
+  flex: 1;
+}
+
+.process-time {
+  font-size: 11px;
+  font-family: monospace;
+  opacity: 0.8;
+}
+
+.process-content {
+  display: none;
+  margin-left: 1em;
+}
+
+.process-content.expanded {
+  display: block;
+}
+
+.bpmn-link {
+  display: block;
+  padding: 0.4em 0.8em;
+  color: #1976D2;
+  text-decoration: none;
+  border-radius: 3px;
+  margin-bottom: 0.3em;
+  transition: background 0.2s;
+  font-size: 14px;
+}
+
+.bpmn-link:hover {
+  background: #e3f2fd;
+  text-decoration: none;
+}
+
+.bpmn-link.active {
+  background: #1976D2;
+  color: white;
+}
+
+.variable-link {
+  display: block;
+  padding: 0.3em 0.6em;
+  color: #9C27B0;
+  text-decoration: none;
+  border-radius: 3px;
+  margin-bottom: 0.2em;
+  transition: background 0.2s;
+  font-size: 13px;
+}
+
+.variable-link:hover {
+  background: #f3e5f5;
+  text-decoration: none;
+}
+
+.variable-link.active {
+  background: #9C27B0;
+  color: white;
+}
+
+.dmn-links {
+  margin-left: 1em;
+  margin-top: 0.3em;
+}
+
+.dmn-link {
+  display: flex;
+  align-items: center;
+  padding: 0.3em 0.6em;
+  color: #4CAF50;
+  text-decoration: none;
+  border-radius: 3px;
+  margin-bottom: 0.2em;
+  transition: background 0.2s;
+  font-size: 12px;
+}
+
+.dmn-link:hover {
+  background: #e8f5e8;
+  text-decoration: none;
+}
+
+.dmn-link.active {
+  background: #4CAF50;
+  color: white;
+}
+
+.dmn-name {
+  flex: 1;
+  margin-right: 0.5em;
+}
+
+.execution-time {
+  font-family: monospace;
+  font-size: 10px;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+.bpmn-link .execution-time {
+  margin-left: 0.5em;
+}
+/*#endregion*/
+
+/*#region [================== COMMON COMPONENT STYLES ==================]*/
+/* Standard info header used in decision tables and literal expressions */
+.info-header {
+  margin-bottom: 15px;
+  padding: 10px;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Warning container for notifications */
+.warning-container {
+  margin: 8px 0;
+  padding: 8px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+}
+
+/* Content wrapper with light background */
+.content-wrapper {
+  padding: 15px;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Viewer container styles */
+.viewer-container {
+  width: 100%;
+  height: 100%;
+  background: white;
+  position: relative;
+}
+
+.viewer-inner {
+  width: 100%;
+  height: calc(100% - 50px);
+  position: relative;
+}
+
+/* Error message container */
+.error-container {
+  padding: 20px;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  color: #721c24;
+  text-align: center;
+}
+
+/* Reference decision container */
+.reference-container {
+  padding: 30px;
+  text-align: center;
+  color: #495057;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  margin: 20px;
+}
+
+/* DMN table content container */
+.dmn-table-content {
+  width: 100%;
+  flex: 1;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dmn-table-content.has-margin {
+  margin-bottom: 0;
+}
+
+/* Pan hint for BPMN viewer */
+.pan-hint {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* Manual DMN container layout */
+.manual-dmn-container {
+  width: 100%;
+  height: 100%;
+  background: white;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Table zoom container layout */
+.table-zoom-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+  margin: 0;
+  padding: 20px;
+}
+
+/* DMN execution status styles */
+.execution-success {
+  margin: 5px 0 0 0;
+}
+
+.execution-success p {
+  margin: 0;
+  color: #28a745;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.execution-success p:last-child {
+  margin: 3px 0 0 0;
+  font-size: 10px;
+}
+
+.execution-warning {
+  margin: 8px 0;
+  padding: 8px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+}
+
+.execution-warning p:first-child {
+  margin: 0;
+  color: #856404;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.execution-warning p:last-child {
+  margin: 3px 0 0 0;
+  color: #6c757d;
+  font-size: 11px;
+}
+
+/* Input value display in DMN tables */
+.input-value-display {
+  font-size: 0.9em; /* Relative to parent font size for zoom support */
+  margin-top: 2px;
+  font-weight: bold;
+}
+
+/* Input value type colors for DMN tables */
+.input-value-string { color: #0074D9; }
+.input-value-number { color: #FF4136; }
+.input-value-boolean { color: #2ECC40; }
+.input-value-null { color: #888; }
+.input-value-default { color: #333; }
+
+/* Form labels */
+.form-label {
+  display: block;
+  margin-bottom: 0.3em;
+  font-size: 0.9em;
+  color: #666;
+}
+
+/* Connection error styling */
+.connection-error {
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: #d32f2f;
+}
+
+/* Reference description text */
+.reference-description {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+/* Reference container content styles */
+.reference-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.reference-title {
+  margin-bottom: 12px;
+  color: #343a40;
+}
+
+.reference-key {
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 500;
+}
+/*#endregion*/
+
+/*#region [================== UI COMPONENTS ==================]*/
+/* Quit section layout */
+.quit-section {
+  padding: 0.5em;
+  margin-right: 0.5em;
+  background: #f9f9f9;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  text-align: center;
+  display: flex;
+  gap: 2%;
+}
+
+/* Button container styles */
+.button-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-container-with-margin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+}
+
+/* History dropdown */
+.history-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  display: none;
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Process history item */
+.process-history-item {
+  padding: 0.75em 1em;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  font-family: monospace;
+}
+
+/* Exit icon styling */
+.exit-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* Canvas placeholder message */
+.canvas-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+  font-size: 14px;
+}
+/*#endregion*/
+
+/*#region [================== LAYOUT UTILITIES ==================]*/
+/* Input container positioning */
+.input-container-relative {
+  position: relative;
+  width: calc(100% - 120px);
+  display: inline-block;
+}
+
+/* Full width input style */
+.input-full-width {
+  width: 100%;
+  padding: 0.5em;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* Input group with margin */
+.input-group-with-margin {
+  margin-top: 0.5em;
+}
+
+/* Flex layout utilities */
+.flex-gap {
+  display: flex;
+  gap: 1em;
+}
+
+.flex-full {
+  flex: 1;
+}
+
+.flex-fixed {
+  flex: 0 0 120px;
+}
+
+/* Center message containers */
+.center-message {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+/* Monospace content container */
+.monospace-container {
+  width: 100%;
+  height: 100%;
+  background: white;
+  padding: 20px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+/*#endregion*/
+
+/*#region [================== TEXT AND TYPOGRAPHY ==================]*/
+/* Text utilities */
+.text-with-margin {
+  margin-right: 10px;
+}
+
+.percentage-text {
+  font-size: 10px;
+  color: #666;
+  align-self: center;
+}
+
+.large-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.small-text {
+  font-size: 14px;
+}
+
+.medium-text {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+/* Menu title variations */
+.menu-title-bordered {
+  margin-bottom: 0.8em;
+  font-size: 1.0em;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Highlighted search text */
+.highlighted-text {
+  background: #ffffcc;
+}
+
+/* Status message with spacing */
+.status-message-with-spacing {
+  font-size: 14px;
+  margin-top: 10px;
+  display: block;
+}
+
+/* Auto-deserializing message */
+.auto-deserializing {
+  color: #ff9800;
+  font-weight: bold;
+}
+/*#endregion*/
+
+/*#region [================== GENERAL UTILITIES ==================]*/
+/* Hidden elements */
+.hidden {
+  display: none;
+}
+
+/* Visibility utilities */
+.visible {
+  display: block;
+}
+
+.flex-visible {
+  display: flex;
+}
+
+/* Text color utilities */
+.text-black {
+  color: #000 !important;
+}
+
+.text-success {
+  color: #28a745;
+}
+
+.text-warning {
+  color: #ff9800;
+}
+
+.text-error {
+  color: #d32f2f;
+}
+
+/* Background color utilities */
+.bg-success {
+  background: #28a745;
+}
+
+.bg-clear {
+  background: transparent;
+}
+
+/* Display state utilities */
+.display-block {
+  display: block;
+}
+
+.display-none {
+  display: none;
+}
+
+/* Position utilities */
+.position-fixed {
+  position: fixed;
+}
+
+/* Margin utilities */
+.margin-left-10 {
+  margin-left: 10px;
+}
+
+.margin-left-20 {
+  margin-left: 20px;
+}
+
+.margin-bottom-5 {
+  margin-bottom: 5px;
+}
+
+.margin-bottom-10 {
+  margin-bottom: 10px;
+}
+
+/* Font weight utilities */
+.font-bold {
+  font-weight: bold;
+}
+
+.font-normal {
+  font-weight: normal;
+}
+
+/* Process hierarchy utilities */
+.process-instance {
+  border-left: 2px solid #ddd;
+  padding-left: 10px;
+}
+
+/* Consolidated badge system - replaces all individual badge classes */
+.badge {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: white;
+  margin-right: 10px;
+}
+
+.badge-small {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  color: white;
+  margin-right: 6px;
+}
+
+.badge-orange { background: #ff9800; }
+.badge-blue { background: #2196F3; }
+.badge-green { background: #4CAF50; }
+.badge-purple { background: #9C27B0; }
+.badge-grey { background: #666; }
+.badge-brown { background: #795548; }
+.badge-slate { background: #607D8B; }
+
+/* Consolidated button state utilities */
+.button-success-state {
+  background: #28a745 !important;
+  color: white !important;
+}
+
+.button-reset-state {
+  background: '';
+}
+
+/* Consolidated collapsible and visibility utilities */
+.collapsible-content.collapsible-static,
+.collapsible-content-orange.collapsible-static,
+.collapsible-content.collapsible-expanded,
+.collapsible-content-orange.collapsible-expanded {
+  display: block !important;
+}
+
+.collapsible-content.collapsible-collapsed,
+.collapsible-content-orange.collapsible-collapsed {
+  display: none !important;
+}
+
+.show-flex { display: flex !important; }
+.show-inline-block { display: inline-block !important; }
+.show-block { display: block !important; }
+.hide { display: none !important; }
+/*#endregion*/
+
+/*#region [================== BPMN PAN CONTROLS ==================]*/
+/* BPMN pan interaction styles */
+.bpmn-pan-container { 
+  cursor: default !important; 
+}
+
+.bpmn-pan-container.ctrl-pressed { 
+  cursor: grab !important; 
+}
+
+.bpmn-pan-container.panning { 
+  cursor: grabbing !important; 
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+.bpmn-pan-container.panning * { 
+  cursor: grabbing !important; 
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+/*#endregion*/
+
+/*#region [================== DMN TABLE SCROLLBARS ==================]*/
+/* Enhanced scrollbar styles for DMN tables */
+.dmn-table-scroll-container {
+  scrollbar-width: auto;
+  scrollbar-color: #888 #f1f1f1;
+}
+
+.dmn-table-scroll-container::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.dmn-table-scroll-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 6px;
+}
+
+.dmn-table-scroll-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 6px;
+}
+
+.dmn-table-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+/*#endregion*/
+
+/*#region [================== DMN TABLE COMPONENTS ==================]*/
+/* DMN table header container */
+.dmn-header-container {
+  margin: 0 0 15px 0;
+  padding: 10px 20px;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* DMN header title */
+.dmn-header-title {
+  margin: 0 0 5px 0;
+  color: #333;
+  font-size: 14px;
+}
+
+/* DMN header subtitle */
+.dmn-header-subtitle {
+  margin: 0;
+  color: #666;
+  font-size: 11px;
+}
+
+/* DMN table scroll container */
+.dmn-table-scroll-main {
+  flex: 1;
+  overflow: auto;
+  border: 2px solid #333;
+  border-radius: 4px;
+  position: relative;
+  font-size: 11px; /* Base font size for zoom scaling */
+  font-family: Arial, sans-serif;
+  background: white;
+  min-height: 0;
+  /* Enhanced scrolling for large tables */
+  overflow-x: auto; /* Always allow horizontal scrolling */
+  overflow-y: auto; /* Always allow vertical scrolling */
+  /* Use container queries when available for responsive table layout */
+  container-type: inline-size;
+}
+
+/* DMN table base */
+.dmn-table-base {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%; /* Fill container width by default */
+  min-width: max-content; /* Ensure table is at least as wide as content */
+  position: relative;
+  table-layout: fixed; /* Use fixed layout for even distribution when space is available */
+}
+
+/* Large table layout - switch to auto layout when content is wide */
+.dmn-table-scroll-main.large-table .dmn-table-base {
+  table-layout: auto; /* Allow content-based sizing for large tables */
+  width: auto; /* Allow table to grow beyond container */
+  min-width: 100%; /* But at least fill the container */
+}
+
+/* Small table layout - ensure even distribution */
+.dmn-table-scroll-main.small-table .dmn-table-base {
+  table-layout: fixed; /* Fixed layout for even distribution */
+  width: 100%; /* Fill container exactly */
+}
+
+/* Small table column distribution - more balanced percentages */
+.dmn-table-scroll-main.small-table table th:first-child,
+.dmn-table-scroll-main.small-table table td:first-child {
+  width: 10%; /* Rule column - slightly wider for small tables */
+  min-width: 50px;
+  max-width: 80px;
+}
+
+.dmn-table-scroll-main.small-table table th:last-child,
+.dmn-table-scroll-main.small-table table td:last-child {
+  width: 35%; /* Annotations column - more space for small tables */
+  min-width: 120px;
+}
+
+/* Special handling for very small tables (3-4 columns like precedence tables) */
+.dmn-table-scroll-main.small-table table th:nth-child(2):last-child,
+.dmn-table-scroll-main.small-table table td:nth-child(2):last-child {
+  /* When there are only 3 columns (Rule, Then, Annotations), the middle column gets more space */
+  width: 55%; /* Then column takes most of the space when it's the only content column */
+}
+
+.dmn-table-scroll-main.small-table table th:nth-child(2):not(:last-child),
+.dmn-table-scroll-main.small-table table td:nth-child(2):not(:last-child) {
+  /* When there are more columns, middle columns share remaining space */
+  width: auto; /* Let remaining columns share the remaining 55% */
+}
+
+/* Large table column constraints - more flexible */
+.dmn-table-scroll-main.large-table table th,
+.dmn-table-scroll-main.large-table table td {
+  min-width: 150px; /* Reasonable minimum for readability in large tables */
+  max-width: none; /* Remove max-width constraints to allow content-based sizing */
+}
+
+.dmn-table-scroll-main.large-table table th:first-child,
+.dmn-table-scroll-main.large-table table td:first-child {
+  min-width: 50px; /* Rule column can be narrower */
+  max-width: 80px; /* But not too wide */
+  width: auto; /* Auto width based on content */
+}
+
+.dmn-table-scroll-main.large-table table th:last-child,
+.dmn-table-scroll-main.large-table table td:last-child {
+  min-width: 200px; /* Annotations need more space in large tables */
+  max-width: 350px; /* But reasonable limit */
+  width: auto; /* Auto width based on content */
+}
+
+/* DMN table base styling */
+.dmn-table-scroll-main table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+/* All table cells need borders for grid lines */
+.dmn-table-scroll-main table td,
+.dmn-table-scroll-main table th {
+  border: 1px solid #666;
+  padding: 4px 8px;
+  text-align: center;
+  font-size: inherit; /* Allow font size to be inherited from container for zoom */
+  background: white;
+  box-sizing: border-box; /* Ensure padding doesn't create gaps */
+  position: relative; /* Default positioning */
+  min-width: fit-content; /* Each column should be at least as wide as its content */
+  max-width: 200px; /* Prevent any column from getting too wide */
+  white-space: nowrap; /* Prevent text wrapping in cells by default */
+  overflow: hidden; /* Hide overflow text */
+  text-overflow: ellipsis; /* Show ellipsis for long text */
+}
+
+/* Allow word wrapping for columns with long text content */
+.dmn-table-scroll-main table td,
+.dmn-table-scroll-main table th {
+  white-space: normal; /* Allow text wrapping when content is long */
+  word-wrap: break-word; /* Break long words if necessary */
+  word-break: break-word; /* Break long words for better layout */
+}
+
+/* Special handling for annotation cells - allow text wrapping */
+.dmn-table-scroll-main table td.dmn-annotation-normal,
+.dmn-table-scroll-main table td.dmn-annotation-highlighted {
+  white-space: normal; /* Allow text wrapping in annotation cells */
+  text-align: left; /* Left align annotation text for better readability */
+  max-width: 300px; /* Limit width to prevent overly wide annotations */
+  min-width: 120px; /* Minimum width for annotations */
+}
+
+/* DMN.js table grid lines - ensure all table cells have borders */
+.dmn-js-container table td,
+.dmn-js-container table th {
+  border: 1px solid #666 !important;
+  box-sizing: border-box !important;
+}
+
+/* COMPREHENSIVE STICKY HEADER SYSTEM */
+
+/* All header cells get basic sticky positioning */
+.dmn-table-scroll-main table thead th,
+.dmn-js-container table thead th {
+  position: sticky !important;
+  font-weight: bold !important;
+  color: #000 !important;
+  background: white !important;
+}
+
+/* Header Row 1 - Highest header row */
+.dmn-table-scroll-main table thead tr:first-child th,
+.dmn-js-container table thead tr:first-child th {
+  top: 0 !important;
+  z-index: 90 !important;
+}
+
+/* Header Row 1 non-rule columns - should go under rule column */
+.dmn-table-scroll-main table thead tr:first-child th:not(:first-child),
+.dmn-js-container table thead tr:first-child th:not(:first-child) {
+  z-index: 60 !important; /* Lower than rule column (100) but higher than rule data cells (50) */
+}
+
+/* Header Row 2 - Middle header row */
+.dmn-table-scroll-main table thead tr:nth-child(2) th,
+.dmn-js-container table thead tr:nth-child(2) th {
+  top: var(--first-row-height, 25px) !important;
+  z-index: 80 !important;
+}
+
+/* Header Row 3 - Bottom header row */
+.dmn-table-scroll-main table thead tr:nth-child(3) th,
+.dmn-js-container table thead tr:nth-child(3) th {
+  top: var(--first-two-rows-height, 50px) !important;
+  z-index: 70 !important;
+}
+
+/* RULE COLUMN FREEZE SYSTEM */
+
+/* Rule column data cells - frozen left */
+.dmn-table-scroll-main table td:first-child,
+.dmn-js-container table td:first-child {
+  position: sticky !important;
+  left: 0 !important;
+  z-index: 50 !important; /* Below headers, above regular content */
+  background: #f8f9fa !important;
+  font-weight: bold !important;
+  width: 45px !important;
+  min-width: 45px !important;
+}
+
+/* Rule header cells - highest priority (intersection of frozen row and column) */
+.dmn-table-scroll-main table thead th:first-child,
+.dmn-js-container table thead th:first-child {
+  position: sticky !important;
+  left: 0 !important;
+  z-index: 100 !important; /* Highest - always on top */
+  font-weight: bold !important;
+  width: 45px !important;
+  min-width: 45px !important;
+}
+
+/* Rule column header background - only for the actual rule header */
+.dmn-table-scroll-main table thead th:first-child.dmn-header-rule-rowspan,
+.dmn-js-container table thead th:first-child.dmn-header-rule-rowspan {
+  background: #f8f9fa !important;
+}
+
+/* Reset all other cells to static positioning to prevent conflicts */
+.dmn-table-scroll-main table th:not(:first-child):not(thead tr th),
+.dmn-table-scroll-main table td:not(:first-child),
+.dmn-js-container table th:not(:first-child):not(thead tr th),
+.dmn-js-container table td:not(:first-child) {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  z-index: 1 !important;
+}
+
+/* Target specific header classes based on actual HTML structure */
+/* Rule column header */
+.dmn-table-scroll-main table th.dmn-header-rule-rowspan {
+  background: #f8f9fa !important;
+}
+
+/* When section header (colspan) */
+.dmn-table-scroll-main table th.dmn-header-when-colspan {
+  background: #e8f4fd !important;
+}
+
+/* Then section header (colspan) */
+.dmn-table-scroll-main table th.dmn-header-then-colspan {
+  background: #fff2e8 !important;
+}
+
+/* Annotations section header */
+.dmn-table-scroll-main table th.dmn-header-annotations-rowspan {
+  background: #e8f5e8 !important;
+}
+
+/* Responsive column width balancing - adaptable to table size */
+.dmn-table-scroll-main table th:last-child,
+.dmn-table-scroll-main table td:last-child {
+  min-width: 120px; /* Annotations column - minimum width for readability */
+  width: 25%; /* Preferred width when space is available */
+}
+
+.dmn-table-scroll-main table th:first-child,
+.dmn-table-scroll-main table td:first-child {
+  min-width: 50px; /* Rule column - minimum width */
+  width: 60px; /* Fixed width for rule numbers */
+  max-width: 80px; /* Rule column - maximum width */
+}
+
+/* Individual input label headers (under When) */
+.dmn-table-scroll-main table th.dmn-header-input-label {
+  background: #e8f4fd !important;
+}
+
+/* Individual output label headers (under Then) */
+.dmn-table-scroll-main table th.dmn-header-output-label {
+  background: #fff2e8 !important;
+}
+
+/* Input type headers (third row under When) */
+.dmn-table-scroll-main table th.dmn-header-input-type {
+  background: #e8f4fd !important;
+}
+
+/* Output type headers (third row under Then) */
+.dmn-table-scroll-main table th.dmn-header-output-type {
+  background: #fff2e8 !important;
+}
+
+/* DMN table text content */
+.dmn-no-match-title {
+  margin: 0 0 10px 0;
+}
+
+.dmn-no-match-text {
+  margin: 0;
+}
+
+.dmn-no-match-available {
+  margin: 10px 0 0 0;
+  font-size: inherit; /* Allow font size inheritance for zoom */
+}
+
+/* DMN table copy styles for Word/Excel export */
+.dmn-table-copy-style {
+  border: 1px solid #000000;
+  padding: 4pt 6pt 4pt 6pt;
+  text-align: left;
+  vertical-align: top;
+  mso-border-alt: solid #000000 0.5pt;
+}
+
+.dmn-table-copy-header {
+  border: 1px solid #000000;
+  padding: 4pt 6pt 4pt 6pt;
+  background-color: #f0f0f0;
+  font-weight: bold;
+  text-align: center;
+  vertical-align: top;
+  mso-border-alt: solid #000000 0.5pt;
+}
+
+.dmn-table-copy-highlighted {
+  border: 1px solid #000000;
+  padding: 4pt 6pt 4pt 6pt;
+  background-color: #ADD8E6;
+  text-align: left;
+  vertical-align: top;
+  mso-border-alt: solid #000000 0.5pt;
+  font-weight: bold;
+}
+
+.dmn-table-copy-container {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: Arial, sans-serif;
+  border: 2px solid #000;
+}
+/*#endregion*/
+
+/*#region [================== VARIABLE DISPLAY COMPONENTS ==================]*/
+/* Variable containers - using utility classes */
+.variable-container {
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  background: #fafafa;
+}
+
+/* Variable header */
+.variable-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* Variable name */
+.variable-name {
+  font-weight: bold;
+  color: #1976D2;
+  margin-right: 10px;
+  font-size: 18px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Variable content */
+.variable-content {
+  margin-left: 0;
+}
+
+/* Variable list styles */
+.variable-list-container {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 10px 0;
+  margin-bottom: 5px;
+}
+
+.variable-list-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.variable-list-name {
+  color: #333;
+  margin-right: 10px;
+}
+
+.variable-list-content {
+  margin-left: 0;
+}
+
+/* Instance info */
+.instance-info {
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+/* Process variables header section */
+.process-variables-header {
+  margin-bottom: 20px;
+}
+
+.process-variables-title {
+  color: #333;
+  margin: 0 0 10px 0;
+  font-size: 20px;
+}
+
+.process-variables-info {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+/* Collapsible content components */
+.collapsible-header {
+  cursor: pointer;
+  color: #2196F3;
+  text-decoration: underline;
+}
+
+.collapsible-header-warning {
+  cursor: pointer;
+  color: #f57c00;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.collapsible-content {
+  display: none;
+  margin-left: 20px;
+  border-left: 2px solid #ddd;
+  padding-left: 10px;
+}
+
+.collapsible-content-orange {
+  display: none;
+  margin-left: 20px;
+  border-left: 2px solid #ff9800;
+  padding-left: 10px;
+}
+
+/* Pre-formatted content styles */
+.pre-content {
+  margin: 5px 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.pre-formatted {
+  margin: 5px 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  background: #f9f9f9;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  border: 1px solid #ddd;
+  font-family: monospace;
+}
+
+.pre-formatted-detailed {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+/* Value type styling */
+.null-value {
+  color: #999;
+  font-style: italic;
+}
+
+.value-string {
+  color: #4CAF50;
+}
+
+.value-other {
+  color: #2196F3;
+}
+
+/* Java object styles */
+.java-serialized-variable {
+  cursor: pointer;
+  color: #f57c00;
+  font-weight: bold;
+  margin: 4px 0;
+  padding: 8px;
+  background: #fff8e1;
+  border: 1px solid #ffb74d;
+  border-radius: 4px;
+}
+
+.java-execution-header {
+  cursor: pointer;
+  color: #f57c00;
+  font-weight: bold;
+  margin: 4px 0;
+}
+
+.java-execution-content {
+  margin: 8px 0;
+}
+
+/* Variable indentation utility */
+.variable-indent {
+  margin-left: 10px;
+}
+/*#endregion*/
+
+/*#region [================== STATUS AND ERROR MESSAGES ==================]*/
+/* Error page container */
+.error-page-container {
+  padding: 20px;
+  text-align: center;
+  color: #721c24;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  margin: 20px;
+}
+
+/* Application stopped container */
+.app-stopped-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: sans-serif;
+  background: #f5f5f5;
+}
+
+/* App stopped content box */
+.app-stopped-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+/* App stopped title */
+.app-stopped-title {
+  color: #4CAF50;
+  margin-bottom: 1rem;
+}
+
+/* App stopped text */
+.app-stopped-text {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+/* App stopped small text */
+.app-stopped-small {
+  color: #666;
+  font-size: 14px;
+}
+
+/* Error containers */
+.error-container-bold {
+  color: #d32f2f;
+  font-weight: bold;
+}
+
+.error-container-bold-margin {
+  color: #d32f2f;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.error-message-container {
+  background: #ffebee;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #f44336;
+}
+
+/* Status messages */
+.status-message {
+  color: #666;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 50px;
+}
+
+.status-message-error {
+  color: #d32f2f;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 50px;
+}
+/*#endregion*/
+
+/*#region [================== SECTION CONTAINERS ==================]*/
+/* Section containers - using utility classes */
+.section-container {
+  margin-bottom: 20px;
+}
+
+.section-container-large {
+  margin-bottom: 30px;
+}
+
+/* Section titles - using utility classes */
+.section-title {
+  color: #333;
+  margin: 0 0 10px 0;
+  font-size: 20px;
+}
+
+.section-title-variables {
+  color: #1976D2;
+  margin: 0 0 15px 0;
+  font-size: 18px;
+}
+
+.section-title-history {
+  color: #4CAF50;
+  margin: 0 0 15px 0;
+  font-size: 18px;
+}
+
+.section-title-summary {
+  color: #9C27B0;
+  margin: 0 0 15px 0;
+  font-size: 18px;
+}
+
+.section-title-java {
+  color: #333;
+  margin: 0 0 10px 0;
+  font-size: 20px;
+}
+
+/* Section descriptions */
+.section-description {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.section-description-small {
+  color: #666;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+/* Warning info containers */
+.warning-info {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.warning-info-small {
+  margin-bottom: 10px;
+  padding: 8px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+}
+
+.warning-info-text {
+  font-size: 12px;
+  color: #856404;
+  margin-bottom: 5px;
+}
+
+.warning-info-text-only {
+  font-size: 12px;
+  color: #856404;
+}
+
+/* Summary containers */
+.summary-container {
+  margin-bottom: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 15px;
+}
+
+.summary-title {
+  color: #FF9800;
+  margin: 0 0 10px 0;
+  font-size: 14px;
+}
+
+.summary-info {
+  color: #666;
+  font-size: 12px;
+}
+
+.summary-background {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* History item containers */
+.history-item {
+  margin-bottom: 15px;
+  border-left: 3px solid #4CAF50;
+  padding-left: 15px;
+}
+
+.history-item-info {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+/* Variable change containers */
+.variable-change-container {
+  margin-bottom: 10px;
+}
+
+.variable-change-info {
+  font-size: 12px;
+  color: #666;
+}
+/*#endregion*/
+
+/*#region [================== DIAGRAM VIEWER STYLES ==================]*/
+/* Ensure viewer containers take full size */
+#canvas .bjs-container,
+#canvas .dmn-js-container {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+/* BPMN highlighting - light blue background for shapes only */
+.highlight > .djs-visual rect,
+.highlight > .djs-visual circle,
+.highlight > .djs-visual ellipse,
+.highlight > .djs-visual path,
+.highlight > .djs-visual polygon {
+  fill: rgba(173, 216, 230, 0.6) !important;
+  stroke: #1976d2 !important;
+  stroke-width: 2px !important;
+}
+
+/* Ensure BPMN text remains black and readable */
+.highlight text,
+.highlight tspan,
+.highlight .djs-label text,
+.highlight .djs-label tspan {
+  fill: #000 !important;
+  color: #000 !important;
+}
+
+/* DMN highlighting - light blue background */
+.highlight {
+  background-color: rgba(173, 216, 230, 0.6) !important;
+  border: 2px solid #1976d2 !important;
+  border-radius: 4px;
+}
+
+/* DMN table cell highlighting - target both our custom and dmn-js containers */
+.dmn-js-container .highlight,
+.dmn-js-container .highlight td,
+.dmn-js-container .highlight th,
+.dmn-table-scroll-main .highlight,
+.dmn-table-scroll-main .highlight td,
+.dmn-table-scroll-main .highlight th {
+  background-color: rgba(173, 216, 230, 0.6) !important;
+  color: #000 !important; /* Keep text black and readable */
+}
+
+/* DMN table row highlighting - target table rows specifically */
+.dmn-js-container table tr.highlight,
+.dmn-js-container table tr.highlight td,
+.dmn-js-container table tr.highlight th,
+.dmn-table-scroll-main table tr.highlight,
+.dmn-table-scroll-main table tr.highlight td,
+.dmn-table-scroll-main table tr.highlight th {
+  background-color: rgba(173, 216, 230, 0.6) !important;
+  color: #000 !important;
+}
+
+/* DMN table highlighted row and cell classes - target actual classes used */
+.dmn-row-highlighted,
+.dmn-row-highlighted td,
+.dmn-row-highlighted th,
+.dmn-cell-highlighted,
+.dmn-rule-number-highlighted,
+.dmn-annotation-highlighted {
+  background-color: rgba(173, 216, 230, 0.6) !important;
+  color: #000 !important;
+}
+
+/* Scrollbar styling - only for main canvas to avoid double scrollbars */
+#canvas::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+#canvas::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+#canvas::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 6px;
+}
+
+#canvas::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Hide scrollbars on inner containers to prevent double scrollbars */
+.bjs-container::-webkit-scrollbar,
+.dmn-js-container::-webkit-scrollbar {
+  display: none;
+}
+
+.bjs-container,
+.dmn-js-container {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* No data message styling */
+.no-data-message {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin: 20px 0;
+  padding: 20px;
+}
+
+/* Literal expression container - prevent horizontal scrollbars and ensure proper width constraints */
+.literal-expression-container {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  margin-bottom: 0 !important;
+  border: 2px solid #333;
+  border-radius: 4px;
+  font-family: Arial, sans-serif;
+}
+
+/* Literal expression title */
+.literal-expression-title {
+  margin: 0 0 5px 0;
+  color: #333;
+}
+
+/* Literal expression language info */
+.literal-expression-language {
+  margin: 0;
+  color: #666;
+}
+
+/* Literal expression success status */
+.literal-expression-success {
+  margin: 5px 0 0 0;
+}
+
+.literal-expression-success p {
+  margin: 0;
+  color: #28a745;
+  font-weight: bold;
+}
+
+/* Literal expression warning title */
+.literal-expression-warning-title {
+  margin: 0;
+  color: #856404;
+  font-weight: bold;
+}
+
+/* Literal expression warning description */
+.literal-expression-warning-desc {
+  margin: 3px 0 0 0;
+  color: #6c757d;
+}
+
+/* Expression title in content */
+.expression-title {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+/* Expression code block */
+.expression-code {
+  margin: 0;
+  font-family: "Courier New", monospace;
+  background: white;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.literal-expression-container *,
+.literal-expression-container pre {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+  word-wrap: break-word !important;
+  white-space: pre-wrap !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Make the content div flexible and the pre element scrollable */
+.literal-expression-container > div:last-child {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+}
+
+/* Allow vertical scrolling for long literal expressions - target the pre element specifically */
+.literal-expression-container pre {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+}
+/*#endregion*/
+
+/*#region [================== LOG MODAL STYLES ==================]*/
+/* Log modal overlay */
+.log-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Log modal content */
+.log-modal-content {
+  background-color: white;
+  margin: 5% auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 800px;
+  max-height: 80%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Log modal header */
+.log-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Log modal title */
+.log-modal-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+}
+
+/* Log modal close button */
+.log-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.log-modal-close:hover {
+  color: #000;
+}
+
+/* Log modal body */
+.log-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+  background: #f8f9fa;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+/*#endregion*/
